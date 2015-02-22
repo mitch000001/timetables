@@ -132,6 +132,8 @@ func schedule(d time.Duration, fn func()) {
 }
 
 func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) {
+	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
+	start := time.Now()
 	var t *table
 	cacheValue := cache.Get("table")
 	if cacheValue == nil {
@@ -139,12 +141,12 @@ func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harve
 	} else {
 		t = cacheValue.(*table)
 	}
-	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
 	err := populateTable(t, timeframe, client)
 	if err != nil {
 		log.Printf("%T: %v\n", err, err)
 	}
 	cache.Store("table", t)
+	log.Printf("Table cache invalidated, took %s", time.Since(start))
 }
 
 func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harvest) error {
@@ -210,20 +212,49 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 }
 
 func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe, billable bool, client *harvest.Harvest) (float64, error) {
+	key := fmt.Sprintf("user=%d&timeframe=%s&billable=%t", user.Id(), timeframe, billable)
+	dayEntries := cache.Get(key)
+	var entries []*harvest.DayEntry
+	var lastUpdate time.Time
+	var cachedEntries []*harvest.DayEntry
+	if dayEntries != nil {
+		lastUpdate = time.Now()
+		cachedEntries = dayEntries.([]*harvest.DayEntry)
+	}
 	params := harvest.Params{}
-	params.ForTimeframe(timeframe)
+	params.ForTimeframe(timeframe).UpdatedSince(lastUpdate)
 	if billable {
 		params.OnlyBillable(billable)
 	}
-	var entries []*harvest.DayEntry
 	err := client.Users.DayEntries(user).All(&entries, params.Values())
 	if err != nil {
 		return -1.0, err
 	}
-	hours := 0.0
+	newEntries := make(map[int]*harvest.DayEntry)
 	for _, entry := range entries {
-		hours += entry.Hours
+		newEntries[entry.ID] = entry
 	}
+	replacements := make(map[int]int)
+	hours := 0.0
+	for i, entry := range cachedEntries {
+		if newEntry, ok := newEntries[entry.ID]; ok {
+			replacements[entry.ID] = i
+			hours += newEntry.Hours
+		} else {
+			hours += entry.Hours
+		}
+	}
+	for id, i := range replacements {
+		cachedEntries[i] = newEntries[id]
+		delete(newEntries, id)
+	}
+	if len(newEntries) != 0 {
+		for _, entry := range newEntries {
+			cachedEntries = append(cachedEntries, entry)
+			hours += entry.Hours
+		}
+	}
+	cache.Store(key, cachedEntries)
 	return hours, nil
 }
 
