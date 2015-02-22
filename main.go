@@ -40,26 +40,6 @@ func mustString(str string, err error) string {
 	return str
 }
 
-func htmlHandler(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		fn(w, r)
-	}
-}
-
-func logHandler(fn http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		start := time.Now()
-		fn(w, r)
-		log.Printf(
-			"%s\t%s\t%s",
-			r.Method,
-			r.RequestURI,
-			time.Since(start),
-		)
-	}
-}
-
 var cache Cache
 
 func main() {
@@ -78,25 +58,6 @@ func main() {
 	cache = &InMemoryCache{}
 	http.HandleFunc("/", logHandler(htmlHandler(indexHandler(client))))
 	log.Fatal(http.ListenAndServe(":4000", nil))
-}
-
-type table struct {
-	Timeframe harvest.Timeframe
-	Rows      []row
-}
-
-type row struct {
-	User                   *harvest.User
-	Hours                  float64
-	Days                   float64
-	CumulatedHours         float64
-	CumulatedDays          float64
-	BillableHours          float64
-	BillableDays           float64
-	BillingDegree          float64
-	CumulatedBillableHours float64
-	CumulatedBillableDays  float64
-	CumulatedBillingDegree float64
 }
 
 func indexHandler(client *harvest.Harvest) http.HandlerFunc {
@@ -121,6 +82,26 @@ func indexHandler(client *harvest.Harvest) http.HandlerFunc {
 	}
 }
 
+func htmlHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		fn(w, r)
+	}
+}
+
+func logHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		fn(w, r)
+		log.Printf(
+			"%s\t%s\t%s",
+			r.Method,
+			r.RequestURI,
+			time.Since(start),
+		)
+	}
+}
+
 func schedule(d time.Duration, fn func()) {
 	ticker := time.NewTicker(d)
 	for {
@@ -129,6 +110,25 @@ func schedule(d time.Duration, fn func()) {
 			fn()
 		}
 	}
+}
+
+type table struct {
+	Timeframe harvest.Timeframe
+	Rows      []row
+}
+
+type row struct {
+	User                   *harvest.User
+	Hours                  float64
+	Days                   float64
+	CumulatedHours         float64
+	CumulatedDays          float64
+	BillableHours          float64
+	BillableDays           float64
+	BillingDegree          float64
+	CumulatedBillableHours float64
+	CumulatedBillableDays  float64
+	CumulatedBillingDegree float64
 }
 
 func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) {
