@@ -9,7 +9,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"reflect"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/mitch000001/go-harvest/harvest"
@@ -58,6 +60,8 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
+var cache Cache
+
 func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
 	username := os.Getenv("HARVEST_USERNAME")
@@ -71,6 +75,7 @@ func main() {
 		fmt.Printf("%T: %v\n", err, err)
 		os.Exit(1)
 	}
+	cache = &InMemoryCache{}
 	http.HandleFunc("/", logHandler(htmlHandler(indexHandler(client))))
 	log.Fatal(http.ListenAndServe(":4000", nil))
 }
@@ -95,25 +100,51 @@ type row struct {
 }
 
 func indexHandler(client *harvest.Harvest) http.HandlerFunc {
+	startDate := harvest.Date(2015, 01, 01, time.Local)
+	endDate := harvest.Date(2015, 01, 25, time.Local)
+	rowTimeframe := harvest.Timeframe{StartDate: startDate, EndDate: endDate}
+	calcFn := func() {
+		invalidateTableCacheForTimeframe(rowTimeframe, client)
+	}
+	calcFn()
+	// TODO(2015-02-22): remove brute force syncing with delta receiving via updated_since param
+	go schedule(15*time.Second, calcFn)
 	return func(w http.ResponseWriter, r *http.Request) {
 		// TODO(2015-02-20): reasonable caching
-		startDate := harvest.Date(2015, 01, 01, time.Local)
-		endDate := harvest.Date(2015, 01, 25, time.Local)
-		rowTimeframe := harvest.Timeframe{StartDate: startDate, EndDate: endDate}
-		var t table
-		err := populateTable(&t, rowTimeframe, client)
-		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-			return
-		}
 		var buf bytes.Buffer
-		err = indexTemplate.Execute(&buf, t)
+		err := indexTemplate.Execute(&buf, cache.Get("table"))
 		if err != nil {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 		} else {
 			io.Copy(w, &buf)
 		}
 	}
+}
+
+func schedule(d time.Duration, fn func()) {
+	ticker := time.NewTicker(d)
+	for {
+		select {
+		case <-ticker.C:
+			fn()
+		}
+	}
+}
+
+func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) {
+	var t *table
+	cacheValue := cache.Get("table")
+	if cacheValue == nil {
+		t = &table{}
+	} else {
+		t = cacheValue.(*table)
+	}
+	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
+	err := populateTable(t, timeframe, client)
+	if err != nil {
+		log.Printf("%T: %v\n", err, err)
+	}
+	cache.Store("table", t)
 }
 
 func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harvest) error {
@@ -170,10 +201,11 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	if len(multiErr) != 0 {
 		return multiErr
 	}
-	*t = table{
-		Timeframe: timeframe,
-		Rows:      rows,
+	if t == nil {
+		*t = table{}
 	}
+	t.Timeframe = timeframe
+	t.Rows = rows
 	return nil
 }
 
@@ -193,6 +225,47 @@ func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe
 		hours += entry.Hours
 	}
 	return hours, nil
+}
+
+type Cache interface {
+	Get(key string) interface{}
+	GetType(key string) reflect.Type
+	Store(key string, data interface{}) error
+}
+
+type InMemoryCache struct {
+	store map[string]interface{}
+	mutex sync.RWMutex
+}
+
+func (i *InMemoryCache) init() {
+	i.mutex.Lock()
+	defer i.mutex.Unlock()
+	if i.store == nil {
+		i.store = make(map[string]interface{})
+	}
+}
+
+func (i *InMemoryCache) Get(key string) interface{} {
+	i.init()
+	i.mutex.RLock()
+	defer i.mutex.RUnlock()
+	return i.store[key]
+}
+
+func (i *InMemoryCache) GetType(key string) reflect.Type {
+	i.init()
+	i.mutex.RLock()
+	defer i.mutex.RUnlock()
+	return reflect.TypeOf(i.store[key])
+}
+
+func (i *InMemoryCache) Store(key string, data interface{}) error {
+	i.init()
+	i.mutex.Lock()
+	defer i.mutex.Unlock()
+	i.store[key] = data
+	return nil
 }
 
 type multiError []error
