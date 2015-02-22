@@ -122,53 +122,35 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	if err != nil {
 		return err
 	}
-	params := harvest.Params{}
-	params.ForTimeframe(timeframe)
-	billable := params.Clone().OnlyBillable(true)
-	cumulated := harvest.Params{}
-	cumulated.ForTimeframe(harvest.Timeframe{harvest.Date(2015, 01, 01, time.Local), timeframe.EndDate})
-	cumulatedBillable := cumulated.Clone().OnlyBillable(true)
+	cumulationTimeframe := harvest.Timeframe{harvest.Date(2015, 01, 01, time.Local), timeframe.EndDate}
 	var rows []row
 	var multiErr multiError
 	for _, user := range users {
-		var entries []*harvest.DayEntry
-		err = client.Users.DayEntries(user).All(&entries, params.Values())
+		var hours float64
+		var billableHours float64
+		var cumulatedHours float64
+		var cumulatedBillableHours float64
+		hours, err = getHoursForUserAndTimeframe(user, timeframe, false, client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
 		}
-		hours := 0.0
-		for _, entry := range entries {
-			hours += entry.Hours
-		}
-		err = client.Users.DayEntries(user).All(&entries, billable.Values())
+		billableHours, err = getHoursForUserAndTimeframe(user, timeframe, true, client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
-		}
-		billableHours := 0.0
-		for _, entry := range entries {
-			billableHours += entry.Hours
 		}
 		// TODO: don't fetch all data since new years eve, use cached values
-		err = client.Users.DayEntries(user).All(&entries, cumulated.Values())
+		cumulatedHours, err = getHoursForUserAndTimeframe(user, cumulationTimeframe, false, client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
-		}
-		cumulatedHours := 0.0
-		for _, entry := range entries {
-			cumulatedHours += entry.Hours
 		}
 		// TODO: don't fetch all data since new years eve, use cached values
-		err = client.Users.DayEntries(user).All(&entries, cumulatedBillable.Values())
+		cumulatedBillableHours, err = getHoursForUserAndTimeframe(user, cumulationTimeframe, true, client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
-		}
-		cumulatedBillableHours := 0.0
-		for _, entry := range entries {
-			cumulatedBillableHours += entry.Hours
 		}
 		r := row{
 			User:                   user,
@@ -193,6 +175,24 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 		Rows:      rows,
 	}
 	return nil
+}
+
+func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe, billable bool, client *harvest.Harvest) (float64, error) {
+	params := harvest.Params{}
+	params.ForTimeframe(timeframe)
+	if billable {
+		params.OnlyBillable(billable)
+	}
+	var entries []*harvest.DayEntry
+	err := client.Users.DayEntries(user).All(&entries, params.Values())
+	if err != nil {
+		return -1.0, err
+	}
+	hours := 0.0
+	for _, entry := range entries {
+		hours += entry.Hours
+	}
+	return hours, nil
 }
 
 type multiError []error
