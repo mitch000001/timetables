@@ -7,7 +7,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -133,7 +132,7 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	var multiErr multiError
 	for _, user := range users {
 		var entries []*harvest.DayEntry
-		err = client.Users.DayEntries(user).All(&entries, url.Values(params))
+		err = client.Users.DayEntries(user).All(&entries, params.Values())
 		if err != nil {
 			multiErr.Add(err)
 			continue
@@ -142,7 +141,7 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 		for _, entry := range entries {
 			hours += entry.Hours
 		}
-		err = client.Users.DayEntries(user).All(&entries, url.Values(billable))
+		err = client.Users.DayEntries(user).All(&entries, billable.Values())
 		if err != nil {
 			multiErr.Add(err)
 			continue
@@ -152,7 +151,7 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 			billableHours += entry.Hours
 		}
 		// TODO: don't fetch all data since new years eve, use cached values
-		err = client.Users.DayEntries(user).All(&entries, url.Values(cumulated))
+		err = client.Users.DayEntries(user).All(&entries, cumulated.Values())
 		if err != nil {
 			multiErr.Add(err)
 			continue
@@ -162,7 +161,7 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 			cumulatedHours += entry.Hours
 		}
 		// TODO: don't fetch all data since new years eve, use cached values
-		err = client.Users.DayEntries(user).All(&entries, url.Values(cumulatedBillable))
+		err = client.Users.DayEntries(user).All(&entries, cumulatedBillable.Values())
 		if err != nil {
 			multiErr.Add(err)
 			continue
