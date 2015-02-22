@@ -1,0 +1,58 @@
+{{ define "table" }}
+<h2>Vom {{ printDate .Timeframe.StartDate }} bis {{ printDate .Timeframe.EndDate }}</h2>
+<table class="table">
+  <thead>
+    <tr>
+      <th>Mitarbeiter</th>
+      <th>Stunden</th>
+      <th>Tage</th>
+      <th>Stunden, kumuliert</th>
+      <th>Tage, kumuliert</th>
+      <th>Werktage Soll</th>
+      <th>Konto (Tage)</th>
+      <th>Urlaubszeiten (h), kumuliert</th>
+      <th>Anspruch Urlaubstage</th>
+      <th>genommene Urlaubstage</th>
+      <th>geplante Urlaubstage (h)</th>
+      <th>geplante Urlaubstage (Tage)</th>
+      <th>ungeplante Urlaubstage</th>
+      <th>fakturierte Stunden</th>
+      <th>fakturierte Tage</th>
+      <th>Fakturierungsgrad</th>
+      <th>fakturierte Stunden, kumuliert</th>
+      <th>fakturierte Tage, kumuliert</th>
+      <th>Fakturierungsgrad, kumuliert</th>
+      <th>Fakturierungsgrad Plan, kumuliert</th>
+      <th>Fakturierte Zeit über Soll</th>
+      <th>Slacktage, Vorjahre</th>
+      <th>Slacktage, insgesamt</th>
+      <th>Weiterbildungsbudget</th>
+    </tr>
+  </thead>
+  <tbody>
+    {{ range $row := .Rows }}
+    <tr>
+      <td>{{ $row.User.FirstName }}</td>
+      <td>{{ $row.Hours }}</td>
+      <td>{{ $row.Days }}</td>
+      <td>{{ $row.CumulatedHours }}</td>
+      <td>{{ $row.CumulatedDays }}</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>-</td>
+      <td>{{ $row.BillableHours }}</td>
+      <td>{{ $row.BillableDays }}</td>
+      <td>{{ printf "%.2g%%" $row.BillingDegree }}</td>
+      <td>{{ $row.CumulatedBillableHours }}</td>
+      <td>{{ $row.CumulatedBillableDays }}</td>
+      <td>{{ printf "%.2g%%" $row.CumulatedBillingDegree }}</td>
+    </tr>
+    {{ end }}
+  </tbody>
+</table>
+{{ end }}
