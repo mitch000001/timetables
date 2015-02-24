@@ -27,8 +27,6 @@ var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "_*.tmpl")
 var rootTemplate = template.Must(template.ParseGlob(rootTemplatePattern)).Funcs(funcMap)
 var partialTmpl *template.Template = template.Must(rootTemplate.ParseGlob(partialTemplatePattern))
 
-var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
-
 func printDate(date harvest.ShortDate) string {
 	return date.Format("02.01.2006")
 }
@@ -60,6 +58,8 @@ func main() {
 	log.Fatal(http.ListenAndServe(":4000", nil))
 }
 
+var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
+
 func indexHandler(client *harvest.Harvest) http.HandlerFunc {
 	startDate := harvest.Date(2015, 01, 01, time.Local)
 	endDate := harvest.Date(2015, 01, 25, time.Local)
@@ -78,6 +78,22 @@ func indexHandler(client *harvest.Harvest) http.HandlerFunc {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 		} else {
 			io.Copy(w, &buf)
+		}
+	}
+}
+
+var loginTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "login" .}}{{end}}`))
+
+func loginHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			var buf bytes.Buffer
+			err := loginTemplate.Execute(&buf, nil)
+			if err != nil {
+				fmt.Fprintf(w, "%T: %v\n", err, err)
+			} else {
+				io.Copy(w, &buf)
+			}
 		}
 	}
 }
