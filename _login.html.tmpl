@@ -1,0 +1,12 @@
+{{ define "login" }}
+<form name="login" method="POST" accept-charset="UTF-8" action="/login">
+  <label for="username">Benutzername</label>
+  <input type="text" name="username"/>
+  <label for="password">Passwort</label>
+  <input type="password" name="password"/>
+  <button type="submit">Login</button>
+</form>
+<form name=google-login method="POST" accept-charset="UTF-8" action="/google-login">
+  <button type="submit">Mit Google anmelden</button>
+</form>
+{{ end }}

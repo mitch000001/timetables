@@ -2,6 +2,8 @@ package main
 
 import (
 	"bytes"
+	"crypto/rand"
+	"crypto/sha256"
 	"fmt"
 	"html/template"
 	"io"
@@ -16,6 +18,7 @@ import (
 
 	"github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/go-harvest/harvest/auth"
+	"golang.org/x/oauth2"
 )
 
 var funcMap = template.FuncMap{
@@ -44,6 +47,22 @@ func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
 	username := os.Getenv("HARVEST_USERNAME")
 	password := os.Getenv("HARVEST_PASSWORD")
+	clientId := os.Getenv("HARVEST_CLIENTID")
+	clientSecret := os.Getenv("HARVEST_CLIENTSECRET")
+	port := os.Getenv("PORT")
+
+	if port == "" {
+		port = "4000"
+	}
+
+	oauthEndpoint := auth.NewOauth2EndpointForSubdomain(subdomain)
+
+	config := oauth2.Config{
+		ClientID:     clientId,
+		ClientSecret: clientSecret,
+		Endpoint:     oauthEndpoint,
+		RedirectURL:  "http://localhost" + port,
+	}
 
 	clientProvider := auth.NewBasicAuthClientProvider(&auth.BasicAuthConfig{username, password})
 
@@ -54,8 +73,12 @@ func main() {
 		os.Exit(1)
 	}
 	cache = &InMemoryCache{}
-	http.HandleFunc("/", logHandler(htmlHandler(indexHandler(client))))
-	log.Fatal(http.ListenAndServe(":4000", nil))
+
+	http.HandleFunc("/", logHandler(htmlHandler(getHandler(indexHandler(client)))))
+	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
+	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(harvestOauthHandler(config))))
+
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
 
 var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
@@ -87,14 +110,99 @@ var loginTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{d
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
+			s := newSession()
+			sessions.Add(s)
 			var buf bytes.Buffer
 			err := loginTemplate.Execute(&buf, nil)
 			if err != nil {
 				fmt.Fprintf(w, "%T: %v\n", err, err)
-			} else {
-				io.Copy(w, &buf)
+				return
 			}
+			io.Copy(w, &buf)
+			return
 		}
+		if r.Method == "POST" {
+			http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
+			return
+		}
+	}
+}
+
+func authHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		cookie, err := r.Cookie("timetable")
+		if err != nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		sessionId := cookie.Value
+		r.Header.Set("X-Session-Id", sessionId)
+		fn(w, r)
+	}
+}
+
+func googleLogin(w http.ResponseWriter, r *http.Request) {
+	http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
+}
+
+func harvestOauthHandler(config oauth2.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
+	}
+}
+
+var sessions sessionMap
+
+type sessionMap map[string]*session
+
+func (s *sessionMap) init() {
+	if s == nil {
+		*s = make(map[string]*session)
+	}
+}
+
+func (sm *sessionMap) Add(s *session) {
+	sm.init()
+	(*sm)[s.id] = s
+}
+
+func (sm *sessionMap) Find(sessionId string) *session {
+	return (*sm)[sessionId]
+}
+
+type session struct {
+	email     string
+	subdomain string
+	id        string
+}
+
+func newSession() *session {
+	b := make([]byte, 30)
+	_, err := rand.Read(b)
+	if err != nil {
+		panic(err)
+	}
+	id := fmt.Sprintf("%x", sha256.Sum256(b))
+	return &session{id: id}
+}
+
+func getHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Redirect(w, r, "/", http.StatusMethodNotAllowed)
+			return
+		}
+		fn(w, r)
+	}
+}
+
+func postHandler(fn http.HandlerFunc) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Redirect(w, r, "/", http.StatusMethodNotAllowed)
+			return
+		}
+		fn(w, r)
 	}
 }
 
