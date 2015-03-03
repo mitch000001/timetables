@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"html/template"
 	"io"
@@ -19,6 +22,8 @@ import (
 	"github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/go-harvest/harvest/auth"
 	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
+	"golang.org/x/oauth2/jws"
 )
 
 var funcMap = template.FuncMap{
@@ -47,21 +52,31 @@ func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
 	username := os.Getenv("HARVEST_USERNAME")
 	password := os.Getenv("HARVEST_PASSWORD")
-	clientId := os.Getenv("HARVEST_CLIENTID")
-	clientSecret := os.Getenv("HARVEST_CLIENTSECRET")
+	harvestClientId := os.Getenv("HARVEST_CLIENTID")
+	harvestClientSecret := os.Getenv("HARVEST_CLIENTSECRET")
+	googleClientId := os.Getenv("GOOGLE_CLIENTID")
+	googleClientSecret := os.Getenv("GOOGLE_CLIENTSECRET")
 	port := os.Getenv("PORT")
 
 	if port == "" {
 		port = "4000"
 	}
 
-	oauthEndpoint := auth.NewOauth2EndpointForSubdomain(subdomain)
+	harvestOauthEndpoint := auth.NewOauth2EndpointForSubdomain(subdomain)
 
-	config := oauth2.Config{
-		ClientID:     clientId,
-		ClientSecret: clientSecret,
-		Endpoint:     oauthEndpoint,
-		RedirectURL:  "http://localhost" + port,
+	harvestConfig := oauth2.Config{
+		ClientID:     harvestClientId,
+		ClientSecret: harvestClientSecret,
+		Endpoint:     harvestOauthEndpoint,
+		RedirectURL:  "http://localhost:" + port,
+	}
+
+	googleConfig := oauth2.Config{
+		ClientID:     googleClientId,
+		ClientSecret: googleClientSecret,
+		Scopes:       []string{"openid", "email"},
+		Endpoint:     google.Endpoint,
+		RedirectURL:  "http://127.0.0.1:" + port + "/google_oauth2redirect",
 	}
 
 	clientProvider := auth.NewBasicAuthClientProvider(&auth.BasicAuthConfig{username, password})
@@ -73,10 +88,13 @@ func main() {
 		os.Exit(1)
 	}
 	cache = &InMemoryCache{}
+	sessions = make(sessionMap)
 
 	http.HandleFunc("/", logHandler(htmlHandler(getHandler(indexHandler(client)))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
-	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(harvestOauthHandler(config))))
+	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleConfig))))
+	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(googleRedirectHandler(googleConfig))))
+	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(harvestOauthHandler(harvestConfig))))
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -110,8 +128,6 @@ var loginTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{d
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			s := newSession()
-			sessions.Add(s)
 			var buf bytes.Buffer
 			err := loginTemplate.Execute(&buf, nil)
 			if err != nil {
@@ -122,13 +138,15 @@ func loginHandler() http.HandlerFunc {
 			return
 		}
 		if r.Method == "POST" {
+			s := newSession()
+			sessions.Add(s)
 			http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
 			return
 		}
 	}
 }
 
-func authHandler(fn http.HandlerFunc) http.HandlerFunc {
+func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("timetable")
 		if err != nil {
@@ -136,13 +154,94 @@ func authHandler(fn http.HandlerFunc) http.HandlerFunc {
 			return
 		}
 		sessionId := cookie.Value
-		r.Header.Set("X-Session-Id", sessionId)
-		fn(w, r)
+		session := sessions.Find(sessionId)
+		if session == nil {
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		fn(w, r, session)
 	}
 }
 
-func googleLogin(w http.ResponseWriter, r *http.Request) {
-	http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
+func googleLoginHandler(config oauth2.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		s := newSession()
+		sessions.Add(s)
+		url := config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
+		http.Redirect(w, r, url, http.StatusFound)
+		return
+	}
+}
+
+func googleRedirectHandler(config oauth2.Config) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		params := r.URL.Query()
+		state := params.Get("state")
+		if state == "" {
+			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			return
+		}
+		session := sessions.Find(state)
+		if session == nil {
+			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			return
+		}
+		code := params.Get("code")
+		if code == "" {
+			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			return
+		}
+		token, err := config.Exchange(oauth2.NoContext, code)
+		if err != nil {
+			fmt.Fprintf(w, "%T: %v\n", err, err)
+			//http.Redirect(w, r, "/login", http.StatusBadRequest)
+			return
+		}
+		fmt.Fprintf(w, "%+#v\n", token)
+		id := token.Extra("id_token")
+		idToken, err := decode(id.(string))
+		if err != nil {
+			fmt.Fprintf(w, "%T: %v\n", err, err)
+			//http.Redirect(w, r, "/login", http.StatusBadRequest)
+			return
+		}
+		fmt.Fprintf(w, "%+#v\n", idToken)
+		session.email = idToken.Email
+	}
+}
+
+func decode(payload string) (*googleIdToken, error) {
+	// decode returned id token to get expiry
+	s := strings.Split(payload, ".")
+	if len(s) < 2 {
+		// TODO(jbd): Provide more context about the error.
+		return nil, errors.New("jws: invalid token received")
+	}
+	decoded, err := base64Decode(s[1])
+	if err != nil {
+		return nil, err
+	}
+	c := &googleIdToken{}
+	err = json.NewDecoder(bytes.NewBuffer(decoded)).Decode(c)
+	return c, err
+}
+func base64Decode(s string) ([]byte, error) {
+	// add back missing padding
+	switch len(s) % 4 {
+	case 2:
+		s += "=="
+	case 3:
+		s += "="
+	}
+	return base64.URLEncoding.DecodeString(s)
+}
+
+type googleIdToken struct {
+	jws.ClaimSet
+	AccessTokenHash     string `json:"at_hash"`
+	EmailVerified       bool   `json:"email_verified"`
+	AuthorizedPresenter string `json:"azp"`
+	Email               string `json:"email"`
 }
 
 func harvestOauthHandler(config oauth2.Config) http.HandlerFunc {
@@ -150,6 +249,8 @@ func harvestOauthHandler(config oauth2.Config) http.HandlerFunc {
 		http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
 	}
 }
+
+type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
 
 var sessions sessionMap
 
