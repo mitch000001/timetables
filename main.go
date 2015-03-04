@@ -47,6 +47,7 @@ func mustString(str string, err error) string {
 }
 
 var cache Cache
+var googleOauth2Config *oauth2.Config
 
 func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
@@ -71,7 +72,7 @@ func main() {
 		RedirectURL:  "http://localhost:" + port,
 	}
 
-	googleConfig := oauth2.Config{
+	googleOauth2Config = &oauth2.Config{
 		ClientID:     googleClientId,
 		ClientSecret: googleClientSecret,
 		Scopes:       []string{"openid", "email"},
@@ -90,10 +91,11 @@ func main() {
 	cache = &InMemoryCache{}
 	sessions = make(sessionMap)
 
-	http.HandleFunc("/", logHandler(htmlHandler(getHandler(indexHandler(client)))))
+	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler(client))))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
-	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleConfig))))
-	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(googleRedirectHandler(googleConfig))))
+	http.HandleFunc("/logout", logHandler(htmlHandler(authHandler(logoutHandler()))))
+	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleOauth2Config))))
+	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(googleRedirectHandler(googleOauth2Config))))
 	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(harvestOauthHandler(harvestConfig))))
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
@@ -101,7 +103,7 @@ func main() {
 
 var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
 
-func indexHandler(client *harvest.Harvest) http.HandlerFunc {
+func indexHandler(client *harvest.Harvest) authHandlerFunc {
 	startDate := harvest.Date(2015, 01, 01, time.Local)
 	endDate := harvest.Date(2015, 01, 25, time.Local)
 	rowTimeframe := harvest.Timeframe{StartDate: startDate, EndDate: endDate}
@@ -111,10 +113,11 @@ func indexHandler(client *harvest.Harvest) http.HandlerFunc {
 	calcFn()
 	// TODO(2015-02-22): remove brute force syncing with delta receiving via updated_since param
 	go schedule(15*time.Second, calcFn)
-	return func(w http.ResponseWriter, r *http.Request) {
-		// TODO(2015-02-20): reasonable caching
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := pageForSession(s)
+		page.Set("table", cache.Get("table"))
 		var buf bytes.Buffer
-		err := indexTemplate.Execute(&buf, cache.Get("table"))
+		err := indexTemplate.Execute(&buf, page)
 		if err != nil {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 		} else {
@@ -140,9 +143,17 @@ func loginHandler() http.HandlerFunc {
 		if r.Method == "POST" {
 			s := newSession()
 			sessions.Add(s)
+			http.SetCookie(w, &http.Cookie{Name: "timetable", Value: s.id, Expires: time.Now().Add(5 * 24 * time.Hour)})
 			http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
 			return
 		}
+	}
+}
+
+func logoutHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		sessions.Remove(s)
+		http.Redirect(w, r, "/", http.StatusFound)
 	}
 }
 
@@ -150,12 +161,14 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("timetable")
 		if err != nil {
+			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		sessionId := cookie.Value
 		session := sessions.Find(sessionId)
 		if session == nil {
+			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
@@ -163,9 +176,10 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	}
 }
 
-func googleLoginHandler(config oauth2.Config) http.HandlerFunc {
+func googleLoginHandler(config *oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		s := newSession()
+		s.location = r.Header.Get("X-Referer")
 		sessions.Add(s)
 		url := config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
 		http.Redirect(w, r, url, http.StatusFound)
@@ -173,7 +187,7 @@ func googleLoginHandler(config oauth2.Config) http.HandlerFunc {
 	}
 }
 
-func googleRedirectHandler(config oauth2.Config) http.HandlerFunc {
+func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		params := r.URL.Query()
 		state := params.Get("state")
@@ -193,20 +207,19 @@ func googleRedirectHandler(config oauth2.Config) http.HandlerFunc {
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-			//http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusBadRequest)
 			return
 		}
-		fmt.Fprintf(w, "%+#v\n", token)
+		session.googleToken = token
 		id := token.Extra("id_token")
 		idToken, err := decode(id.(string))
 		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-			//http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusBadRequest)
 			return
 		}
-		fmt.Fprintf(w, "%+#v\n", idToken)
-		session.email = idToken.Email
+		session.idToken = idToken
+		http.SetCookie(w, &http.Cookie{Name: "timetable", Value: session.id, Expires: time.Now().Add(5 * 24 * time.Hour)})
+		http.Redirect(w, r, session.location, http.StatusFound)
 	}
 }
 
@@ -214,7 +227,6 @@ func decode(payload string) (*googleIdToken, error) {
 	// decode returned id token to get expiry
 	s := strings.Split(payload, ".")
 	if len(s) < 2 {
-		// TODO(jbd): Provide more context about the error.
 		return nil, errors.New("jws: invalid token received")
 	}
 	decoded, err := base64Decode(s[1])
@@ -252,6 +264,33 @@ func harvestOauthHandler(config oauth2.Config) http.HandlerFunc {
 
 type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
 
+func pageForSession(s *session) *pageObject {
+	p := make(pageObject)
+	p["session"] = s
+	if s.idToken != nil {
+		p["email"] = s.idToken.Email
+	}
+	return &p
+}
+
+type pageObject map[string]interface{}
+
+func (p *pageObject) LoggedIn() bool {
+	s, ok := (*p)["session"]
+	if !ok {
+		return false
+	}
+	return s.(*session).loggedIn()
+}
+
+func (p *pageObject) CurrentUser() string {
+	return (*p)["email"].(string)
+}
+
+func (p *pageObject) Set(key string, value interface{}) {
+	(*p)[key] = value
+}
+
 var sessions sessionMap
 
 type sessionMap map[string]*session
@@ -271,10 +310,19 @@ func (sm *sessionMap) Find(sessionId string) *session {
 	return (*sm)[sessionId]
 }
 
+func (sm *sessionMap) Remove(s *session) {
+	delete(*sm, s.id)
+}
+
 type session struct {
-	email     string
-	subdomain string
-	id        string
+	location    string
+	googleToken *oauth2.Token
+	idToken     *googleIdToken
+	id          string
+}
+
+func (s *session) loggedIn() bool {
+	return s.idToken != nil
 }
 
 func newSession() *session {

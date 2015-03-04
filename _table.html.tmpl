@@ -1,5 +1,5 @@
 {{ define "table" }}
-<h2>Vom {{ printDate .Timeframe.StartDate }} bis {{ printDate .Timeframe.EndDate }}</h2>
+<h2>Vom {{ printDate .table.Timeframe.StartDate }} bis {{ printDate .table.Timeframe.EndDate }}</h2>
 <table class="table">
   <thead>
     <tr>
@@ -30,7 +30,7 @@
     </tr>
   </thead>
   <tbody>
-    {{ range $row := .Rows }}
+    {{ range $row := .table.Rows }}
     <tr>
       <td>{{ $row.User.FirstName }}</td>
       <td>{{ $row.Hours }}</td>

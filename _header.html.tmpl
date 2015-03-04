@@ -1,0 +1,8 @@
+{{ define "header" }}
+<nav>
+  {{ if .LoggedIn }}<span style="float:right;">
+    Eingeloggt als {{ .CurrentUser }}
+    <a href="/logout">Logout</a>
+  </span>{{end}}
+</nav>
+{{ end }}
