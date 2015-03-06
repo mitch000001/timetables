@@ -1,0 +1,10 @@
+{{ define "harvest_connect" }}
+<form name="harvest-connect" method="POST" accept-charset="UTF-8" action="/harvest_oauth">
+  <label for="subdomain">Subdomain</label>
+  <span>
+    <input type="text" name="subdomain"/>
+    <strong>.havestapp.com</strong>
+  </span>
+  <button type="submit">Harvest Account verknüpfen</button>
+</form>
+{{ end }}

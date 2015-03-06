@@ -48,6 +48,7 @@ func mustString(str string, err error) string {
 
 var cache Cache
 var googleOauth2Config *oauth2.Config
+var harvestOauth2Config *oauth2.Config
 
 func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
@@ -63,13 +64,10 @@ func main() {
 		port = "4000"
 	}
 
-	harvestOauthEndpoint := auth.NewOauth2EndpointForSubdomain(subdomain)
-
-	harvestConfig := oauth2.Config{
+	harvestOauth2Config = &oauth2.Config{
 		ClientID:     harvestClientId,
 		ClientSecret: harvestClientSecret,
-		Endpoint:     harvestOauthEndpoint,
-		RedirectURL:  "http://localhost:" + port,
+		RedirectURL:  "http://localhost:" + port + "/harvest_oauth2redirect",
 	}
 
 	googleOauth2Config = &oauth2.Config{
@@ -93,10 +91,12 @@ func main() {
 
 	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler(client))))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
-	http.HandleFunc("/logout", logHandler(htmlHandler(authHandler(logoutHandler()))))
+	http.HandleFunc("/logout", logHandler(htmlHandler(getHandler(authHandler(logoutHandler())))))
 	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleOauth2Config))))
-	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(googleRedirectHandler(googleOauth2Config))))
-	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(harvestOauthHandler(harvestConfig))))
+	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(getHandler(googleRedirectHandler(googleOauth2Config)))))
+	http.HandleFunc("/harvest_connect", logHandler(htmlHandler(getHandler(authHandler(harvestConnectHandler())))))
+	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(postHandler(authHandler(harvestOauthHandler())))))
+	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -223,6 +223,61 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 	}
 }
 
+var harvestConnectTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "harvest_connect" .}}{{end}}`))
+
+func harvestConnectHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		var buf bytes.Buffer
+		err := loginTemplate.Execute(&buf, nil)
+		if err != nil {
+			fmt.Fprintf(w, "%T: %v\n", err, err)
+			return
+		}
+		io.Copy(w, &buf)
+		return
+	}
+}
+
+func harvestOauthHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		err := r.ParseForm()
+		if err != nil {
+			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			return
+		}
+		params := r.Form
+		subdomain := params.Get("subdomain")
+		if subdomain == "" {
+			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			return
+		}
+		harvestOauthEndpoint := auth.NewOauth2EndpointForSubdomain(subdomain)
+
+		s.harvestOauth2Config = oauth2ConfigForEndpoint(harvestOauthEndpoint)
+
+		url := s.harvestOauth2Config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
+		http.Redirect(w, r, url, http.StatusFound)
+		return
+	}
+}
+
+func oauth2ConfigForEndpoint(endpoint oauth2.Endpoint) *oauth2.Config {
+	return &oauth2.Config{
+		ClientID:     harvestOauth2Config.ClientID,
+		ClientSecret: harvestOauth2Config.ClientSecret,
+		RedirectURL:  harvestOauth2Config.RedirectURL,
+		Endpoint:     endpoint,
+	}
+
+}
+
+func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+
+		return
+	}
+}
+
 func decode(payload string) (*googleIdToken, error) {
 	// decode returned id token to get expiry
 	s := strings.Split(payload, ".")
@@ -254,12 +309,6 @@ type googleIdToken struct {
 	EmailVerified       bool   `json:"email_verified"`
 	AuthorizedPresenter string `json:"azp"`
 	Email               string `json:"email"`
-}
-
-func harvestOauthHandler(config oauth2.Config) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
-	}
 }
 
 type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
@@ -315,10 +364,12 @@ func (sm *sessionMap) Remove(s *session) {
 }
 
 type session struct {
-	location    string
-	googleToken *oauth2.Token
-	idToken     *googleIdToken
-	id          string
+	location            string
+	googleToken         *oauth2.Token
+	idToken             *googleIdToken
+	harvestOauth2Config *oauth2.Config
+	harvestToken        *oauth2.Token
+	id                  string
 }
 
 func (s *session) loggedIn() bool {
