@@ -146,7 +146,7 @@ func loginHandler() http.HandlerFunc {
 		if r.Method == "POST" {
 			s := newSession()
 			sessions.Add(s)
-			http.SetCookie(w, &http.Cookie{Name: "timetable", Value: s.id, Expires: time.Now().Add(5 * 24 * time.Hour)})
+			http.SetCookie(w, newSessionCookie(s.id))
 			http.Error(w, "NOT IMPLEMENTED", http.StatusInternalServerError)
 			return
 		}
@@ -164,6 +164,11 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("timetable")
 		if err != nil {
+			r.Header.Set("X-Referer", r.URL.String())
+			http.Redirect(w, r, "/login", http.StatusFound)
+			return
+		}
+		if expired := cookie.Expires.After(time.Now()); expired {
 			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return

@@ -63,9 +63,13 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 			return
 		}
 		session.idToken = idToken
-		http.SetCookie(w, &http.Cookie{Name: "timetable", Value: session.id, Expires: time.Now().Add(5 * 24 * time.Hour)})
+		http.SetCookie(w, newSessionCookie(session.id))
 		http.Redirect(w, r, session.location, http.StatusFound)
 	}
+}
+
+func newSessionCookie(sessionId string) *http.Cookie {
+	return &http.Cookie{Name: "timetable", Value: sessionId, Expires: time.Now().Add(5 * 24 * time.Hour)}
 }
 
 func decode(payload string) (*googleIdToken, error) {
