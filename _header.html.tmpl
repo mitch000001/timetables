@@ -5,4 +5,6 @@
     <a href="/logout">Logout</a>
   </span>{{end}}
 </nav>
+<div class="errors" style="clear:right; padding: 5px;">{{ range $err := .Errors }}<div class="bg-danger" style="padding: 5px;">{{ $err.Error }}</div>{{ end }}
+</div>
 {{ end }}

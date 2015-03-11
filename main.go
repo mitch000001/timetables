@@ -296,6 +296,22 @@ func (p *pageObject) CurrentUser() string {
 	return (*p)["email"].(string)
 }
 
+func (p *pageObject) Errors() []error {
+	return (*p)["errors"].([]error)
+}
+
+func (p *pageObject) AddError(err error) {
+	errs, ok := (*p)["errors"]
+	var errors []error
+	if !ok {
+		errors = make([]error, 0)
+	} else {
+		errors = errs.([]error)
+	}
+	errors = append(errors, err)
+	(*p)["errors"] = errors
+}
+
 func (p *pageObject) Set(key string, value interface{}) {
 	(*p)[key] = value
 }
