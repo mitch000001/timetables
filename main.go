@@ -67,7 +67,7 @@ func main() {
 	harvestOauth2Config = &oauth2.Config{
 		ClientID:     harvestClientId,
 		ClientSecret: harvestClientSecret,
-		RedirectURL:  "http://localhost:" + port + "/harvest_oauth2redirect",
+		RedirectURL:  "http://127.0.0.1:" + port + "/harvest_oauth2redirect",
 	}
 
 	googleOauth2Config = &oauth2.Config{
@@ -182,7 +182,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		client, err := s.getHarvestClient()
 		if err != nil {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		fn(w, r, s, client)
@@ -205,29 +205,29 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
-			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
-			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
-			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		session.googleToken = token
 		id := token.Extra("id_token")
 		idToken, err := decode(id.(string))
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusBadRequest)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		session.idToken = idToken
@@ -255,13 +255,13 @@ func harvestOauthHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		err := r.ParseForm()
 		if err != nil {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		params := r.Form
 		subdomain := params.Get("subdomain")
 		if subdomain == "" {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		// TODO(mw): move into harvest package and extract as utility function
@@ -292,22 +292,22 @@ func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
-			http.Redirect(w, r, "/harvest_connect", http.StatusBadRequest)
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		session.harvestToken = token
