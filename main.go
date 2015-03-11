@@ -45,6 +45,7 @@ func mustString(str string, err error) string {
 var cache Cache
 var googleOauth2Config *oauth2.Config
 var harvestOauth2Config *oauth2.Config
+var workerQueue *worker
 
 func main() {
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
@@ -88,6 +89,7 @@ func main() {
 		os.Exit(1)
 	}
 	cache = &InMemoryCache{}
+	workerQueue = newWorker(5)
 	sessions = make(sessionMap)
 
 	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler(client))))))
@@ -111,9 +113,9 @@ func indexHandler(client *harvest.Harvest) authHandlerFunc {
 	calcFn := func() {
 		invalidateTableCacheForTimeframe(rowTimeframe, client)
 	}
-	calcFn()
+	workerQueue.addJob(calcFn)
 	// TODO(2015-02-22): remove brute force syncing with delta receiving via updated_since param
-	go schedule(15*time.Second, calcFn)
+	workerQueue.addJob(func() { schedule(15*time.Second, calcFn) })
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		page := pageForSession(s)
 		page.Set("table", cache.Get("table"))
@@ -297,13 +299,18 @@ func (p *pageObject) CurrentUser() string {
 }
 
 func (p *pageObject) Errors() []error {
-	return (*p)["errors"].([]error)
+	errs, ok := (*p)["errors"]
+	if !ok {
+		return nil
+	} else {
+		return errs.([]error)
+	}
 }
 
 func (p *pageObject) AddError(err error) {
 	errs, ok := (*p)["errors"]
 	var errors []error
-	if !ok {
+	if !ok || errs == nil {
 		errors = make([]error, 0)
 	} else {
 		errors = errs.([]error)
@@ -429,6 +436,37 @@ func schedule(d time.Duration, fn func()) {
 			fn()
 		}
 	}
+}
+
+type worker struct {
+	queue chan func()
+}
+
+func newWorker(size int) *worker {
+	var queue chan func()
+	if size <= 0 {
+		queue = make(chan func())
+	} else {
+		queue = make(chan func(), size)
+	}
+	w := &worker{queue: queue}
+	w.run()
+	return w
+}
+
+func (w *worker) run() {
+	go func() {
+		for {
+			select {
+			case fn := <-w.queue:
+				go fn()
+			}
+		}
+	}()
+}
+
+func (w *worker) addJob(fn func()) {
+	w.queue <- fn
 }
 
 type table struct {
@@ -626,8 +664,11 @@ func (m *multiError) init() {
 	}
 }
 
-func (m multiError) Add(err error) {
-	m = append(m, err)
+func (m *multiError) Add(err error) {
+	if m == nil {
+		*m = make([]error, 0)
+	}
+	*m = append(*m, err)
 }
 
 func (m multiError) Error() string {
