@@ -20,7 +20,7 @@ func TestGetHoursForUserAndTimeframe(t *testing.T) {
 		Users: harvest.NewUserService(&crudProvider{entries: entries}, &userEndpoint{}),
 	}
 	user := harvest.User{ID: 2}
-	timeframe := harvest.From(harvest.Date(2014, 01, 01, time.Local))
+	timeframe := harvest.TimeframeFromDate(harvest.Date(2014, 01, 01, time.Local))
 
 	hours, err := getHoursForUserAndTimeframe(&user, timeframe, false, client)
 

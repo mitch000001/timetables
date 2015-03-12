@@ -92,6 +92,7 @@ func main() {
 	workerQueue = newWorker(5)
 	sessions = make(sessionMap)
 
+	// TODO(mw): find a more readable way to compose handler
 	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler(client))))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
 	http.HandleFunc("/logout", logHandler(htmlHandler(getHandler(authHandler(logoutHandler())))))
@@ -100,6 +101,7 @@ func main() {
 	http.HandleFunc("/harvest_connect", logHandler(htmlHandler(getHandler(authHandler(harvestConnectHandler())))))
 	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(postHandler(authHandler(harvestOauthHandler())))))
 	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
+	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
 
 	log.Fatal(http.ListenAndServe(":"+port, nil))
 }
@@ -121,6 +123,31 @@ func indexHandler(client *harvest.Harvest) authHandlerFunc {
 		page.Set("table", cache.Get("table"))
 		var buf bytes.Buffer
 		err := indexTemplate.Execute(&buf, page)
+		if err != nil {
+			fmt.Fprintf(w, "%T: %v\n", err, err)
+		} else {
+			io.Copy(w, &buf)
+		}
+	}
+}
+
+func timeframeHandler() harvestHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
+		params := r.URL.Query()
+		tf, err := harvest.TimeframeFromQuery(params)
+		if err != nil {
+			// TODO(mw): What to do if the timeframe is not correct?
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+		calcFn := func() {
+			invalidateTableCacheForTimeframe(tf, c)
+		}
+		workerQueue.addJob(calcFn)
+		page := pageForSession(s)
+		page.Set("table", cache.Get("table"))
+		var buf bytes.Buffer
+		err = indexTemplate.Execute(&buf, page)
 		if err != nil {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 		} else {
@@ -188,9 +215,9 @@ type harvestHandlerFunc func(http.ResponseWriter, *http.Request, *session, *harv
 
 func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
-		client, err := s.getHarvestClient()
+		client, err := s.GetHarvestClient()
 		if err != nil {
-			s.location = r.URL.String()
+			s.location = r.Header.Get("X-Referer")
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -254,6 +281,7 @@ func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
+			s.AddError(fmt.Errorf("State was not set in harvest oauth redirect"))
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -286,6 +314,11 @@ func pageForSession(s *session) *pageObject {
 	if s.idToken != nil {
 		p["email"] = s.idToken.Email
 	}
+	sessErrors := s.GetErrors()
+	if len(sessErrors) > 0 {
+		p.AddErrors(sessErrors)
+		s.ResetErrors()
+	}
 	return &p
 }
 
@@ -296,7 +329,7 @@ func (p *pageObject) LoggedIn() bool {
 	if !ok {
 		return false
 	}
-	return s.(*session).loggedIn()
+	return s.(*session).LoggedIn()
 }
 
 func (p *pageObject) CurrentUser() string {
@@ -321,6 +354,18 @@ func (p *pageObject) AddError(err error) {
 		errors = errs.([]error)
 	}
 	errors = append(errors, err)
+	(*p)["errors"] = errors
+}
+
+func (p *pageObject) AddErrors(errs []error) {
+	pErrs, ok := (*p)["errors"]
+	var errors []error
+	if !ok || errs == nil {
+		errors = make([]error, 0)
+	} else {
+		errors = pErrs.([]error)
+	}
+	errors = append(errors, errs...)
 	(*p)["errors"] = errors
 }
 
@@ -359,13 +404,14 @@ type session struct {
 	harvestSubdomain    string
 	harvestToken        *oauth2.Token
 	id                  string
+	errors              []error
 }
 
-func (s *session) loggedIn() bool {
+func (s *session) LoggedIn() bool {
 	return s.idToken != nil
 }
 
-func (s *session) getHarvestClient() (*harvest.Harvest, error) {
+func (s *session) GetHarvestClient() (*harvest.Harvest, error) {
 	if s.harvestOauth2Config == nil {
 		return nil, fmt.Errorf("Missing harvest oauth config")
 	}
@@ -381,6 +427,21 @@ func (s *session) getHarvestClient() (*harvest.Harvest, error) {
 		return nil, fmt.Errorf("Error while creating new harvest client: %T(%v)", err, err)
 	}
 	return client, nil
+}
+
+func (s *session) AddError(err error) {
+	if s.errors == nil {
+		s.errors = make([]error, 0)
+	}
+	s.errors = append(s.errors, err)
+}
+
+func (s *session) GetErrors() []error {
+	return s.errors
+}
+
+func (s *session) ResetErrors() {
+	s.errors = make([]error, 0)
 }
 
 func newSession() *session {
