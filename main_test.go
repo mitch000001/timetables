@@ -20,7 +20,7 @@ func TestGetHoursForUserAndTimeframe(t *testing.T) {
 		Users: harvest.NewUserService(&crudProvider{entries: entries}, &userEndpoint{}),
 	}
 	user := harvest.User{ID: 2}
-	timeframe := harvest.TimeframeFromDate(harvest.Date(2014, 01, 01, time.Local))
+	timeframe := harvest.Timeframe{harvest.Date(2014, 01, 01, time.Local), harvest.Date(2014, 02, 01, time.Local)}
 
 	hours, err := getHoursForUserAndTimeframe(&user, timeframe, false, client)
 
@@ -37,7 +37,7 @@ func TestGetHoursForUserAndTimeframe(t *testing.T) {
 		t.Fail()
 	}
 	for k, v := range memCache.store {
-		expectedKey := "user=2&timeframe={{2014-01-01 00:00:00 +0000 UTC} {2015-02-22 00:00:00 +0000 UTC}}&billable=false"
+		expectedKey := "user=2&timeframe={{2014-01-01 00:00:00 +0000 UTC} {2014-02-01 00:00:00 +0000 UTC}}&billable=false"
 		if k != expectedKey {
 			t.Logf("Expected key to equal '%s', got '%s'\n", expectedKey, k)
 			t.Fail()
