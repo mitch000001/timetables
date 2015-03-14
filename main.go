@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"flag"
 	"fmt"
 	"html/template"
 	"io"
@@ -46,8 +47,18 @@ var cache Cache
 var googleOauth2Config *oauth2.Config
 var harvestOauth2Config *oauth2.Config
 var workerQueue *worker
+var httpAddr string
+var httpPort string
+var host string
+
+func init() {
+	flag.StringVar(&httpAddr, "http.addr", "127.0.0.1", "-http.addr=localhost")
+	flag.StringVar(&httpPort, "http.port", "4000", "-http.port=4000")
+}
 
 func main() {
+	flag.Parse()
+	host = strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
 	username := os.Getenv("HARVEST_USERNAME")
 	password := os.Getenv("HARVEST_PASSWORD")
@@ -55,21 +66,11 @@ func main() {
 	harvestClientSecret := os.Getenv("HARVEST_CLIENTSECRET")
 	googleClientId := os.Getenv("GOOGLE_CLIENTID")
 	googleClientSecret := os.Getenv("GOOGLE_CLIENTSECRET")
-	host := os.Getenv("HOST")
-	port := os.Getenv("PORT")
-
-	if host == "" {
-		host = "http://127.0.0.1"
-	}
-
-	if port == "" {
-		port = "4000"
-	}
 
 	harvestOauth2Config = &oauth2.Config{
 		ClientID:     harvestClientId,
 		ClientSecret: harvestClientSecret,
-		RedirectURL:  host + ":" + port + "/harvest_oauth2redirect",
+		RedirectURL:  host + "/harvest_oauth2redirect",
 	}
 
 	googleOauth2Config = &oauth2.Config{
@@ -77,7 +78,7 @@ func main() {
 		ClientSecret: googleClientSecret,
 		Scopes:       []string{"openid", "email"},
 		Endpoint:     google.Endpoint,
-		RedirectURL:  host + ":" + port + "/google_oauth2redirect",
+		RedirectURL:  host + "/google_oauth2redirect",
 	}
 
 	clientProvider := auth.NewBasicAuthClientProvider(&auth.BasicAuthConfig{username, password})
@@ -103,7 +104,8 @@ func main() {
 	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
 	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
 
-	log.Fatal(http.ListenAndServe(":"+port, nil))
+	log.Printf("Listening on address %s\n", host)
+	log.Fatal(http.ListenAndServe(host, nil))
 }
 
 var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
