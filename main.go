@@ -630,24 +630,24 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 		var billableHours float64
 		var cumulatedHours float64
 		var cumulatedBillableHours float64
-		hours, err = getHoursForUserAndTimeframe(user, timeframe, false, client)
+		hours, err = getHoursForUserAndTimeframe(newUserHours(user, timeframe, false), client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
 		}
-		billableHours, err = getHoursForUserAndTimeframe(user, timeframe, true, client)
-		if err != nil {
-			multiErr.Add(err)
-			continue
-		}
-		// TODO: don't fetch all data since new years eve, use cached values
-		cumulatedHours, err = getHoursForUserAndTimeframe(user, cumulationTimeframe, false, client)
+		billableHours, err = getHoursForUserAndTimeframe(newUserHours(user, timeframe, true), client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
 		}
 		// TODO: don't fetch all data since new years eve, use cached values
-		cumulatedBillableHours, err = getHoursForUserAndTimeframe(user, cumulationTimeframe, true, client)
+		cumulatedHours, err = getHoursForUserAndTimeframe(newUserHours(user, cumulationTimeframe, false), client)
+		if err != nil {
+			multiErr.Add(err)
+			continue
+		}
+		// TODO: don't fetch all data since new years eve, use cached values
+		cumulatedBillableHours, err = getHoursForUserAndTimeframe(newUserHours(user, cumulationTimeframe, true), client)
 		if err != nil {
 			multiErr.Add(err)
 			continue
@@ -678,8 +678,8 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	return nil
 }
 
-func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe, billable bool, client *harvest.Harvest) (float64, error) {
-	key := fmt.Sprintf("user=%d&timeframe=%s&billable=%t", user.Id(), timeframe, billable)
+func getHoursForUserAndTimeframe(userHours *userHours, client *harvest.Harvest) (float64, error) {
+	key := fmt.Sprintf("user=%d&timeframe=%s&billable=%t", userHours.user.Id(), userHours.timeframe, userHours.billable)
 	dayEntries := cache.Get(key)
 	var entries []*harvest.DayEntry
 	var lastUpdate time.Time
@@ -689,11 +689,11 @@ func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe
 		cachedEntries = dayEntries.([]*harvest.DayEntry)
 	}
 	params := harvest.Params{}
-	params.ForTimeframe(timeframe).UpdatedSince(lastUpdate)
-	if billable {
-		params.OnlyBillable(billable)
+	params.ForTimeframe(userHours.timeframe).UpdatedSince(lastUpdate)
+	if userHours.billable {
+		params.OnlyBillable(userHours.billable)
 	}
-	err := client.Users.DayEntries(user).All(&entries, params.Values())
+	err := client.Users.DayEntries(userHours.user).All(&entries, params.Values())
 	if err != nil {
 		return -1.0, err
 	}
@@ -723,6 +723,25 @@ func getHoursForUserAndTimeframe(user *harvest.User, timeframe harvest.Timeframe
 	}
 	cache.Store(key, cachedEntries)
 	return hours, nil
+}
+
+func newUserHours(user *harvest.User, timeframe harvest.Timeframe, billable bool) *userHours {
+	return &userHours{
+		user:      user,
+		timeframe: timeframe,
+		billable:  billable,
+	}
+}
+
+type userHours struct {
+	user      *harvest.User
+	timeframe harvest.Timeframe
+	billable  bool
+	hours     float64
+}
+
+func (u *userHours) getHours() float64 {
+	return u.hours
 }
 
 type multiError []error
