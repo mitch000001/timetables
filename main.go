@@ -56,7 +56,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-	host = strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
+	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
+	host = "http://" + hostAddress
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
 	username := os.Getenv("HARVEST_USERNAME")
 	password := os.Getenv("HARVEST_PASSWORD")
@@ -102,8 +103,8 @@ func main() {
 	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
 	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
 
-	log.Printf("Listening on address %s\n", host)
-	log.Fatal(http.ListenAndServe(host, nil))
+	log.Printf("Listening on address %s\n", hostAddress)
+	log.Fatal(http.ListenAndServe(hostAddress, nil))
 }
 
 var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
@@ -229,8 +230,9 @@ var harvestConnectTemplate = template.Must(template.Must(rootTemplate.Clone()).P
 
 func harvestConnectHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := pageForSession(s)
 		var buf bytes.Buffer
-		err := harvestConnectTemplate.Execute(&buf, nil)
+		err := harvestConnectTemplate.Execute(&buf, page)
 		if err != nil {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 			return
@@ -244,12 +246,14 @@ func harvestOauthHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		err := r.ParseForm()
 		if err != nil {
+			s.AddError(err)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		params := r.Form
 		subdomain := params.Get("subdomain")
 		if subdomain == "" {
+			s.AddError(fmt.Errorf("Subdomain muss gefüllt sein"))
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -287,16 +291,19 @@ func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
 		}
 		session := sessions.Find(state)
 		if session == nil {
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			s.AddError(fmt.Errorf("Sie müssen eingeloggt sein"))
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
+			s.AddError(fmt.Errorf("Die Antwort von Harvest war fehlerhaft."))
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
+			s.AddError(err)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
