@@ -25,8 +25,8 @@ var funcMap = template.FuncMap{
 	"printDate": printDate,
 }
 
-var rootTemplatePattern = filepath.Join(mustString(os.Getwd()), "index.html.tmpl")
-var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "_*.tmpl")
+var rootTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "index.html.tmpl")
+var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "_*.tmpl")
 var rootTemplate = template.Must(template.ParseGlob(rootTemplatePattern)).Funcs(funcMap)
 var partialTmpl *template.Template = template.Must(rootTemplate.ParseGlob(partialTemplatePattern))
 
