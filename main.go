@@ -41,6 +41,7 @@ func mustString(str string, err error) string {
 	return str
 }
 
+var debug *debugLogger
 var debugMode bool
 var cache Cache
 var googleOauth2Config *oauth2.Config
@@ -58,6 +59,7 @@ func init() {
 
 func main() {
 	flag.Parse()
+	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
@@ -194,11 +196,13 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("timetable")
 		if err != nil {
+			debug.Printf("No cookie found: %+#v\n", err)
 			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		if expired := cookie.Expires.After(time.Now()); expired {
+			debug.Printf("Cookie expired: %+#v\n", cookie.Expires)
 			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
@@ -206,6 +210,7 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 		sessionId := cookie.Value
 		session := sessions.Find(sessionId)
 		if session == nil {
+			debug.Printf("No session found for sessionId '%s'\n", sessionId)
 			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
@@ -220,6 +225,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		client, err := s.GetHarvestClient()
 		if err != nil {
+			debug.Printf("no client found: sessionId='%s', error=%T:%v\n", s.id, err, err)
 			s.location = r.URL.String()
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
@@ -510,6 +516,33 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 			r.RequestURI,
 			time.Since(start),
 		)
+	}
+}
+
+type debugLogger struct {
+	log.Logger
+}
+
+func newDebugLogger(out io.Writer, prefix string, flag int) *debugLogger {
+	logger := log.New(out, prefix, flag)
+	return &debugLogger{*logger}
+}
+
+func (d *debugLogger) Printf(format string, v ...interface{}) {
+	if debugMode {
+		d.Logger.Printf(format, v...)
+	}
+}
+
+func (d *debugLogger) Print(v ...interface{}) {
+	if debugMode {
+		d.Logger.Print(v...)
+	}
+}
+
+func (d *debugLogger) Println(v ...interface{}) {
+	if debugMode {
+		d.Logger.Println(v...)
 	}
 }
 
