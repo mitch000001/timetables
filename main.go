@@ -123,10 +123,15 @@ func indexHandler(client *harvest.Harvest) authHandlerFunc {
 	}
 	workerQueue.addJob(calcFn)
 	// TODO(2015-02-22): remove brute force syncing with delta receiving via updated_since param
-	workerQueue.addJob(func() { schedule(15*time.Second, calcFn) })
+	//workerQueue.addJob(func() { schedule(15*time.Second, calcFn) })
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		if r.URL.Path != "/" {
+			s.AddError(fmt.Errorf("Die eingegebene Seite existiert nicht: '%s'", r.URL.Path))
+			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			return
+		}
 		page := pageForSession(s)
-		page.Set("table", cache.Get("table"))
+		page.Set("table", cache.Get(fmt.Sprintf("table:timeframe=%s", rowTimeframe)))
 		var buf bytes.Buffer
 		err := indexTemplate.Execute(&buf, page)
 		if err != nil {
@@ -153,7 +158,7 @@ func timeframeHandler() harvestHandlerFunc {
 		}
 		workerQueue.addJob(calcFn)
 		page := pageForSession(s)
-		page.Set("table", cache.Get("table"))
+		page.Set("table", cache.Get(fmt.Sprintf("table:timeframe=%s", tf)))
 		var buf bytes.Buffer
 		err = indexTemplate.Execute(&buf, page)
 		if err != nil {
@@ -609,9 +614,9 @@ func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harve
 	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
 	start := time.Now()
 	var t *table
-	cacheValue := cache.Get("table")
+	cacheValue := cache.Get(fmt.Sprintf("table:timeframe=%s", timeframe))
 	if cacheValue == nil {
-		t = &table{}
+		t = &table{Timeframe: timeframe}
 	} else {
 		t = cacheValue.(*table)
 	}
@@ -619,7 +624,7 @@ func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harve
 	if err != nil {
 		log.Printf("%T: %v\n", err, err)
 	}
-	cache.Store("table", t)
+	cache.Store(fmt.Sprintf("table:timeframe=%s", timeframe), t)
 	log.Printf("Table cache invalidated, took %s", time.Since(start))
 }
 
@@ -677,10 +682,6 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	if len(multiErr) != 0 {
 		return multiErr
 	}
-	if t == nil {
-		*t = table{}
-	}
-	t.Timeframe = timeframe
 	t.Rows = rows
 	return nil
 }
