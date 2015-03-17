@@ -108,6 +108,7 @@ func main() {
 	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
 
 	log.Printf("Listening on address %s\n", hostAddress)
+	debug.Printf("Running in debug mode\n")
 	log.Fatal(http.ListenAndServe(hostAddress, nil))
 }
 
@@ -141,6 +142,7 @@ func timeframeHandler() harvestHandlerFunc {
 		params := r.URL.Query()
 		tf, err := harvest.TimeframeFromQuery(params)
 		if err != nil {
+			debug.Printf("Error fetching timeframe from params: sessionId=%s\tparams=%+#v\terror=%T:%v\n", s.id, params, err, err)
 			// TODO(mw): What to do if the timeframe is not correct?
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
@@ -196,7 +198,7 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		cookie, err := r.Cookie("timetable")
 		if err != nil {
-			debug.Printf("No cookie found: %+#v\n", err)
+			debug.Printf("No cookie found: %v\n", err)
 			r.Header.Set("X-Referer", r.URL.String())
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
