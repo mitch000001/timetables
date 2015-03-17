@@ -143,6 +143,7 @@ func timeframeHandler() harvestHandlerFunc {
 		tf, err := harvest.TimeframeFromQuery(params)
 		if err != nil {
 			debug.Printf("Error fetching timeframe from params: sessionId=%s\tparams=%+#v\terror=%T:%v\n", s.id, params, err, err)
+			s.AddDebugError(err)
 			// TODO(mw): What to do if the timeframe is not correct?
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
@@ -461,6 +462,12 @@ func (s *session) AddError(err error) {
 		s.errors = make([]error, 0)
 	}
 	s.errors = append(s.errors, err)
+}
+
+func (s *session) AddDebugError(err error) {
+	if debugMode {
+		s.AddError(err)
+	}
 }
 
 func (s *session) GetErrors() []error {
