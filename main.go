@@ -41,6 +41,7 @@ func mustString(str string, err error) string {
 	return str
 }
 
+var debugMode bool
 var cache Cache
 var googleOauth2Config *oauth2.Config
 var harvestOauth2Config *oauth2.Config
@@ -50,6 +51,7 @@ var httpPort string
 var host string
 
 func init() {
+	flag.BoolVar(&debugMode, "debug", false, "-debug")
 	flag.StringVar(&httpAddr, "http.addr", "127.0.0.1", "-http.addr=localhost")
 	flag.StringVar(&httpPort, "http.port", "4000", "-http.port=4000")
 }
@@ -218,7 +220,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		client, err := s.GetHarvestClient()
 		if err != nil {
-			s.location = r.Header.Get("X-Referer")
+			s.location = r.URL.String()
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -280,7 +282,7 @@ func oauth2ConfigForEndpoint(endpoint oauth2.Endpoint) *oauth2.Config {
 
 }
 
-func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
+func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		params := r.URL.Query()
 		state := params.Get("state")
@@ -298,6 +300,12 @@ func harvestOauthRedirectHandler(config *oauth2.Config) authHandlerFunc {
 		code := params.Get("code")
 		if code == "" {
 			s.AddError(fmt.Errorf("Die Antwort von Harvest war fehlerhaft."))
+			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			return
+		}
+		config := s.harvestOauth2Config
+		if config == nil {
+			s.AddError(fmt.Errorf("Keine oauth config für diese session gefunden."))
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -337,6 +345,10 @@ func (p *pageObject) LoggedIn() bool {
 		return false
 	}
 	return s.(*session).LoggedIn()
+}
+
+func (p *pageObject) Debug() bool {
+	return debugMode
 }
 
 func (p *pageObject) CurrentUser() string {
