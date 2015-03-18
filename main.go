@@ -41,7 +41,7 @@ func mustString(str string, err error) string {
 	return str
 }
 
-var debug *debugLogger
+var debug *log.Logger
 var debugMode bool
 var cache Cache
 var googleOauth2Config *oauth2.Config
@@ -521,31 +521,21 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 	}
 }
 
-type debugLogger struct {
-	log.Logger
+type debugWriter struct {
+	debugMode *bool
+	io.Writer
 }
 
-func newDebugLogger(out io.Writer, prefix string, flag int) *debugLogger {
-	logger := log.New(out, prefix, flag)
-	return &debugLogger{*logger}
-}
-
-func (d *debugLogger) Printf(format string, v ...interface{}) {
-	if debugMode {
-		d.Logger.Printf(format, v...)
+func (d *debugWriter) Write(p []byte) (int, error) {
+	if *d.debugMode {
+		return d.Writer.Write(p)
 	}
+	return 0, nil
 }
 
-func (d *debugLogger) Print(v ...interface{}) {
-	if debugMode {
-		d.Logger.Print(v...)
-	}
-}
-
-func (d *debugLogger) Println(v ...interface{}) {
-	if debugMode {
-		d.Logger.Println(v...)
-	}
+func newDebugLogger(out io.Writer, prefix string, flag int) *log.Logger {
+	debugOut := &debugWriter{Writer: out, debugMode: &debugMode}
+	return log.New(debugOut, prefix, flag)
 }
 
 func schedule(d time.Duration, fn func()) {
