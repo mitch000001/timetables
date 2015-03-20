@@ -22,7 +22,8 @@ func TestGetHoursForUserAndTimeframe(t *testing.T) {
 	user := harvest.User{ID: 2}
 	timeframe := harvest.Timeframe{harvest.Date(2014, 01, 01, time.Local), harvest.Date(2014, 02, 01, time.Local)}
 
-	hours, err := getHoursForUserAndTimeframe(&user, timeframe, false, client)
+	userHours := newUserHours(&user, timeframe, false)
+	hours, err := getHoursForUserAndTimeframe(userHours, client)
 
 	if err != nil {
 		t.Logf("Expected no error, got %T: %v\n", err, err)
