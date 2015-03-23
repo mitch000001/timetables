@@ -23,10 +23,15 @@ type googleIdToken struct {
 
 func googleLoginHandler(config *oauth2.Config) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		r.ParseForm()
+		form := r.PostForm
 		s := newSession()
-		s.location = r.Header.Get("X-Referer")
+		s.location = form.Get("referer")
+		debug.Printf("form: %+#v\n", form)
+		debug.Printf("Referer: %s\n", s.location)
 		sessions.Add(s)
 		url := config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
+		copyHeader(w.Header(), r.Header)
 		http.Redirect(w, r, url, http.StatusFound)
 		return
 	}
@@ -37,21 +42,25 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
@@ -59,11 +68,13 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 		id := token.Extra("id_token")
 		idToken, err := decode(id.(string))
 		if err != nil {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		session.idToken = idToken
 		http.SetCookie(w, newSessionCookie(session.id))
+		copyHeader(w.Header(), r.Header)
 		http.Redirect(w, r, session.location, http.StatusFound)
 	}
 }

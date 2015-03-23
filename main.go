@@ -59,7 +59,8 @@ func init() {
 
 func main() {
 	flag.Parse()
-	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+	debug = newDebugLogger(os.Stdout, "timetables: ", log.LstdFlags|log.Lshortfile)
+	harvest.SetDebugMode(debugMode)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
 	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
@@ -150,6 +151,7 @@ func timeframeHandler() harvestHandlerFunc {
 			debug.Printf("Error fetching timeframe from params: sessionId=%s\tparams=%+#v\terror=%T:%v\n", s.id, params, err, err)
 			s.AddDebugError(err)
 			// TODO(mw): What to do if the timeframe is not correct?
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
@@ -173,9 +175,14 @@ var loginTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{d
 
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
+		debug.Printf("Request: %+#v\n", r)
+		debug.Printf("Request Location: %s\n", r.Header.Get("Location"))
 		if r.Method == "GET" {
+			page := &pageObject{}
+			page.Set("Referer", r.Header.Get("X-Referer"))
+			debug.Printf("Page: %+#v\n", page)
 			var buf bytes.Buffer
-			err := loginTemplate.Execute(&buf, nil)
+			err := loginTemplate.Execute(&buf, page)
 			if err != nil {
 				fmt.Fprintf(w, "%T: %v\n", err, err)
 				return
@@ -206,13 +213,17 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 		if err != nil {
 			debug.Printf("No cookie found: %v\n", err)
 			r.Header.Set("X-Referer", r.URL.String())
-			http.Redirect(w, r, "/login", http.StatusFound)
+			copyHeader(w.Header(), r.Header)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			debug.Printf("Request: %+#v\n", r)
 			return
 		}
 		if expired := cookie.Expires.After(time.Now()); expired {
 			debug.Printf("Cookie expired: %+#v\n", cookie.Expires)
 			r.Header.Set("X-Referer", r.URL.String())
-			http.Redirect(w, r, "/login", http.StatusFound)
+			copyHeader(w.Header(), r.Header)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			debug.Printf("Request: %+#v\n", r)
 			return
 		}
 		sessionId := cookie.Value
@@ -220,7 +231,9 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 		if session == nil {
 			debug.Printf("No session found for sessionId '%s'\n", sessionId)
 			r.Header.Set("X-Referer", r.URL.String())
-			http.Redirect(w, r, "/login", http.StatusFound)
+			copyHeader(w.Header(), r.Header)
+			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			debug.Printf("Request: %+#v\n", r)
 			return
 		}
 		fn(w, r, session)
@@ -234,7 +247,10 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 		client, err := s.GetHarvestClient()
 		if err != nil {
 			debug.Printf("no client found: sessionId='%s', error=%T:%v\n", s.id, err, err)
+			debug.Printf("Request URL: %s", r.URL.String())
+			debug.Printf("X-Referer: %s", r.Header.Get("X-Referer"))
 			s.location = r.URL.String()
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -263,6 +279,7 @@ func harvestOauthHandler() authHandlerFunc {
 		err := r.ParseForm()
 		if err != nil {
 			s.AddError(err)
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -270,6 +287,7 @@ func harvestOauthHandler() authHandlerFunc {
 		subdomain := params.Get("subdomain")
 		if subdomain == "" {
 			s.AddError(fmt.Errorf("Subdomain muss gefüllt sein"))
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
@@ -281,6 +299,7 @@ func harvestOauthHandler() authHandlerFunc {
 		s.harvestOauth2Config = oauth2ConfigForEndpoint(harvestOauthEndpoint)
 
 		url := s.harvestOauth2Config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
+		copyHeader(w.Header(), r.Header)
 		http.Redirect(w, r, url, http.StatusFound)
 		return
 	}
@@ -302,34 +321,40 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 		state := params.Get("state")
 		if state == "" {
 			s.AddError(fmt.Errorf("State was not set in harvest oauth redirect"))
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
 			s.AddError(fmt.Errorf("Sie müssen eingeloggt sein"))
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
 			s.AddError(fmt.Errorf("Die Antwort von Harvest war fehlerhaft."))
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		config := s.harvestOauth2Config
 		if config == nil {
 			s.AddError(fmt.Errorf("Keine oauth config für diese session gefunden."))
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
 			s.AddError(err)
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
 			return
 		}
 		session.harvestToken = token
+		copyHeader(w.Header(), r.Header)
 		http.Redirect(w, r, session.location, http.StatusFound)
 		return
 	}
@@ -496,6 +521,7 @@ func newSession() *session {
 func getHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/", http.StatusMethodNotAllowed)
 			return
 		}
@@ -506,6 +532,7 @@ func getHandler(fn http.HandlerFunc) http.HandlerFunc {
 func postHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
+			copyHeader(w.Header(), r.Header)
 			http.Redirect(w, r, "/", http.StatusMethodNotAllowed)
 			return
 		}
@@ -530,6 +557,12 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 			r.RequestURI,
 			time.Since(start),
 		)
+	}
+}
+
+func copyHeader(dst, src http.Header) {
+	for k, v := range src {
+		dst[k] = v
 	}
 }
 

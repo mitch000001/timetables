@@ -7,6 +7,7 @@
   <button type="submit">Login</button>
 </form>
 <form name=google-login method="POST" accept-charset="UTF-8" action="/google_login">
+  <input type="hidden" name="referer" value="{{.Referer}}">
   <button type="submit">Mit Google anmelden</button>
 </form>
 {{ end }}
