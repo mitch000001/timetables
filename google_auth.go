@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"golang.org/x/oauth2"
-	"golang.org/x/oauth2/jws"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/jws"
 )
 
 type googleIdToken struct {

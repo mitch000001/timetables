@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/mitch000001/go-harvest/harvest"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 )
 
 func TestGetHoursForUserAndTimeframe(t *testing.T) {
