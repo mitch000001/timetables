@@ -1,0 +1,16 @@
+{{ define "index" }}
+{{ if .CurrentTimeframe }}
+<strong>
+  <a href="/timeframe?{{ .CurrentTimeframe }}">Momentaner Abrechnungszeitraum</a>
+</strong>
+{{ else }}
+<h3>Es wurden noch kein aktueller Abrechnungszeiträume angelegt</h3>
+{{ end }}
+<hr/>
+<h2>Vergangene Abrechnungszeiträume</h2>
+{{ range $timeframe := .PastTimeframes }}
+<a href="/timeframe?{{ $timeframe }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
+{{ else }}
+<p>Keine Abrechnungszeiträume vorhanden</p>
+{{ end }}
+{{ end }}

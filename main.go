@@ -25,10 +25,10 @@ var funcMap = template.FuncMap{
 	"printDate": printDate,
 }
 
-var rootTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "index.html.tmpl")
+var layoutPattern = filepath.Join(mustString(os.Getwd()), "templates", "layout.html.tmpl")
 var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "_*.tmpl")
-var rootTemplate = template.Must(template.ParseGlob(rootTemplatePattern)).Funcs(funcMap)
-var partialTmpl *template.Template = template.Must(rootTemplate.ParseGlob(partialTemplatePattern))
+var layout = template.Must(template.ParseGlob(layoutPattern)).Funcs(funcMap)
+var partialTmpl *template.Template = template.Must(layout.ParseGlob(partialTemplatePattern))
 
 func printDate(date harvest.ShortDate) string {
 	return date.Format("02.01.2006")
@@ -62,9 +62,6 @@ func main() {
 	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
-	subdomain := os.Getenv("HARVEST_SUBDOMAIN")
-	username := os.Getenv("HARVEST_USERNAME")
-	password := os.Getenv("HARVEST_PASSWORD")
 	harvestClientId := os.Getenv("HARVEST_CLIENTID")
 	harvestClientSecret := os.Getenv("HARVEST_CLIENTSECRET")
 	googleClientId := os.Getenv("GOOGLE_CLIENTID")
@@ -84,20 +81,12 @@ func main() {
 		RedirectURL:  host + "/google_oauth2redirect",
 	}
 
-	clientProvider := auth.NewBasicAuthClientProvider(&auth.BasicAuthConfig{username, password})
-
-	client, err := harvest.New(subdomain, clientProvider.Client)
-	if err != nil {
-		fmt.Printf("There was an error creating the client:\n")
-		fmt.Printf("%T: %v\n", err, err)
-		os.Exit(1)
-	}
 	cache = &InMemoryCache{}
 	workerQueue = newWorker(5)
 	sessions = make(sessionMap)
 
 	// TODO(mw): find a more readable way to compose handler
-	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler(client))))))
+	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler())))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
 	http.HandleFunc("/logout", logHandler(htmlHandler(getHandler(authHandler(logoutHandler())))))
 	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleOauth2Config))))
@@ -112,18 +101,9 @@ func main() {
 	log.Fatal(http.ListenAndServe(hostAddress, nil))
 }
 
-var indexTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
+var indexTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "index" .}}{{end}}`))
 
-func indexHandler(client *harvest.Harvest) authHandlerFunc {
-	startDate := harvest.Date(2015, 01, 01, time.Local)
-	endDate := harvest.Date(2015, 01, 25, time.Local)
-	rowTimeframe := harvest.Timeframe{StartDate: startDate, EndDate: endDate}
-	calcFn := func() {
-		invalidateTableCacheForTimeframe(rowTimeframe, client)
-	}
-	workerQueue.addJob(calcFn)
-	// TODO(2015-02-22): remove brute force syncing with delta receiving via updated_since param
-	//workerQueue.addJob(func() { schedule(15*time.Second, calcFn) })
+func indexHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		if r.URL.Path != "/" {
 			s.AddError(fmt.Errorf("Die eingegebene Seite existiert nicht: '%s'", r.URL.Path))
@@ -131,7 +111,6 @@ func indexHandler(client *harvest.Harvest) authHandlerFunc {
 			return
 		}
 		page := pageForSession(s)
-		page.Set("table", cache.Get(fmt.Sprintf("table:timeframe=%s", rowTimeframe)))
 		var buf bytes.Buffer
 		err := indexTemplate.Execute(&buf, page)
 		if err != nil {
@@ -169,7 +148,7 @@ func timeframeHandler() harvestHandlerFunc {
 	}
 }
 
-var loginTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "login" .}}{{end}}`))
+var loginTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "login" .}}{{end}}`))
 
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
@@ -242,7 +221,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	}
 }
 
-var harvestConnectTemplate = template.Must(template.Must(rootTemplate.Clone()).Parse(`{{define "content"}}{{template "harvest_connect" .}}{{end}}`))
+var harvestConnectTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "harvest_connect" .}}{{end}}`))
 
 func harvestConnectHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
@@ -589,148 +568,6 @@ func (w *worker) run() {
 
 func (w *worker) addJob(fn func()) {
 	w.queue <- fn
-}
-
-type table struct {
-	Timeframe harvest.Timeframe
-	Rows      []row
-}
-
-type row struct {
-	User                   *harvest.User
-	Hours                  float64
-	Days                   float64
-	CumulatedHours         float64
-	CumulatedDays          float64
-	BillableHours          float64
-	BillableDays           float64
-	BillingDegree          float64
-	CumulatedBillableHours float64
-	CumulatedBillableDays  float64
-	CumulatedBillingDegree float64
-}
-
-func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) {
-	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
-	start := time.Now()
-	var t *table
-	cacheValue := cache.Get(fmt.Sprintf("table:timeframe=%s", timeframe))
-	if cacheValue == nil {
-		t = &table{Timeframe: timeframe}
-	} else {
-		t = cacheValue.(*table)
-	}
-	err := populateTable(t, timeframe, client)
-	if err != nil {
-		log.Printf("%T: %v\n", err, err)
-	}
-	cache.Store(fmt.Sprintf("table:timeframe=%s", timeframe), t)
-	log.Printf("Table cache invalidated, took %s", time.Since(start))
-}
-
-func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harvest) error {
-	var users []*harvest.User
-	err := client.Users.All(&users, nil)
-	if err != nil {
-		return err
-	}
-	cumulationTimeframe := harvest.Timeframe{harvest.Date(2015, 01, 01, time.Local), timeframe.EndDate}
-	var rows []row
-	var multiErr multiError
-	for _, user := range users {
-		var hours float64
-		var billableHours float64
-		var cumulatedHours float64
-		var cumulatedBillableHours float64
-		hours, err = getHoursForUserAndTimeframe(newUserHours(user, timeframe, false), client)
-		if err != nil {
-			multiErr.Add(err)
-			continue
-		}
-		billableHours, err = getHoursForUserAndTimeframe(newUserHours(user, timeframe, true), client)
-		if err != nil {
-			multiErr.Add(err)
-			continue
-		}
-		// TODO: don't fetch all data since new years eve, use cached values
-		cumulatedHours, err = getHoursForUserAndTimeframe(newUserHours(user, cumulationTimeframe, false), client)
-		if err != nil {
-			multiErr.Add(err)
-			continue
-		}
-		// TODO: don't fetch all data since new years eve, use cached values
-		cumulatedBillableHours, err = getHoursForUserAndTimeframe(newUserHours(user, cumulationTimeframe, true), client)
-		if err != nil {
-			multiErr.Add(err)
-			continue
-		}
-		r := row{
-			User:                   user,
-			Hours:                  hours,
-			Days:                   hours / 8,
-			CumulatedHours:         cumulatedHours,
-			CumulatedDays:          cumulatedHours / 8,
-			BillableHours:          billableHours,
-			BillableDays:           billableHours / 8,
-			CumulatedBillableHours: cumulatedBillableHours,
-			CumulatedBillableDays:  cumulatedBillableHours / 8,
-			BillingDegree:          (billableHours / hours) * 100,
-			CumulatedBillingDegree: (cumulatedBillableHours / cumulatedHours) * 100,
-		}
-		rows = append(rows, r)
-	}
-	if len(multiErr) != 0 {
-		return multiErr
-	}
-	t.Rows = rows
-	return nil
-}
-
-func getHoursForUserAndTimeframe(userHours *userHours, client *harvest.Harvest) (float64, error) {
-	key := fmt.Sprintf("user=%d&timeframe=%s&billable=%t", userHours.user.Id(), userHours.timeframe, userHours.billable)
-	dayEntries := cache.Get(key)
-	var entries []*harvest.DayEntry
-	var lastUpdate time.Time
-	var cachedEntries []*harvest.DayEntry
-	if dayEntries != nil {
-		lastUpdate = time.Now()
-		cachedEntries = dayEntries.([]*harvest.DayEntry)
-	}
-	params := harvest.Params{}
-	params.ForTimeframe(userHours.timeframe).UpdatedSince(lastUpdate)
-	if userHours.billable {
-		params.OnlyBillable(userHours.billable)
-	}
-	err := client.Users.DayEntries(userHours.user).All(&entries, params.Values())
-	if err != nil {
-		return -1.0, err
-	}
-	newEntries := make(map[int]*harvest.DayEntry)
-	for _, entry := range entries {
-		newEntries[entry.ID] = entry
-	}
-	replacements := make(map[int]int)
-	hours := 0.0
-	for i, entry := range cachedEntries {
-		if newEntry, ok := newEntries[entry.ID]; ok {
-			replacements[entry.ID] = i
-			hours += newEntry.Hours
-		} else {
-			hours += entry.Hours
-		}
-	}
-	for id, i := range replacements {
-		cachedEntries[i] = newEntries[id]
-		delete(newEntries, id)
-	}
-	if len(newEntries) != 0 {
-		for _, entry := range newEntries {
-			cachedEntries = append(cachedEntries, entry)
-			hours += entry.Hours
-		}
-	}
-	cache.Store(key, cachedEntries)
-	return hours, nil
 }
 
 func newUserHours(user *harvest.User, timeframe harvest.Timeframe, billable bool) *userHours {
