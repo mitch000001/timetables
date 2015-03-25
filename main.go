@@ -12,6 +12,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -95,6 +96,7 @@ func main() {
 	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(postHandler(authHandler(harvestOauthHandler())))))
 	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
 	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
+	http.HandleFunc("/timeframes", logHandler(htmlHandler(authHandler(timeframesHandler()))))
 
 	log.Printf("Listening on address %s\n", hostAddress)
 	debug.Printf("Running in debug mode\n")
@@ -102,15 +104,30 @@ func main() {
 }
 
 var indexTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "index" .}}{{end}}`))
+var fiscalYear *FiscalYear
 
 func indexHandler() authHandlerFunc {
+	if fiscalYear == nil {
+		fiscalYear = &FiscalYear{Year: time.Now().Year()}
+	}
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
 		if r.URL.Path != "/" {
 			s.AddError(fmt.Errorf("Die eingegebene Seite existiert nicht: '%s'", r.URL.Path))
-			http.Redirect(w, r, "/", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
 		page := pageForSession(s)
+		page.Set("CurrentTimeframe", fiscalYear.CurrentFiscalPeriod())
+		pastFiscalPeriods := fiscalYear.PastFiscalPeriods()
+		pastTimeframes := make([]map[string]interface{}, len(pastFiscalPeriods))
+		for i, fp := range pastFiscalPeriods {
+			pastTimeframes[i] = map[string]interface{}{
+				"Link":      template.URL(fp.Timeframe.ToQuery().Encode()),
+				"StartDate": fp.StartDate,
+				"EndDate":   fp.EndDate,
+			}
+		}
+		page.Set("PastTimeframes", pastTimeframes)
 		var buf bytes.Buffer
 		err := indexTemplate.Execute(&buf, page)
 		if err != nil {
@@ -120,6 +137,63 @@ func indexHandler() authHandlerFunc {
 		}
 	}
 }
+
+var timeframesTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "create-timeframes" .}}{{end}}`))
+
+func timeframesHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		debug.Printf("Request: %+#v\n", r)
+		if r.Method == "GET" {
+			page := pageForSession(s)
+			var buf bytes.Buffer
+			err := timeframesTemplate.Execute(&buf, page)
+			if err != nil {
+				fmt.Fprintf(w, "%T: %v\n", err, err)
+			} else {
+				io.Copy(w, &buf)
+			}
+			return
+		}
+		if r.Method == "POST" {
+			err := r.ParseForm()
+			if err != nil {
+				s.AddError(err)
+				http.Redirect(w, r, "/timeframes", http.StatusFound)
+				return
+			}
+			var multiErr multiError
+			params := r.Form
+			startDate, err := time.Parse("2006-01-02", params.Get("start-date"))
+			if err != nil {
+				multiErr.Add(err)
+			}
+			endDate, err := time.Parse("2006-01-02", params.Get("end-date"))
+			if err != nil {
+				multiErr.Add(err)
+			}
+			businessDays, err := strconv.Atoi(params.Get("business-days"))
+			if err != nil {
+				multiErr.Add(err)
+			}
+			fiscalPeriod := NewFiscalPeriod(startDate, endDate, businessDays)
+			err = fiscalYear.Add(fiscalPeriod)
+			if err != nil {
+				multiErr.Add(err)
+			}
+			if len(multiErr) > 0 {
+				for _, err := range multiErr {
+					s.AddError(err)
+				}
+				http.Redirect(w, r, "/timeframes", http.StatusFound)
+				return
+			}
+			http.Redirect(w, r, "/", http.StatusFound)
+			return
+		}
+	}
+}
+
+var tableTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
 
 func timeframeHandler() harvestHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
@@ -139,7 +213,7 @@ func timeframeHandler() harvestHandlerFunc {
 		page := pageForSession(s)
 		page.Set("table", cache.Get(fmt.Sprintf("table:timeframe=%s", tf)))
 		var buf bytes.Buffer
-		err = indexTemplate.Execute(&buf, page)
+		err = tableTemplate.Execute(&buf, page)
 		if err != nil {
 			fmt.Fprintf(w, "%T: %v\n", err, err)
 		} else {
@@ -214,7 +288,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 		if err != nil {
 			debug.Printf("no client found: sessionId='%s', error=%T:%v\n", s.id, err, err)
 			s.location = r.URL.String()
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		fn(w, r, s, client)
@@ -242,14 +316,14 @@ func harvestOauthHandler() authHandlerFunc {
 		err := r.ParseForm()
 		if err != nil {
 			s.AddError(err)
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		params := r.Form
 		subdomain := params.Get("subdomain")
 		if subdomain == "" {
 			s.AddError(fmt.Errorf("Subdomain muss gefüllt sein"))
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		// TODO(mw): move into harvest package and extract as utility function
@@ -281,31 +355,31 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 		state := params.Get("state")
 		if state == "" {
 			s.AddError(fmt.Errorf("State was not set in harvest oauth redirect"))
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
 			s.AddError(fmt.Errorf("Sie müssen eingeloggt sein"))
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
 			s.AddError(fmt.Errorf("Die Antwort von Harvest war fehlerhaft."))
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		config := s.harvestOauth2Config
 		if config == nil {
 			s.AddError(fmt.Errorf("Keine oauth config für diese session gefunden."))
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
 			s.AddError(err)
-			http.Redirect(w, r, "/harvest_connect", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
 		session.harvestToken = token
