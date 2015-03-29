@@ -296,6 +296,9 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
+		if !s.User.Admin {
+			s.AddError(fmt.Errorf("Der verknüpfte Account hat keine Administrationsrechte. Die Anwendung kann deshalb nur eingeschränkt genutzt werden."))
+		}
 		fn(w, r, s, client)
 	}
 }
@@ -380,7 +383,19 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 			return
 		}
 		session.harvestToken = token
-		http.Redirect(w, r, session.location, http.StatusFound)
+		defer http.Redirect(w, r, session.location, http.StatusFound)
+
+		client, err := session.GetHarvestClient()
+		if err != nil {
+			session.AddError(err)
+			return
+		}
+		account, err := client.Account()
+		if err != nil {
+			session.AddError(err)
+			return
+		}
+		session.User.SetHarvestAccount(account)
 		return
 	}
 }

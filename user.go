@@ -17,7 +17,7 @@ type User struct {
 	idToken *googleIdToken
 	profile *googleProfile
 	company *Company
-	*harvest.User
+	*harvest.AccountUser
 	backOffice bool
 	admin      bool
 }
@@ -45,7 +45,15 @@ func (u *User) IsAdmin() bool {
 	return u.admin
 }
 
+func (u *User) SetHarvestAccount(account *harvest.Account) {
+	if u.company != nil {
+		u.company.Account = account
+	}
+	u.AccountUser = account.User
+}
+
 type Company struct {
+	*harvest.Account
 	Domain              string
 	HarvestSubdomain    string
 	harvestOauth2Config *oauth2.Config
