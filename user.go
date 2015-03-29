@@ -8,7 +8,13 @@ import (
 func NewUser(idToken *googleIdToken) *User {
 	var company *Company
 	if idToken.HostedDomain != "" {
-		company = &Company{Domain: idToken.HostedDomain}
+		c, ok := CompanyRepository.FindByDomain(idToken.HostedDomain)
+		if ok {
+			company = c
+		} else {
+			company = &Company{Domain: idToken.HostedDomain}
+			CompanyRepository.Add(company)
+		}
 	}
 	return &User{idToken: idToken, company: company}
 }
@@ -50,6 +56,24 @@ func (u *User) SetHarvestAccount(account *harvest.Account) {
 		u.company.Account = account
 	}
 	u.AccountUser = account.User
+}
+
+var CompanyRepository Companies = make(Companies)
+
+type Companies map[string]*Company
+
+func (c *Companies) FindByDomain(domain string) (*Company, bool) {
+	company, ok := (*c)[domain]
+	return company, ok
+}
+
+func (c *Companies) Add(company *Company) bool {
+	_, ok := (*c)[company.Domain]
+	if ok {
+		return false
+	}
+	(*c)[company.Domain] = company
+	return true
 }
 
 type Company struct {
