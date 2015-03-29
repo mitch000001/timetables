@@ -6,12 +6,17 @@ import (
 )
 
 func NewUser(idToken *googleIdToken) *User {
-	return &User{idToken: idToken}
+	var company *Company
+	if idToken.HostedDomain != "" {
+		company = &Company{Domain: idToken.HostedDomain}
+	}
+	return &User{idToken: idToken, company: company}
 }
 
 type User struct {
 	idToken *googleIdToken
 	profile *googleProfile
+	company *Company
 	*harvest.User
 	backOffice bool
 	admin      bool
