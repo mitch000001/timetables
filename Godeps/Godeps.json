@@ -9,7 +9,7 @@
 		},
 		{
 			"ImportPath": "github.com/mitch000001/go-harvest/harvest",
-			"Rev": "1bc675fe78522d024c5182424d011a44525c7579"
+			"Rev": "1f7c1edf94d6e22e0a71f332621ecd86e4410505"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
