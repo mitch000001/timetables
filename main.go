@@ -330,13 +330,21 @@ func harvestOauthHandler() authHandlerFunc {
 		harvestUrl := "https://" + subdomain + ".harvestapp.com"
 		harvestOauthEndpoint := auth.NewOauth2EndpointForSubdomain(harvestUrl)
 
-		s.harvestSubdomain = subdomain
-		s.harvestOauth2Config = oauth2ConfigForEndpoint(harvestOauthEndpoint)
+		harvestOauth2Config := &HarvestOauth2Config{
+			Config:    oauth2ConfigForEndpoint(harvestOauthEndpoint),
+			Subdomain: subdomain,
+		}
+		s.User.SetHarvestOauthConfig(harvestOauth2Config)
 
-		url := s.harvestOauth2Config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
+		url := harvestOauth2Config.AuthCodeURL(s.id, oauth2.AccessTypeOffline)
 		http.Redirect(w, r, url, http.StatusFound)
 		return
 	}
+}
+
+type HarvestOauth2Config struct {
+	*oauth2.Config
+	Subdomain string
 }
 
 func oauth2ConfigForEndpoint(endpoint oauth2.Endpoint) *oauth2.Config {
@@ -346,7 +354,6 @@ func oauth2ConfigForEndpoint(endpoint oauth2.Endpoint) *oauth2.Config {
 		RedirectURL:  harvestOauth2Config.RedirectURL,
 		Endpoint:     endpoint,
 	}
-
 }
 
 func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
@@ -370,7 +377,7 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
-		config := s.harvestOauth2Config
+		config := s.User.HarvestOauth2Config()
 		if config == nil {
 			s.AddError(fmt.Errorf("Keine oauth config für diese session gefunden."))
 			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
@@ -382,7 +389,7 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 			http.Redirect(w, r, "/harvest_connect", http.StatusFound)
 			return
 		}
-		session.harvestToken = token
+		session.User.SetHarvestToken(token)
 		defer http.Redirect(w, r, session.location, http.StatusFound)
 
 		client, err := session.GetHarvestClient()
@@ -504,16 +511,13 @@ func (sm *sessionMap) Remove(s *session) {
 }
 
 type session struct {
-	Stack               string
-	URL                 *url.URL
-	location            string
-	googleToken         *oauth2.Token
-	User                *User
-	harvestOauth2Config *oauth2.Config
-	harvestSubdomain    string
-	harvestToken        *oauth2.Token
-	id                  string
-	errors              []error
+	Stack       string
+	URL         *url.URL
+	location    string
+	googleToken *oauth2.Token
+	User        *User
+	id          string
+	errors      []error
 }
 
 func (s *session) LoggedIn() bool {
@@ -521,17 +525,16 @@ func (s *session) LoggedIn() bool {
 }
 
 func (s *session) GetHarvestClient() (*harvest.Harvest, error) {
-	if s.harvestOauth2Config == nil {
+	config := s.User.HarvestOauth2Config()
+	if config == nil {
 		return nil, fmt.Errorf("Missing harvest oauth config")
 	}
-	if s.harvestToken == nil {
+	token := s.User.HarvestToken()
+	if token == nil {
 		return nil, fmt.Errorf("Missing harvest token")
 	}
-	if s.harvestSubdomain == "" {
-		return nil, fmt.Errorf("Missing harvest subdomain")
-	}
 	// TODO(mw): validate that the token is valid and if not, exchange a new token!
-	client, err := harvest.New(s.harvestSubdomain, func() harvest.HttpClient { return s.harvestOauth2Config.Client(oauth2.NoContext, s.harvestToken) })
+	client, err := harvest.New(config.Subdomain, func() harvest.HttpClient { return config.Client(oauth2.NoContext, token) })
 	if err != nil {
 		return nil, fmt.Errorf("Error while creating new harvest client: %T(%v)", err, err)
 	}
