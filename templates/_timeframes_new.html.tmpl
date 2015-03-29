@@ -1,0 +1,12 @@
+{{ define "create-timeframes" }}
+<h2>Neuen Abrechnungszeitraum anlegen</h2>
+<form name="create-timeframe" action="/timeframes" method="POST">
+  <label for="start-date">Beginn</label>
+  <input type="date" name="start-date" required="true" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
+  <label for="end-date">Ende<label>
+  <input type="date" name="end-date" required="true" pattern="[0-9]{4}-[0-9]{2}-[0-9]{2}">
+  <label for="business-days">Werktage</label>
+  <input type="number" name="business-days"/>
+  <button type="submit">Anlegen</button>
+</form>
+{{ end }}
