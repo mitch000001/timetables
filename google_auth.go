@@ -5,6 +5,8 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -19,6 +21,24 @@ type googleIdToken struct {
 	EmailVerified       bool   `json:"email_verified"`
 	AuthorizedPresenter string `json:"azp"`
 	Email               string `json:"email"`
+	HostedDomain        string `json:"hd"`
+}
+
+type googleProfile struct {
+	DisplayName string `json:"displayName"`
+	Name        struct {
+		Formatted  string `json:"formatted"`
+		FamilyName string `json:"familyName"`
+		GivenName  string `json:"givenName"`
+		MiddleName string `json:"middleName"`
+	}
+	Domain string `json:"domain"`
+}
+
+var profileUrl string = "https://www.googleapis.com/plus/v1/people/me"
+
+func (g *googleProfile) FullName() string {
+	return fmt.Sprintf("%s %s", g.Name.GivenName, g.Name.FamilyName)
 }
 
 func googleLoginHandler(config *oauth2.Config) http.HandlerFunc {
@@ -62,10 +82,36 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
 			return
 		}
-		session.idToken = idToken
-		http.SetCookie(w, newSessionCookie(session.id))
-		http.Redirect(w, r, session.location, http.StatusFound)
+		user := NewUser(idToken)
+		session.User = user
+		defer func() {
+			http.SetCookie(w, newSessionCookie(session.id))
+			http.Redirect(w, r, session.location, http.StatusFound)
+		}()
+		client := config.Client(oauth2.NoContext, token)
+		response, err := client.Get(profileUrl)
+		if err != nil {
+			debug.Printf("Error %T: %v\n", err, err)
+			return
+		}
+		defer response.Body.Close()
+		profile, err := decodeGoogleProfile(response.Body)
+		if err != nil {
+			debug.Printf("Error %T: %v\n", err, err)
+			return
+		}
+		debug.Printf("Google Profile: %+#v\n", profile)
+		session.User.SetProfile(profile)
 	}
+}
+
+func decodeGoogleProfile(r io.Reader) (*googleProfile, error) {
+	var profile googleProfile
+	err := json.NewDecoder(r).Decode(&profile)
+	if err != nil {
+		return nil, err
+	}
+	return &profile, nil
 }
 
 func newSessionCookie(sessionId string) *http.Cookie {
@@ -82,10 +128,12 @@ func decode(payload string) (*googleIdToken, error) {
 	if err != nil {
 		return nil, err
 	}
+	debug.Printf("Decoded Google auth payload: %s\n", string(decoded))
 	c := &googleIdToken{}
 	err = json.NewDecoder(bytes.NewBuffer(decoded)).Decode(c)
 	return c, err
 }
+
 func base64Decode(s string) ([]byte, error) {
 	// add back missing padding
 	switch len(s) % 4 {

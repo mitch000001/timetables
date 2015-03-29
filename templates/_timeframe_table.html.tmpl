@@ -1,5 +1,5 @@
-{{ define "table" }}
-{{ with $table := .table }}
+{{ define "timeframe-table" }}
+{{ with $table := .Table }}
 <h2>Vom {{ printDate $table.Timeframe.StartDate }} bis {{ printDate $table.Timeframe.EndDate }}</h2>
 <table class="table">
   <thead>

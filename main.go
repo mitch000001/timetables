@@ -10,11 +10,15 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
+	runtimeDebug "runtime/debug"
 	"strconv"
 	"strings"
 	"time"
+	"unicode"
+	"unicode/utf8"
 
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest/auth"
@@ -23,7 +27,10 @@ import (
 )
 
 var funcMap = template.FuncMap{
-	"printDate": printDate,
+	"printDate":         printDate,
+	"printTimeframe":    printTimeframe,
+	"printFiscalPeriod": printFiscalPeriod,
+	"startsWith":        strings.HasPrefix,
 }
 
 var layoutPattern = filepath.Join(mustString(os.Getwd()), "templates", "layout.html.tmpl")
@@ -33,6 +40,14 @@ var partialTmpl *template.Template = template.Must(layout.ParseGlob(partialTempl
 
 func printDate(date harvest.ShortDate) string {
 	return date.Format("02.01.2006")
+}
+
+func printFiscalPeriod(fp *FiscalPeriod) string {
+	return fmt.Sprintf("%s - %s", fp.StartDate.Format("02.01.2006"), fp.EndDate.Format("02.01.2006"))
+}
+
+func printTimeframe(tf harvest.Timeframe) string {
+	return fmt.Sprintf("%s - %s", tf.StartDate.Format("02.01.2006"), tf.EndDate.Format("02.01.2006"))
 }
 
 func mustString(str string, err error) string {
@@ -77,7 +92,7 @@ func main() {
 	googleOauth2Config = &oauth2.Config{
 		ClientID:     googleClientId,
 		ClientSecret: googleClientSecret,
-		Scopes:       []string{"openid", "email"},
+		Scopes:       []string{"openid", "email", "profile"},
 		Endpoint:     google.Endpoint,
 		RedirectURL:  host + "/google_oauth2redirect",
 	}
@@ -87,23 +102,26 @@ func main() {
 	sessions = make(sessionMap)
 
 	// TODO(mw): find a more readable way to compose handler
-	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(indexHandler())))))
+	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(errorHandler(indexHandler()))))))
 	http.HandleFunc("/login", logHandler(htmlHandler(loginHandler())))
-	http.HandleFunc("/logout", logHandler(htmlHandler(getHandler(authHandler(logoutHandler())))))
+	http.HandleFunc("/logout", logHandler(htmlHandler(getHandler(authHandler(errorHandler(logoutHandler()))))))
 	http.HandleFunc("/google_login", logHandler(htmlHandler(googleLoginHandler(googleOauth2Config))))
 	http.HandleFunc("/google_oauth2redirect", logHandler(htmlHandler(getHandler(googleRedirectHandler(googleOauth2Config)))))
-	http.HandleFunc("/harvest_connect", logHandler(htmlHandler(getHandler(authHandler(harvestConnectHandler())))))
-	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(postHandler(authHandler(harvestOauthHandler())))))
-	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(harvestOauthRedirectHandler(harvestOauth2Config))))))
-	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(harvestHandler(timeframeHandler()))))))
-	http.HandleFunc("/timeframes", logHandler(htmlHandler(authHandler(timeframesHandler()))))
+	http.HandleFunc("/harvest_connect", logHandler(htmlHandler(getHandler(authHandler(errorHandler(harvestConnectHandler()))))))
+	http.HandleFunc("/harvest_oauth", logHandler(htmlHandler(postHandler(authHandler(errorHandler(harvestOauthHandler()))))))
+	http.HandleFunc("/harvest_oauth2redirect", logHandler(htmlHandler(getHandler(authHandler(errorHandler(harvestOauthRedirectHandler(harvestOauth2Config)))))))
+	http.HandleFunc("/timeframe", logHandler(htmlHandler(getHandler(authHandler(errorHandler(harvestHandler(timeframeTableHandler())))))))
+	http.HandleFunc("/timeframes", logHandler(htmlHandler(authHandler(errorHandler(timeframesHandler())))))
+	http.HandleFunc("/timeframes/new", logHandler(htmlHandler(getHandler(authHandler(errorHandler(timeframesNewHandler()))))))
+	http.HandleFunc("/plan_items", logHandler(htmlHandler(authHandler(errorHandler(planItemHandler())))))
+	http.HandleFunc("/plan_items/new", logHandler(htmlHandler(authHandler(errorHandler(harvestHandler(planItemNewHandler()))))))
+	http.HandleFunc("/500", logHandler(htmlHandler(getHandler(authHandler(internalServerError())))))
 
 	log.Printf("Listening on address %s\n", hostAddress)
 	debug.Printf("Running in debug mode\n")
 	log.Fatal(http.ListenAndServe(hostAddress, nil))
 }
 
-var indexTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "index" .}}{{end}}`))
 var fiscalYear *FiscalYear
 
 func indexHandler() authHandlerFunc {
@@ -116,43 +134,34 @@ func indexHandler() authHandlerFunc {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
-		page := pageForSession(s)
-		page.Set("CurrentTimeframe", fiscalYear.CurrentFiscalPeriod())
-		pastFiscalPeriods := fiscalYear.PastFiscalPeriods()
-		pastTimeframes := make([]map[string]interface{}, len(pastFiscalPeriods))
-		for i, fp := range pastFiscalPeriods {
-			pastTimeframes[i] = map[string]interface{}{
-				"Link":      template.URL(fp.Timeframe.ToQuery().Encode()),
-				"StartDate": fp.StartDate,
-				"EndDate":   fp.EndDate,
-			}
-		}
-		page.Set("PastTimeframes", pastTimeframes)
-		var buf bytes.Buffer
-		err := indexTemplate.Execute(&buf, page)
-		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-		} else {
-			io.Copy(w, &buf)
-		}
+		timeframesHandler()(w, r, s)
 	}
 }
 
-var timeframesTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "create-timeframes" .}}{{end}}`))
+func timeframesNewHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := PageForSession(s)
+		renderTemplate(w, "timeframes-new", page)
+		return
+	}
+}
 
 func timeframesHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
-		debug.Printf("Request: %+#v\n", r)
 		if r.Method == "GET" {
-			page := pageForSession(s)
-			var buf bytes.Buffer
-			err := timeframesTemplate.Execute(&buf, page)
-			if err != nil {
-				fmt.Fprintf(w, "%T: %v\n", err, err)
-			} else {
-				io.Copy(w, &buf)
+			page := PageForSession(s)
+			page.Set("CurrentTimeframe", fiscalYear.CurrentFiscalPeriod())
+			pastFiscalPeriods := fiscalYear.PastFiscalPeriods()
+			pastTimeframes := make([]map[string]interface{}, len(pastFiscalPeriods))
+			for i, fp := range pastFiscalPeriods {
+				pastTimeframes[i] = map[string]interface{}{
+					"Link":      template.URL(fp.Timeframe.ToQuery().Encode()),
+					"StartDate": fp.StartDate,
+					"EndDate":   fp.EndDate,
+				}
 			}
-			return
+			page.Set("PastTimeframes", pastTimeframes)
+			renderTemplate(w, "timeframes", page)
 		}
 		if r.Method == "POST" {
 			err := r.ParseForm()
@@ -193,9 +202,7 @@ func timeframesHandler() authHandlerFunc {
 	}
 }
 
-var tableTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "table" .}}{{end}}`))
-
-func timeframeHandler() harvestHandlerFunc {
+func timeframeTableHandler() harvestHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
 		params := r.URL.Query()
 		tf, err := harvest.TimeframeFromQuery(params)
@@ -210,30 +217,27 @@ func timeframeHandler() harvestHandlerFunc {
 			invalidateTableCacheForTimeframe(tf, c)
 		}
 		workerQueue.addJob(calcFn)
-		page := pageForSession(s)
-		page.Set("table", cache.Get(fmt.Sprintf("table:timeframe=%s", tf)))
-		var buf bytes.Buffer
-		err = tableTemplate.Execute(&buf, page)
-		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-		} else {
-			io.Copy(w, &buf)
-		}
+		page := PageForSession(s)
+		page.Set("Table", cache.Get(fmt.Sprintf("table:timeframe=%s", tf)))
+		renderTemplate(w, "timeframe-table", page)
 	}
 }
 
-var loginTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "login" .}}{{end}}`))
+var htmlReplacer = strings.NewReplacer("\n", "<br>", "\r", "<br>")
+
+func internalServerError() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := PageForSession(s)
+		page.Set("Request", r)
+		page.Set("Stack", template.HTML(s.Stack))
+		renderTemplate(w, "internal-server-error", page)
+	}
+}
 
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			var buf bytes.Buffer
-			err := loginTemplate.Execute(&buf, nil)
-			if err != nil {
-				fmt.Fprintf(w, "%T: %v\n", err, err)
-				return
-			}
-			io.Copy(w, &buf)
+			renderTemplate(w, "login", &pageObject{})
 			return
 		}
 		if r.Method == "POST" {
@@ -276,6 +280,7 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
+		session.URL = r.URL
 		fn(w, r, session)
 	}
 }
@@ -295,18 +300,10 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 	}
 }
 
-var harvestConnectTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "harvest_connect" .}}{{end}}`))
-
 func harvestConnectHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
-		page := pageForSession(s)
-		var buf bytes.Buffer
-		err := harvestConnectTemplate.Execute(&buf, page)
-		if err != nil {
-			fmt.Fprintf(w, "%T: %v\n", err, err)
-			return
-		}
-		io.Copy(w, &buf)
+		page := PageForSession(s)
+		renderTemplate(w, "harvest-connect", page)
 		return
 	}
 }
@@ -390,11 +387,12 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 
 type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
 
-func pageForSession(s *session) *pageObject {
+func PageForSession(s *session) *pageObject {
 	p := make(pageObject)
 	p["session"] = s
-	if s.idToken != nil {
-		p["email"] = s.idToken.Email
+	p["RequestPath"] = s.URL.Path
+	if s.User != nil {
+		p["user"] = s.User
 	}
 	sessErrors := s.GetErrors()
 	if len(sessErrors) > 0 {
@@ -418,8 +416,8 @@ func (p *pageObject) Debug() bool {
 	return debugMode
 }
 
-func (p *pageObject) CurrentUser() string {
-	return (*p)["email"].(string)
+func (p *pageObject) CurrentUser() *User {
+	return (*p)["user"].(*User)
 }
 
 func (p *pageObject) Errors() []error {
@@ -456,7 +454,15 @@ func (p *pageObject) AddErrors(errs []error) {
 }
 
 func (p *pageObject) Set(key string, value interface{}) {
+	if isLower(key) {
+		panic(fmt.Errorf("Key must begin with a capital letter"))
+	}
 	(*p)[key] = value
+}
+
+func isLower(input string) bool {
+	c, _ := utf8.DecodeRuneInString(input)
+	return unicode.IsLower(c)
 }
 
 var sessions sessionMap
@@ -483,9 +489,11 @@ func (sm *sessionMap) Remove(s *session) {
 }
 
 type session struct {
+	Stack               string
+	URL                 *url.URL
 	location            string
 	googleToken         *oauth2.Token
-	idToken             *googleIdToken
+	User                *User
 	harvestOauth2Config *oauth2.Config
 	harvestSubdomain    string
 	harvestToken        *oauth2.Token
@@ -494,7 +502,7 @@ type session struct {
 }
 
 func (s *session) LoggedIn() bool {
-	return s.idToken != nil
+	return s.User != nil
 }
 
 func (s *session) GetHarvestClient() (*harvest.Harvest, error) {
@@ -546,6 +554,28 @@ func newSession() *session {
 	return &session{id: id}
 }
 
+var contentTemplateString = `{{define "content"}}{{template "%s" .}}{{end}}`
+
+func renderTemplate(w http.ResponseWriter, tmpl string, page *pageObject) {
+	formattedTemplateString := fmt.Sprintf(contentTemplateString, tmpl)
+	contentTemplate := template.Must(template.Must(layout.Clone()).Parse(formattedTemplateString))
+	var buf bytes.Buffer
+	var err error
+	// TODO(mw): this is a really dirty hack to use this function with no pageObject
+	if page == nil {
+		err = contentTemplate.Execute(&buf, nil)
+	} else {
+		err = contentTemplate.Execute(&buf, page)
+	}
+	if err != nil {
+		debug.Printf("Template error(%T): %v\n", err, err)
+		http.Error(w, fmt.Sprintf("%T: %v\n", err, err), http.StatusInternalServerError)
+	} else {
+		io.Copy(w, &buf)
+	}
+
+}
+
 func getHandler(fn http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "GET" {
@@ -583,6 +613,27 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 			r.RequestURI,
 			time.Since(start),
 		)
+	}
+}
+
+func errorHandler(fn authHandlerFunc) authHandlerFunc {
+	return func(w http.ResponseWriter, request *http.Request, s *session) {
+		defer func() {
+			if r := recover(); r != nil {
+				debug.Printf("Recovered: %+#v\n", r)
+				if err, ok := r.(error); ok {
+					s.AddError(err)
+				} else {
+					s.AddError(fmt.Errorf("%+#v", r))
+				}
+				stack := runtimeDebug.Stack()
+				debug.Println(string(stack))
+				s.Stack = htmlReplacer.Replace(string(stack))
+				http.Redirect(w, request, "/500", http.StatusFound)
+				return
+			}
+		}()
+		fn(w, request, s)
 	}
 }
 
@@ -642,25 +693,6 @@ func (w *worker) run() {
 
 func (w *worker) addJob(fn func()) {
 	w.queue <- fn
-}
-
-func newUserHours(user *harvest.User, timeframe harvest.Timeframe, billable bool) *userHours {
-	return &userHours{
-		user:      user,
-		timeframe: timeframe,
-		billable:  billable,
-	}
-}
-
-type userHours struct {
-	user      *harvest.User
-	timeframe harvest.Timeframe
-	billable  bool
-	hours     float64
-}
-
-func (u *userHours) getHours() float64 {
-	return u.hours
 }
 
 type multiError []error

@@ -17,6 +17,25 @@ type table struct {
 	Rows      []row
 }
 
+func newUserHours(user *harvest.User, timeframe harvest.Timeframe, billable bool) *userHours {
+	return &userHours{
+		user:      user,
+		timeframe: timeframe,
+		billable:  billable,
+	}
+}
+
+type userHours struct {
+	user      *harvest.User
+	timeframe harvest.Timeframe
+	billable  bool
+	hours     float64
+}
+
+func (u *userHours) getHours() float64 {
+	return u.hours
+}
+
 type row struct {
 	User                   *harvest.User
 	Hours                  float64
@@ -55,7 +74,7 @@ func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harves
 	if err != nil {
 		return err
 	}
-	cumulationTimeframe := harvest.Timeframe{harvest.Date(2015, 01, 01, time.Local), timeframe.EndDate}
+	cumulationTimeframe := harvest.Timeframe{StartDate: harvest.Date(2015, 01, 01, time.Local), EndDate: timeframe.EndDate}
 	var rows []row
 	var multiErr multiError
 	for _, user := range users {

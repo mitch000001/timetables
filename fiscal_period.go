@@ -15,7 +15,7 @@ type FiscalPeriod struct {
 }
 
 func NewFiscalPeriod(start time.Time, end time.Time, businessDays int) *FiscalPeriod {
-	timeframe := harvest.Timeframe{StartDate: harvest.ShortDate{start}, EndDate: harvest.ShortDate{end}}
+	timeframe := harvest.Timeframe{StartDate: harvest.NewShortDate(start), EndDate: harvest.NewShortDate(end)}
 	return &FiscalPeriod{
 		Timeframe:    &timeframe,
 		BusinessDays: businessDays,
@@ -77,6 +77,10 @@ func (f *FiscalYear) PastFiscalPeriods() FiscalPeriods {
 	}
 	sort.Sort(pastFiscalPeriods)
 	return pastFiscalPeriods
+}
+
+func (f *FiscalYear) FiscalPeriods() FiscalPeriods {
+	return f.fiscalPeriods
 }
 
 func (f *FiscalYear) Add(fiscalPeriod *FiscalPeriod) error {

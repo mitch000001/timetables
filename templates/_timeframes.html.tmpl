@@ -1,21 +1,23 @@
-{{ define "index" }}
-<area class="col-md-6">
-  {{ if .CurrentTimeframe }}
-  <strong>
-    <a href="/timeframe?{{ .CurrentTimeframe.ToQuery.Encode | urlquery }}">Momentaner Abrechnungszeitraum</a>
-  </strong>
-  {{ else }}
-  <h3>Es wurde noch kein aktueller Abrechnungszeiträume angelegt</h3>
-  {{ end }}
-  <hr/>
-  <h2>Vergangene Abrechnungszeiträume</h2>
-  {{ range $timeframe := .PastTimeframes }}
-  <a href="/timeframe?{{ $timeframe.Link }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
-  {{ else }}
-  <p>Keine Abrechnungszeiträume vorhanden</p>
-  {{ end }}
-</area>
-<area class="col-md-6">
-  <a href="/timeframes">Neuen Zeitraum anlegen</a>
+{{ define "timeframes" }}
+<area class="row">
+  <section class="col-md-6">
+    {{ if .CurrentTimeframe }}
+    <strong>
+      <a href="/timeframe?{{ .CurrentTimeframe.ToQuery.Encode | urlquery }}">Momentaner Abrechnungszeitraum</a>
+    </strong>
+    {{ else }}
+    <h3>Es wurde noch kein aktueller Abrechnungszeiträume angelegt</h3>
+    {{ end }}
+    <hr/>
+    <h2>Vergangene Abrechnungszeiträume</h2>
+    {{ range $timeframe := .PastTimeframes }}
+    <a href="/timeframe?{{ $timeframe.Link }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
+    {{ else }}
+    <p>Keine Abrechnungszeiträume vorhanden</p>
+    {{ end }}
+  </section>
+  <section class="col-md-6">
+    <a href="/timeframes/new">Neuen Zeitraum anlegen</a>
+  </section>
 </area>
 {{ end }}

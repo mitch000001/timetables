@@ -1,0 +1,9 @@
+{{define "internal-server-error"}}
+<h2>Internal Server Error:</h2>
+{{if .Debug}}
+<h3>Request:</h3>
+<p>{{printf "%+#v" .Request}}</p>
+<h3>Stacktrace:</h3>
+<p>{{.Stack}}</p>
+{{end}}
+{{end}}
