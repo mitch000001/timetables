@@ -1,6 +1,8 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
 )
@@ -34,6 +36,13 @@ func (u *User) String() string {
 	return u.idToken.Email
 }
 
+func (u *User) FullName() string {
+	if u.profile != nil {
+		return u.profile.FullName()
+	}
+	return u.idToken.Email
+}
+
 func (u *User) IsBackOffice() bool {
 	return u.backOffice
 }
@@ -58,11 +67,23 @@ func (u *User) HarvestToken() *oauth2.Token {
 	return u.company.harvestToken
 }
 
+func (u *User) HarvestSubdomain() string {
+	return u.company.harvestOauth2Config.Subdomain
+}
+
 func (u *User) SetHarvestAccount(account *harvest.Account) {
 	if u.company != nil {
 		u.company.Account = account
 	}
 	u.AccountUser = account.User
+}
+
+func usersShowHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := PageForSession(s)
+		page.Set("User", s.User)
+		renderTemplate(w, "users-show", page)
+	}
 }
 
 var CompanyRepository Companies = make(Companies)

@@ -1,0 +1,25 @@
+{{define "users-show"}}
+<h2>Benutzerprofil</h2>
+{{with .User}}
+<p>
+  <dl>
+    <dt>Name</dt>
+    <dd>{{.FullName}}</dd>
+    <dt>Email</dt>
+    <dd>{{.Email}}</dd>
+  </dl>
+</p>
+{{if .AccountUser}}
+<p>
+  <dl>
+    <dt>Verknüpfte Harvest-Domain</dt>
+    <dd>{{.HarvestSubdomain}}</dd>
+    <dt>Verknüpfter Harvest-Account</dt>
+    <dd>{{.FirstName}} {{.LastName}}</dd>
+  </dl>
+</p>
+{{else}}
+<a href="/harvest_connect">Mit Harvest-Account verknüpfen</a>
+{{end}}
+{{end}}
+{{end}}

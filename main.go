@@ -115,6 +115,7 @@ func main() {
 	http.HandleFunc("/timeframes/new", logHandler(htmlHandler(getHandler(authHandler(errorHandler(timeframesNewHandler()))))))
 	http.HandleFunc("/plan_items", logHandler(htmlHandler(authHandler(errorHandler(planItemHandler())))))
 	http.HandleFunc("/plan_items/new", logHandler(htmlHandler(authHandler(errorHandler(harvestHandler(planItemNewHandler()))))))
+	http.HandleFunc("/users/", logHandler(htmlHandler(authHandler(errorHandler(usersShowHandler())))))
 	http.HandleFunc("/500", logHandler(htmlHandler(getHandler(authHandler(internalServerError())))))
 
 	log.Printf("Listening on address %s\n", hostAddress)
