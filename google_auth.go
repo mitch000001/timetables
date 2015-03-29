@@ -57,29 +57,29 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		session := sessions.Find(state)
 		if session == nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		code := params.Get("code")
 		if code == "" {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		token, err := config.Exchange(oauth2.NoContext, code)
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		session.googleToken = token
 		id := token.Extra("id_token")
 		idToken, err := decode(id.(string))
 		if err != nil {
-			http.Redirect(w, r, "/login", http.StatusTemporaryRedirect)
+			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
 		user := NewUser(idToken)
