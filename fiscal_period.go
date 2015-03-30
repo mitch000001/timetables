@@ -2,8 +2,10 @@ package main
 
 import (
 	"fmt"
+	"net/url"
 	"reflect"
 	"sort"
+	"strconv"
 	"time"
 
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
@@ -12,6 +14,24 @@ import (
 type FiscalPeriod struct {
 	*harvest.Timeframe
 	BusinessDays int
+}
+
+func (f *FiscalPeriod) ToQuery() url.Values {
+	params := f.Timeframe.ToQuery()
+	params.Set("business-days", fmt.Sprintf("%d", f.BusinessDays))
+	return params
+}
+
+func FiscalPeriodFromQuery(params url.Values) (*FiscalPeriod, error) {
+	tf, err := harvest.TimeframeFromQuery(params)
+	if err != nil {
+		return nil, err
+	}
+	businessDays, err := strconv.Atoi(params.Get("business-days"))
+	if err != nil {
+		return nil, err
+	}
+	return &FiscalPeriod{Timeframe: &tf, BusinessDays: businessDays}, nil
 }
 
 func NewFiscalPeriod(start time.Time, end time.Time, businessDays int) *FiscalPeriod {

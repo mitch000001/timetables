@@ -1,0 +1,45 @@
+{{ define "plan-items-show" }}
+<area class="row">
+  <section class="col-md-6">
+    {{with $planItem := .PlanItem}}
+    <h2>Planungszeitraum {{printFiscalPeriod $planItem.FiscalPeriod}}</h2>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Mitarbeiter</th>
+          <th>Fakturierungsgrad</th>
+          <th>Stelle</th>
+          <th>Werktage</th>
+          <th>Werktage, kumuliert</th>
+          <th>Urlaub</th>
+          <th>Krankheit</th>
+          <th>Resturlaub</th>
+          <th>fakturierte Tage</th>
+          <th>fakturierte Tage kumuliert</th>
+          <th>effektiver Fakturierungsgrad</th>
+          <th>effektiver Fakturierungsgrad kumuliert</th>
+        </tr>
+      </thead>
+      <tbody>
+        {{ range $planUser := $planItem.PlanUsers}}
+        <tr>
+          <td>{{ $planUser.User.FirstName }}</td>
+          <td>{{ $planUser.BillingDegree }}</td>
+          <td>{{ $planUser.WorkingDegree }}</td>
+          <td>{{ $planUser.BusinessDays }}</td>
+          <td>{{ $planUser.CumulatedBusinessDays }}</td>
+          <td>{{ $planUser.VacationInterest }}</td>
+          <td>{{ $planUser.DaysOfIllness }}</td>
+          <td>{{ $planUser.RemainingVacationInterest }}</td>
+          <td>{{ $planUser.BillableDays }}</td>
+          <td>{{ $planUser.CumulatedBillableDays }}</td>
+          <td>{{ $planUser.EffectiveBillingDegree }}</td>
+          <td>{{ $planUser.CumulatedEffectiveBillingDegree }}</td>
+        </tr>
+        {{ end }}
+      </tbody>
+    </table>
+    {{ end }}
+  </section>
+</area>
+{{ end }}

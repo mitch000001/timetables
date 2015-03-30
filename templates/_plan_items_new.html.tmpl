@@ -1,42 +1,54 @@
 {{ define "plan-items-new" }}
 <h2>Neuen Planungszeitraum anlegen</h2>
-<form name="create-plan-item" action="/plan_items" method="POST" class="form-horizontal">
+<form name="create-plan-item" action="/plan_items" method="POST">
   <div class="form-group">
-    <label for="user" class="col-sm-2">Mitarbeiter wählen</label>
-    <select name="user" class="col-sm-2">
-      {{ range $user := .Users}}<option value="{{$user.ID}}">{{$user.FirstName}}</option>{{ end }}
+    <label for="timeframe">Exisiterenden Abrechnungszeitraum wählen</label>
+    <select name="timeframe" class="form-control">
+      {{ range $timeframe := .Timeframes}}
+      <option value="{{$timeframe.ToQuery.Encode}}">
+        {{printFiscalPeriod $timeframe}}
+      </option>
+      {{ end }}
     </select>
   </div>
-  <div class="form-group">
-    <label for="timeframe" class="col-sm-2">Exisiterenden Abrechnungszeitraum wählen</label>
-    <select name="timeframe" class="col-sm-2">
-      {{ range $timeframe := .Timeframes}}<option value="{{$timeframe}}">{{printFiscalPeriod $timeframe}}</option>{{ end }}
-    </select>
-  </div>
-  <div class="form-group">
-    <label for="billing-degree" class="col-sm-2">Fakturierungsgrad</label>
-    <input type="text" name="billing-degree" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
-  <div class="form-group">
-    <label for="working-degree" class="col-sm-2">Stelle</label>
-    <input type="text" name="working-degree" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
-  <div class="form-group">
-    <label for="vacation-interest" class="col-sm-2">Urlaub</label>
-    <input type="text" name="vacation-interest" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
-  <div class="form-group">
-    <label for="remaining-vacation-interest" class="col-sm-2">Resturlaub</label>
-    <input type="text" name="remaining-vacation-interest" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
-  <div class="form-group">
-    <label for="days-of-illness" class="col-sm-2">Krankheit</label>
-    <input type="text" name="days-of-illness" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
-  <div class="form-group">
-    <label for="cumulated-effektive-billing-degree" class="col-sm-2">effektiver Fakturierungsgrad kumuliert</label>
-    <input type="text" name="cumulated-effektive-billing-degree" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="col-sm-2"/>
-  </div>
+  <br/>
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Mitarbeiter</th>
+        <th>Fakturierungsgrad</th>
+        <th>Stelle</th>
+        <th>Urlaub</th>
+        <th>Krankheit</th>
+        <th>Resturlaub</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{range $user := .Users }}
+      <tr>
+        <td>
+          <input type="hidden" value="{{$user.Id}}" name="user"/>
+          {{$user.FirstName}}
+        </td>
+        <td>
+          <input type="text" name="{{$user.Id}}-billing-degree" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+        </td>
+        <td>
+          <input type="text" name="{{$user.Id}}-working-degree" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+        </td>
+        <td>
+          <input type="text" name="{{$user.Id}}-vacation-interest" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+        </td>
+        <td>
+          <input type="text" name="{{$user.Id}}-remaining-vacation-interest" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+        </td>
+        <td>
+          <input type="text" name="{{$user.Id}}-days-of-illness" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+        </td>
+      </tr>
+      {{ end }}
+    </tbody>
+  </table>
   <div class="form-group">
     <button type="submit" class="btn btn-primary">Anlegen</button>
     <a href="/plan_items" class="btn">Abbrechen</a>

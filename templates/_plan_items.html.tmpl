@@ -2,47 +2,14 @@
 <area class="row">
   <section class="col-md-6">
     <h2>Planungszeiträume</h2>
-    {{ range $planItem := .PlanItems }}
-    <table class="table">
-      <thead>
-        <tr>
-          <th>Mitarbeiter</th>
-          <th>Stunden</th>
-          <th>Tage</th>
-          <th>Stunden, kumuliert</th>
-          <th>Tage, kumuliert</th>
-          <th>Werktage Soll</th>
-          <th>Konto (Tage)</th>
-          <th>Urlaubszeiten (h), kumuliert</th>
-          <th>Anspruch Urlaubstage</th>
-          <th>genommene Urlaubstage</th>
-          <th>geplante Urlaubstage (h)</th>
-          <th>geplante Urlaubstage (Tage)</th>
-          <th>ungeplante Urlaubstage</th>
-          <th>fakturierte Stunden</th>
-          <th>fakturierte Tage</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr>
-          <td>{{ $planItem.User.FirstName }}</td>
-          <td>{{ with $timeframe := $planItem.FiscalPeriod }}{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}{{ end }}</td>
-          <td>{{ $planItem.CumulatedBusinessDays }}</td>
-          <td>{{ $planItem.BillingDegree }}</td>
-          <td>{{ $planItem.WorkingDegree }}</td>
-          <td>{{ $planItem.VacationInterest }}</td>
-          <td>{{ $planItem.RemainingVacationInterest }}</td>
-          <td>{{ $planItem.DaysOfIllness }}</td>
-          <td>{{ $planItem.CumulatedEffectiveBillingDegree }}</td>
-        </tr>
-      </tbody>
-    </table>
+    {{ range $timeframe := .Timeframes }}
+    <a href="/plan_item?{{ $timeframe.Link }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
     {{ else }}
-    <p>Keine Planungszeiträume vorhanden</p>
+    <p>Keine Abrechnungszeiträume vorhanden</p>
     {{ end }}
   </section>
   <section class="col-md-6">
-    <a href="/plan_items/new">Neuen Zeitraum anlegen</a>
+    <a href="/plan_items/new">Neuen Planungszeitraum anlegen</a>
   </section>
 </area>
 {{ end }}
