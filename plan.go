@@ -87,6 +87,10 @@ func (p *PlanUserDataEntry) EffectiveBillingDegree() float64 {
 	return p.BillableDays() / p.BusinessDays()
 }
 
+func (p *PlanUserDataEntry) CumulatedEffectiveBillingDegree() float64 {
+	return p.EffectiveBillingDegree()
+}
+
 func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []error) {
 	var errors []error
 	var planUserDataItems []*PlanUserDataEntry
@@ -102,8 +106,10 @@ func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []e
 	for _, user := range users {
 		planUser := PlanUserRepository.FindByHarvestUser(user)
 		if planUser == nil {
-			errors = append(errors, fmt.Errorf("Keine Plandaten für Mitarbeiter %s gefunden", user.FirstName))
-			continue
+			planUser = &PlanUser{User: user}
+			PlanUserRepository.AddUser(planUser)
+			//errors = append(errors, fmt.Errorf("Keine Plandaten für Mitarbeiter %s gefunden", user.FirstName))
+			//continue
 		}
 		planUserData, errs := NewPlanUserFromForm(form, planUser)
 		if len(errs) > 0 {
