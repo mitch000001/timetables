@@ -23,13 +23,43 @@ func (p *PlanItems) FindByFiscalPeriod(fp *FiscalPeriod) *PlanItem {
 }
 
 type PlanItem struct {
-	FiscalPeriod *FiscalPeriod
-	PlanUsers    []*PlanUser
+	FiscalPeriod        *FiscalPeriod
+	PlanUserDataEntries []*PlanUserDataEntry
 }
 
 type PlanUser struct {
+	*harvest.User
+	BillingDegree             float64
+	WorkingDegree             float64
+	VacationInterest          float64
+	RemainingVacationInterest float64
+}
+
+var PlanUserRepository = make(PlanUsers)
+
+type PlanUsers map[int]*PlanUser
+
+func (p *PlanUsers) FindByHarvestUser(harvestUser *harvest.User) *PlanUser {
+	user, ok := (*p)[harvestUser.Id()]
+	if ok {
+		return user
+	}
+	return nil
+}
+
+func (p *PlanUsers) AddUser(planUser *PlanUser) bool {
+	harvestUserId := planUser.Id()
+	_, ok := (*p)[harvestUserId]
+	if ok {
+		return !ok
+	}
+	(*p)[harvestUserId] = planUser
+	return true
+}
+
+type PlanUserDataEntry struct {
 	FiscalPeriod              *FiscalPeriod
-	User                      *harvest.User
+	User                      *PlanUser
 	BillingDegree             float64
 	WorkingDegree             float64
 	VacationInterest          float64
@@ -37,29 +67,29 @@ type PlanUser struct {
 	DaysOfIllness             float64
 }
 
-func (p *PlanUser) BusinessDays() float64 {
+func (p *PlanUserDataEntry) BusinessDays() float64 {
 	return float64(p.FiscalPeriod.BusinessDays) * p.WorkingDegree
 }
 
-func (p *PlanUser) CumulatedBusinessDays() float64 {
+func (p *PlanUserDataEntry) CumulatedBusinessDays() float64 {
 	return float64(p.FiscalPeriod.BusinessDays) * p.WorkingDegree
 }
 
-func (p *PlanUser) BillableDays() float64 {
+func (p *PlanUserDataEntry) BillableDays() float64 {
 	return (p.BusinessDays() - p.VacationInterest - p.RemainingVacationInterest - p.DaysOfIllness) * p.WorkingDegree
 }
 
-func (p *PlanUser) CumulatedBillableDays() float64 {
+func (p *PlanUserDataEntry) CumulatedBillableDays() float64 {
 	return p.BillableDays()
 }
 
-func (p *PlanUser) EffectiveBillingDegree() float64 {
+func (p *PlanUserDataEntry) EffectiveBillingDegree() float64 {
 	return p.BillableDays() / p.BusinessDays()
 }
 
 func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []error) {
 	var errors []error
-	var planUsers []*PlanUser
+	var planUserDataItems []*PlanUserDataEntry
 	timeframe := form.Get("timeframe")
 	timeframeQuery, err := url.ParseQuery(timeframe)
 	if err != nil {
@@ -70,19 +100,24 @@ func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []e
 		errors = append(errors, err)
 	}
 	for _, user := range users {
-		planUser, errs := NewPlanUserFromForm(form, user)
+		planUser := PlanUserRepository.FindByHarvestUser(user)
+		if planUser == nil {
+			errors = append(errors, fmt.Errorf("Keine Plandaten für Mitarbeiter %s gefunden", user.FirstName))
+			continue
+		}
+		planUserData, errs := NewPlanUserFromForm(form, planUser)
 		if len(errs) > 0 {
 			errors = append(errors, errs...)
 		}
-		if planUser != nil {
-			planUser.FiscalPeriod = fiscalPeriod
-			planUsers = append(planUsers, planUser)
+		if planUserData != nil {
+			planUserData.FiscalPeriod = fiscalPeriod
+			planUserDataItems = append(planUserDataItems, planUserData)
 		}
 	}
 	if len(errors) > 0 {
 		return nil, errors
 	}
-	return &PlanItem{PlanUsers: planUsers, FiscalPeriod: fiscalPeriod}, nil
+	return &PlanItem{PlanUserDataEntries: planUserDataItems, FiscalPeriod: fiscalPeriod}, nil
 }
 
 type HarvestUsers []*harvest.User
@@ -96,15 +131,15 @@ func (h *HarvestUsers) ById(id int) *harvest.User {
 	return nil
 }
 
-func NewPlanUserFromForm(form url.Values, user *harvest.User) (*PlanUser, []error) {
-	prefix := fmt.Sprintf("%d-", user.Id())
+func NewPlanUserFromForm(form url.Values, user *PlanUser) (*PlanUserDataEntry, []error) {
+	prefix := fmt.Sprintf("%d-", user.User.Id())
 	billingDegree := form.Get(prefix + "billing-degree")
 	workingDegree := form.Get(prefix + "working-degree")
 	vacationInterest := form.Get(prefix + "vacation-interest")
 	remainingVacationInterest := form.Get(prefix + "remaining-vacation-interest")
 	daysOfIllness := form.Get(prefix + "days-of-illness")
 	parser := NewFormParser()
-	planUser := PlanUser{
+	planUser := PlanUserDataEntry{
 		User:                      user,
 		BillingDegree:             parser.Float64(billingDegree),
 		WorkingDegree:             parser.Float64(workingDegree),

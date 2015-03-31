@@ -21,7 +21,7 @@
         </tr>
       </thead>
       <tbody>
-        {{ range $planUser := $planItem.PlanUsers}}
+        {{ range $planUser := $planItem.PlanUserDataEntries}}
         <tr>
           <td>{{ $planUser.User.FirstName }}</td>
           <td>{{ $planUser.BillingDegree }}</td>
