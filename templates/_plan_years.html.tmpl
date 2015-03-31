@@ -1,0 +1,23 @@
+{{ define "plan-years" }}
+<area class="row">
+  <section class="col-md-6">
+    <h2>Planungsjahre</h2>
+    {{ if .CurrentYear }}
+    <strong>
+      <a href="/plan_years/show/{{ .CurrentYear.Year }}">Aktuelles Planjahr</a>
+    </strong>
+    {{ else }}
+    <h3>Es wurde noch kein aktuelles Planjahr angelegt</h3>
+    {{ end }}
+    <hr/>
+    {{ range $year := .PlanYears }}
+    <a href="/plan_years/show/{{ $year.Year }}">{{ $year.Year }}</a>
+    {{ else }}
+    <p>Keine Planungsjahre vorhanden</p>
+    {{ end }}
+  </section>
+  <section class="col-md-6">
+    <a href="/plan_years/new">Neues Planungsjahr anlegen</a>
+  </section>
+</area>
+{{ end }}

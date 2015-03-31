@@ -65,8 +65,21 @@ func (f ReverseSortedFiscalPeriods) Less(i, j int) bool {
 func (f ReverseSortedFiscalPeriods) Swap(i, j int) { f[i], f[j] = f[j], f[i] }
 
 type FiscalYear struct {
-	fiscalPeriods FiscalPeriods
-	Year          int
+	fiscalPeriods            FiscalPeriods
+	Year                     int
+	BusinessDays             int
+	CalendarWeeks            int
+	BusinessDaysFirstQuarter int
+}
+
+func (f *FiscalYear) init() {
+	if f.fiscalPeriods == nil {
+		f.fiscalPeriods = make(FiscalPeriods, 0)
+	}
+}
+
+func (f *FiscalYear) BusinessDaysInFirstQuarter() int {
+	return f.BusinessDays / 4
 }
 
 // CurrentFiscalPeriod returns the FiscalPeriod for the present day
@@ -75,6 +88,7 @@ type FiscalYear struct {
 // The method is optimized for the common case, i.e. the current period is the last element
 // in the slice of periods
 func (f *FiscalYear) CurrentFiscalPeriod() *FiscalPeriod {
+	f.init()
 	now := time.Now()
 	reverseSorted := ReverseSortedFiscalPeriods(f.fiscalPeriods)
 	defer sort.Sort(f.fiscalPeriods)
@@ -88,6 +102,7 @@ func (f *FiscalYear) CurrentFiscalPeriod() *FiscalPeriod {
 }
 
 func (f *FiscalYear) PastFiscalPeriods() FiscalPeriods {
+	f.init()
 	now := time.Now()
 	var pastFiscalPeriods FiscalPeriods
 	for _, fp := range f.fiscalPeriods {
@@ -104,6 +119,7 @@ func (f *FiscalYear) FiscalPeriods() FiscalPeriods {
 }
 
 func (f *FiscalYear) Add(fiscalPeriod *FiscalPeriod) error {
+	f.init()
 	if fiscalPeriod.StartDate.Year() != f.Year || fiscalPeriod.EndDate.Year() != f.Year {
 		return fmt.Errorf("Der Abrechnungszeitraum wurde für das falsche Jahr angelegt.")
 	}
@@ -119,6 +135,7 @@ func (f *FiscalYear) Add(fiscalPeriod *FiscalPeriod) error {
 }
 
 func (f *FiscalYear) Delete(fiscalPeriod *FiscalPeriod) {
+	f.init()
 	var newFiscalPeriods FiscalPeriods
 	for _, fp := range f.fiscalPeriods {
 		if !reflect.DeepEqual(fp, fiscalPeriod) && !reflect.DeepEqual(fp.Timeframe, fiscalPeriod.Timeframe) {

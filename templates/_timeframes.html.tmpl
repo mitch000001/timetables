@@ -11,7 +11,7 @@
     <hr/>
     <h2>Vergangene Abrechnungszeiträume</h2>
     {{ range $timeframe := .PastTimeframes }}
-    <a href="/timeframe?{{ $timeframe.Link }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
+    <a href="/timeframes/show?{{ $timeframe.Link }}">{{ printDate $timeframe.StartDate }} - {{ printDate $timeframe.EndDate }}</a>
     {{ else }}
     <p>Keine Abrechnungszeiträume vorhanden</p>
     {{ end }}

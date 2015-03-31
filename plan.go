@@ -5,11 +5,28 @@ import (
 	"html/template"
 	"net/http"
 	"net/url"
+	"path"
 	"reflect"
 	"strconv"
+	"time"
 
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 )
+
+type PlanYears map[int]*PlanYear
+
+func (p *PlanYears) FindByYear(year int) *PlanYear {
+	return (*p)[year]
+}
+
+type PlanYear struct {
+	*FiscalYear
+	PlanItems                 PlanItems
+	PlanUsers                 PlanUsers
+	AverageDaysOfIllness      float64
+	AverageDaysOfChildrenCare float64
+	DefaultVacationInterest   float64
+}
 
 type PlanItems []*PlanItem
 
@@ -103,6 +120,7 @@ func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []e
 	if err != nil {
 		errors = append(errors, err)
 	}
+	parser := NewFormParser(form)
 	for _, user := range users {
 		planUser := PlanUserRepository.FindByHarvestUser(user)
 		if planUser == nil {
@@ -111,7 +129,8 @@ func NewPlanItemFromForm(form url.Values, users []*harvest.User) (*PlanItem, []e
 			//errors = append(errors, fmt.Errorf("Keine Plandaten für Mitarbeiter %s gefunden", user.FirstName))
 			//continue
 		}
-		planUserData, errs := NewPlanUserFromForm(form, planUser)
+		parser.ResetErrors()
+		planUserData, errs := NewPlanUserFromForm(parser, planUser)
 		if len(errs) > 0 {
 			errors = append(errors, errs...)
 		}
@@ -137,21 +156,15 @@ func (h *HarvestUsers) ById(id int) *harvest.User {
 	return nil
 }
 
-func NewPlanUserFromForm(form url.Values, user *PlanUser) (*PlanUserDataEntry, []error) {
+func NewPlanUserFromForm(parser *FormParser, user *PlanUser) (*PlanUserDataEntry, []error) {
 	prefix := fmt.Sprintf("%d-", user.User.Id())
-	billingDegree := form.Get(prefix + "billing-degree")
-	workingDegree := form.Get(prefix + "working-degree")
-	vacationInterest := form.Get(prefix + "vacation-interest")
-	remainingVacationInterest := form.Get(prefix + "remaining-vacation-interest")
-	daysOfIllness := form.Get(prefix + "days-of-illness")
-	parser := NewFormParser()
 	planUser := PlanUserDataEntry{
 		User:                      user,
-		BillingDegree:             parser.Float64(billingDegree),
-		WorkingDegree:             parser.Float64(workingDegree),
-		VacationInterest:          parser.Float64(vacationInterest),
-		RemainingVacationInterest: parser.Float64(remainingVacationInterest),
-		DaysOfIllness:             parser.Float64(daysOfIllness),
+		BillingDegree:             parser.Float64(prefix + "billing-degree"),
+		WorkingDegree:             parser.Float64(prefix + "working-degree"),
+		VacationInterest:          parser.Float64(prefix + "vacation-interest"),
+		RemainingVacationInterest: parser.Float64(prefix + "remaining-vacation-interest"),
+		DaysOfIllness:             parser.Float64(prefix + "days-of-illness"),
 	}
 	errs := parser.GetErrors()
 	if len(errs) != 0 {
@@ -161,27 +174,104 @@ func NewPlanUserFromForm(form url.Values, user *PlanUser) (*PlanUserDataEntry, [
 	return &planUser, nil
 }
 
-type FormParser struct {
-	errors []error
-}
-
-func NewFormParser() *FormParser {
-	return &FormParser{make([]error, 0)}
-}
-
-func (f *FormParser) GetErrors() []error {
-	return f.errors
-}
-
-func (f *FormParser) Float64(input string) float64 {
-	num, err := strconv.ParseFloat(input, 64)
-	if err != nil {
-		f.errors = append(f.errors, err)
+func planYearsHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		var cachedPlanYears PlanYears
+		planYears := cache.Get("PlanYears")
+		if planYears == nil {
+			cachedPlanYears = make(PlanYears)
+		} else {
+			cachedPlanYears = planYears.(PlanYears)
+		}
+		page := PageForSession(s)
+		if r.Method == "GET" {
+			var currentYear *FiscalYear
+			var fiscalYears FiscalYears
+			now := time.Now()
+			for year, planYear := range cachedPlanYears {
+				if year == now.Year() {
+					currentYear = planYear.FiscalYear
+				} else {
+					fiscalYears = append(fiscalYears, planYear.FiscalYear)
+				}
+			}
+			page.Set("CurrentYear", currentYear)
+			page.Set("PlanYears", fiscalYears)
+			renderTemplate(w, "plan-years", page)
+			return
+		}
+		if r.Method == "POST" {
+			err := r.ParseForm()
+			if err != nil {
+				s.AddError(err)
+				http.Redirect(w, r, "/plan_years/new", http.StatusFound)
+				return
+			}
+			formParser := NewFormParser(r.PostForm)
+			fiscalYear := &FiscalYear{
+				Year:                     formParser.Int("year"),
+				BusinessDays:             formParser.Int("business-days"),
+				CalendarWeeks:            formParser.Int("calendar-weeks"),
+				BusinessDaysFirstQuarter: formParser.Int("business-days-first-quarter"),
+			}
+			planYear := &PlanYear{
+				FiscalYear:                fiscalYear,
+				AverageDaysOfIllness:      formParser.Float64("average-days-of-illness"),
+				AverageDaysOfChildrenCare: formParser.Float64("average-days-of-children-care"),
+				DefaultVacationInterest:   formParser.Float64("default-vacation-interest"),
+			}
+			errs := formParser.GetErrors()
+			if len(errs) != 0 {
+				for _, err := range errs {
+					s.AddError(err)
+				}
+				http.Redirect(w, r, "/plan_years/new", http.StatusFound)
+				return
+			}
+			cachedPlanYears[planYear.FiscalYear.Year] = planYear
+			cache.Store("PlanYears", cachedPlanYears)
+			http.Redirect(w, r, "/plan_years", http.StatusFound)
+			return
+		}
 	}
-	return num
 }
 
-var planItemsTemplate = template.Must(template.Must(layout.Clone()).Parse(`{{define "content"}}{{template "plan-items" .}}{{end}}`))
+func planYearsNewHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		page := PageForSession(s)
+		renderTemplate(w, "plan-years-new", page)
+	}
+}
+
+func planYearsShowHandler() authHandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request, s *session) {
+		var cachedPlanYears PlanYears
+		planYears := cache.Get("PlanYears")
+		if planYears == nil {
+			s.AddError(fmt.Errorf("Keine Planungsjahre vorhanden."))
+			http.Redirect(w, r, "/plan_years", http.StatusFound)
+			return
+		}
+		cachedPlanYears = planYears.(PlanYears)
+		yearString := path.Base(r.URL.Path)
+		year, err := strconv.Atoi(yearString)
+		if err != nil {
+			s.AddError(err)
+			http.Redirect(w, r, "/plan_years", http.StatusFound)
+			return
+		}
+		planYear := cachedPlanYears.FindByYear(year)
+		if planYear == nil {
+			s.AddError(fmt.Errorf("Kein Planjahr für %d gefunden.", year))
+			http.Redirect(w, r, "/plan_years", http.StatusFound)
+			return
+		}
+		page := PageForSession(s)
+		page.Set("PlanYear", planYear)
+		renderTemplate(w, "plan-years-show", page)
+		return
+	}
+}
 
 func planItemshandler() harvestHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {

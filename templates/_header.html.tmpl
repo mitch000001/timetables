@@ -15,6 +15,7 @@
       {{ if .LoggedIn }}
       <ul class="nav navbar-nav">
         <li{{if (startsWith .RequestPath "/timeframes")}} class="active"{{end}}><a href="/timeframes">Abrechnungszeiträume</a></li>
+        <li{{if (startsWith .RequestPath "/plan_years")}} class="active"{{end}}><a href="/plan_years">Planungsjahre</a></li>
         <li{{if (startsWith .RequestPath "/plan_items")}} class="active"{{end}}><a href="/plan_items">Planungszeiträume</a></li>
       </ul>
       {{end}}

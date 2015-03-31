@@ -1,0 +1,21 @@
+{{ define "plan-years-new" }}
+<h2>Neues Planungsjahr</h2>
+<form name="create-plan-year" action="/plan_years" method="POST">
+  <label for="year">Jahr</label>
+  <input type="number" name="year" required="true" class="form-control"/>
+  <label for="business-days">Arbeitstage</label>
+  <input type="number" name="business-days" class="form-control"/>
+  <label for="business-days-first-quarter">Werktage bis 31.03.</label>
+  <input type="number" name="business-days-first-quarter" class="form-control"/>
+  <label for="calendar-weeks">Kalenderwochen</label>
+  <input type="number" name="calendar-weeks" class="form-control"/>
+  <label for="default-vacation-interest">Urlaub</label>
+  <input type="text" name="default-vacation-interest" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+  <label for="average-days-of-illness">Krankheit</label>
+  <input type="text" name="average-days-of-illness" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+  <label for="average-days-of-children-care">Kinderbetreuung</label>
+  <input type="text" name="average-days-of-children-care" pattern="^[-+]?[0-9]*\.?[0-9]+([eE][-+]?[0-9]+)?$" class="form-control"/>
+  <button type="submit">Anlegen</button>
+  <a href="/plan_years" class="btn">Abbrechen</a>
+</form>
+{{ end }}
