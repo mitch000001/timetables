@@ -1,7 +1,16 @@
 {{ define "plan-years-show" }}
 <area class="row">
+  <h2>Planungsjahr {{ .PlanYear.Year }}</h2>
   <section class="col-md-6">
-    <h2>Planungsjahr {{ .PlanYear.Year }}</h2>
+    <h3>Basisdaten</h3>
+    <dl>
+      <dt>Krankheitstage</dt>
+      <dd>{{.PlanYear.AverageDaysOfIllness}}</dd>
+      <dt>Kinderbetreuung</dt>
+      <dd>{{.PlanYear.AverageDaysOfChildrenCare}}</dd>
+      <dt>Urlaubstage</dt>
+      <dd>{{.PlanYear.DefaultVacationInterest}}</dd>
+    </dl>
   </section>
 </area>
 {{ end }}
