@@ -38,7 +38,9 @@
     </div>
   </div>
 </nav>
+{{ if gt (len .Errors) 0 }}
 <div class="errors" style="clear:right; padding: 5px;">
 {{ range $err := .Errors }}<div class="bg-danger" style="padding: 5px;">{{if $.Debug}}{{ printf "%T: %s" $err $err.Error }}{{else}}{{$err.Error}}{{end}}</div>{{ end }}
 </div>
+{{ end }}
 {{ end }}
