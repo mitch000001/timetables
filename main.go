@@ -78,6 +78,10 @@ func main() {
 	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
+	hostEnv := os.Getenv("HOST")
+	if hostEnv != "" {
+		host = hostEnv
+	}
 	port := os.Getenv("PORT")
 	if port != "" {
 		httpPort = port
@@ -98,7 +102,7 @@ func main() {
 		ClientSecret: googleClientSecret,
 		Scopes:       []string{"openid", "email", "profile"},
 		Endpoint:     google.Endpoint,
-		RedirectURL:  "/google_oauth2redirect",
+		RedirectURL:  host + "/google_oauth2redirect",
 	}
 
 	cache = &InMemoryCache{}
