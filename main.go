@@ -78,6 +78,10 @@ func main() {
 	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
+	port := os.Getenv("PORT")
+	if port != "" {
+		httpPort = port
+	}
 	harvestClientId := os.Getenv("HARVEST_CLIENTID")
 	harvestClientSecret := os.Getenv("HARVEST_CLIENTSECRET")
 	googleClientId := os.Getenv("GOOGLE_CLIENTID")
@@ -124,7 +128,7 @@ func main() {
 
 	log.Printf("Listening on address %s\n", hostAddress)
 	debug.Printf("Running in debug mode\n")
-	log.Fatal(http.ListenAndServe(hostAddress, nil))
+	log.Fatal(http.ListenAndServe(":"+httpPort, nil))
 }
 
 var fiscalYear *FiscalYear
