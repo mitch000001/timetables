@@ -98,7 +98,7 @@ func main() {
 		ClientSecret: googleClientSecret,
 		Scopes:       []string{"openid", "email", "profile"},
 		Endpoint:     google.Endpoint,
-		RedirectURL:  host + "/google_oauth2redirect",
+		RedirectURL:  "/google_oauth2redirect",
 	}
 
 	cache = &InMemoryCache{}
