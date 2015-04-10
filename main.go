@@ -29,15 +29,16 @@ import (
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/google"
 )
 
-var funcMap = template. //go:generate go-bindata migrations/
-FuncMap{
+//go:generate go-bindata migrations/
+
+var funcMap = template.FuncMap{
 	"printDate":         printDate,
 	"printTimeframe":    printTimeframe,
 	"printFiscalPeriod": printFiscalPeriod,
 	"startsWith":        strings.HasPrefix,
 }
 
-var postgresDbUrl string
+var databaseUrl string
 var db *sql.DB
 
 var layoutPattern = filepath.Join(mustString(os.Getwd()), "templates", "layout.html.tmpl")
@@ -83,7 +84,8 @@ func init() {
 func main() {
 	flag.Parse()
 	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
-	db, err := sql.Open("postgres", postgresDbUrl)
+	databaseUrl = os.Getenv("DATABASE_URL")
+	db, err := sql.Open("postgres", databaseUrl)
 	if err != nil {
 		log.Fatalf("Error while opening database: %T: %v\n", err, err)
 	}
