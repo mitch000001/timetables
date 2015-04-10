@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/rand"
 	"crypto/sha256"
+	"database/sql"
 	"flag"
 	"fmt"
 	"html/template"
@@ -20,18 +21,24 @@ import (
 	"unicode"
 	"unicode/utf8"
 
+	_ "github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/lib/pq"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest/auth"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/google"
 )
 
-var funcMap = template.FuncMap{
+var funcMap = template. //go:generate go-bindata migrations/
+FuncMap{
 	"printDate":         printDate,
 	"printTimeframe":    printTimeframe,
 	"printFiscalPeriod": printFiscalPeriod,
 	"startsWith":        strings.HasPrefix,
 }
+
+var postgresDbUrl string
+var db *sql.DB
 
 var layoutPattern = filepath.Join(mustString(os.Getwd()), "templates", "layout.html.tmpl")
 var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "_*.tmpl")
@@ -76,6 +83,14 @@ func init() {
 func main() {
 	flag.Parse()
 	debug = newDebugLogger(os.Stdout, "", log.LstdFlags|log.Lshortfile)
+	db, err := sql.Open("postgres", postgresDbUrl)
+	if err != nil {
+		log.Fatalf("Error while opening database: %T: %v\n", err, err)
+	}
+	err = runMigrations(db)
+	if err != nil {
+		log.Fatalf("Error while migrating database: %T: %v\n", err, err)
+	}
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
 	hostEnv := os.Getenv("HOST")
@@ -133,6 +148,21 @@ func main() {
 	log.Printf("Listening on address %s\n", hostAddress)
 	debug.Printf("Running in debug mode\n")
 	log.Fatal(http.ListenAndServe(":"+httpPort, nil))
+}
+
+func runMigrations(db *sql.DB) error {
+	migrations := &migrate.AssetMigrationSource{
+		Asset:    Asset,
+		AssetDir: AssetDir,
+		Dir:      "migrations",
+	}
+	log.Printf("Applying migrations...\n")
+	n, err := migrate.Exec(db, "postgres", migrations, migrate.Up)
+	if err != nil {
+		return err
+	}
+	log.Printf("Applied %d migrations\n", n)
+	return nil
 }
 
 var fiscalYear *FiscalYear

@@ -8,8 +8,22 @@
 			"Rev": "696c088491246273e92442aa66b5281e5bb34faa"
 		},
 		{
+			"ImportPath": "github.com/go-gorp/gorp",
+			"Comment": "v1.7-63-g6d3d64e",
+			"Rev": "6d3d64eb828eb0e96a99234d8954e3ad89e2f1d7"
+		},
+		{
+			"ImportPath": "github.com/lib/pq",
+			"Comment": "go1.0-cutoff-31-ga33d605",
+			"Rev": "a33d6053e025943d5dc89dfa1f35fe5500618df7"
+		},
+		{
 			"ImportPath": "github.com/mitch000001/go-harvest/harvest",
 			"Rev": "838bab93fe1699b4b8b3b7882c4122e8cbbe5b55"
+		},
+		{
+			"ImportPath": "github.com/rubenv/sql-migrate",
+			"Rev": "0ab1fcff8960ab61100892ed0e2d6d2902867848"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
