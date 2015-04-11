@@ -91,6 +91,13 @@ func (f *FiscalYear) Delete(fiscalPeriod *FiscalPeriod) {
 	f.fiscalPeriods = newFiscalPeriods
 }
 
+func (f *FiscalYear) MustAdd(fiscalPeriod *FiscalPeriod) {
+	err := f.Add(fiscalPeriod)
+	if err != nil {
+		panic(err)
+	}
+}
+
 func InsertFiscalYear(db *sql.DB, fiscalYear *FiscalYear) error {
 	const insertSQL = `
 		INSERT INTO fiscal_years
@@ -100,6 +107,47 @@ func InsertFiscalYear(db *sql.DB, fiscalYear *FiscalYear) error {
 		RETURNING id
 	`
 	return db.QueryRow(insertSQL, fiscalYear.Year, fiscalYear.BusinessDays, fiscalYear.BusinessDaysFirstQuarter, fiscalYear.CalendarWeeks).Scan(&fiscalYear.ID)
+}
+
+func FindFiscalYearForYear(db *sql.DB, year int) (*FiscalYear, error) {
+	const findSQL = `
+		SELECT
+			id,
+			business_days,
+			business_days_first_quarter,
+			calendar_weeks,
+			year
+		FROM fiscal_years
+		WHERE year = $1
+	`
+	row := db.QueryRow(findSQL, year)
+	var fiscalYear FiscalYear
+	err := row.Scan(
+		&fiscalYear.ID,
+		&fiscalYear.BusinessDays,
+		&fiscalYear.BusinessDaysFirstQuarter,
+		&fiscalYear.CalendarWeeks,
+		&fiscalYear.Year,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &fiscalYear, nil
+}
+
+func scanFiscalYear(rows *sql.Rows) (*FiscalYear, error) {
+	var fiscalYear FiscalYear
+	err := rows.Scan(
+		&fiscalYear.ID,
+		&fiscalYear.BusinessDays,
+		&fiscalYear.BusinessDaysFirstQuarter,
+		&fiscalYear.CalendarWeeks,
+		&fiscalYear.Year,
+	)
+	if err != nil {
+		return nil, err
+	}
+	return &fiscalYear, nil
 }
 
 type FiscalYears []*FiscalYear

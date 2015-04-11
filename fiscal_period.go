@@ -27,15 +27,15 @@ func (f *FiscalPeriod) MarshalDb(db *sql.DB) error {
 	return db.QueryRow(insertSQL, f.StartDate, f.EndDate, f.BusinessDays).Scan(&f.ID)
 }
 
-func InsertFiscalPeriod(db *sql.DB, f *FiscalPeriod) error {
+func InsertFiscalPeriod(db *sql.DB, f *FiscalPeriod, fy *FiscalYear) error {
 	const insertSQL = `
 		INSERT INTO fiscal_periods
-			(starts_at, ends_at, business_days)
+			(starts_at, ends_at, business_days, fiscal_year_id)
 		VALUES
-			($1, $2, $3)
+			($1, $2, $3, $4)
 		RETURNING id
 	`
-	return db.QueryRow(insertSQL, f.StartDate, f.EndDate, f.BusinessDays).Scan(&f.ID)
+	return db.QueryRow(insertSQL, f.StartDate, f.EndDate, f.BusinessDays, fy.ID).Scan(&f.ID)
 }
 
 func (f *FiscalPeriod) UnmarshalDb(db *sql.DB, id int) error {
@@ -80,6 +80,37 @@ const findSQL = `
 func FindFiscalPeriods(db *sql.DB, ids []int) (FiscalPeriods, error) {
 	var fiscalPeriods FiscalPeriods
 	rows, err := db.Query(findSQL, ids)
+	defer rows.Close()
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		fp, err := scanFiscalPeriod(rows)
+		if err != nil {
+			return nil, err
+		}
+		fiscalPeriods = append(fiscalPeriods, fp)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return fiscalPeriods, nil
+}
+
+const findForFiscalYearSQL = `
+	SELECT
+		id,
+		starts_at,
+		ends_at,
+		business_days
+	FROM fiscal_periods
+	WHERE fiscal_year_id = $1
+	ORDER BY starts_at ASC
+`
+
+func FindFiscalPeriodsForFiscalYear(db *sql.DB, fiscalYear *FiscalYear) (FiscalPeriods, error) {
+	var fiscalPeriods FiscalPeriods
+	rows, err := db.Query(findForFiscalYearSQL, fiscalYear.ID)
 	defer rows.Close()
 	if err != nil {
 		return nil, err
