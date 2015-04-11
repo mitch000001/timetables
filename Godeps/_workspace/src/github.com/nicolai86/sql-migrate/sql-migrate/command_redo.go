@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate"
 )
 
 type RedoCommand struct {
@@ -59,7 +59,7 @@ func (c *RedoCommand) Run(args []string) int {
 		Dir: env.Dir,
 	}
 
-	migrations, _, err := migrate.PlanMigration(db, dialect, source, migrate.Down, 1)
+	migrations, err := migrate.PlanMigration(db, dialect, source, migrate.Down, 1)
 	if len(migrations) == 0 {
 		ui.Output("Nothing to do!")
 		return 0

@@ -5,7 +5,6 @@ import (
 	"os"
 
 	_ "github.com/mattn/go-sqlite3"
-	"github.com/rubenv/gorp"
 	. "gopkg.in/check.v1"
 )
 
@@ -24,8 +23,7 @@ var sqliteMigrations = []*Migration{
 }
 
 type SqliteMigrateSuite struct {
-	Db    *sql.DB
-	DbMap *gorp.DbMap
+	Db *sql.DB
 }
 
 var _ = Suite(&SqliteMigrateSuite{})
@@ -35,7 +33,6 @@ func (s *SqliteMigrateSuite) SetUpTest(c *C) {
 	c.Assert(err, IsNil)
 
 	s.Db = db
-	s.DbMap = &gorp.DbMap{Db: db, Dialect: &gorp.SqliteDialect{}}
 }
 
 func (s *SqliteMigrateSuite) TearDownTest(c *C) {
@@ -54,7 +51,7 @@ func (s *SqliteMigrateSuite) TestRunMigration(c *C) {
 	c.Assert(n, Equals, 1)
 
 	// Can use table now
-	_, err = s.DbMap.Exec("SELECT * FROM people")
+	_, err = s.Db.Exec("SELECT * FROM people")
 	c.Assert(err, IsNil)
 
 	// Shouldn't apply migration again
@@ -74,7 +71,7 @@ func (s *SqliteMigrateSuite) TestMigrateMultiple(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Can use column now
-	_, err = s.DbMap.Exec("SELECT first_name FROM people")
+	_, err = s.Db.Exec("SELECT first_name FROM people")
 	c.Assert(err, IsNil)
 }
 
@@ -97,7 +94,7 @@ func (s *SqliteMigrateSuite) TestMigrateIncremental(c *C) {
 	c.Assert(n, Equals, 1)
 
 	// Can use column now
-	_, err = s.DbMap.Exec("SELECT first_name FROM people")
+	_, err = s.Db.Exec("SELECT first_name FROM people")
 	c.Assert(err, IsNil)
 }
 
@@ -112,7 +109,8 @@ func (s *SqliteMigrateSuite) TestFileMigrate(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Has data
-	id, err := s.DbMap.SelectInt("SELECT id FROM people")
+	var id int64
+	err = s.Db.QueryRow("SELECT id FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(1))
 }
@@ -130,7 +128,8 @@ func (s *SqliteMigrateSuite) TestAssetMigrate(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Has data
-	id, err := s.DbMap.SelectInt("SELECT id FROM people")
+	var id int64
+	err = s.Db.QueryRow("SELECT id FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(1))
 }
@@ -145,7 +144,8 @@ func (s *SqliteMigrateSuite) TestMigrateMax(c *C) {
 	c.Assert(err, IsNil)
 	c.Assert(n, Equals, 1)
 
-	id, err := s.DbMap.SelectInt("SELECT COUNT(*) FROM people")
+	var id int64
+	err = s.Db.QueryRow("SELECT COUNT(*) FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(0))
 }
@@ -160,7 +160,8 @@ func (s *SqliteMigrateSuite) TestMigrateDown(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Has data
-	id, err := s.DbMap.SelectInt("SELECT id FROM people")
+	var id int64
+	err = s.Db.QueryRow("SELECT id FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(1))
 
@@ -170,7 +171,7 @@ func (s *SqliteMigrateSuite) TestMigrateDown(c *C) {
 	c.Assert(n, Equals, 1)
 
 	// No more data
-	id, err = s.DbMap.SelectInt("SELECT COUNT(*) FROM people")
+	err = s.Db.QueryRow("SELECT COUNT(*) FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(0))
 
@@ -180,7 +181,7 @@ func (s *SqliteMigrateSuite) TestMigrateDown(c *C) {
 	c.Assert(n, Equals, 1)
 
 	// Cannot query it anymore
-	_, err = s.DbMap.SelectInt("SELECT COUNT(*) FROM people")
+	err = s.Db.QueryRow("SELECT COUNT(*) FROM people").Scan(&id)
 	c.Assert(err, Not(IsNil))
 
 	// Nothing left to do.
@@ -199,7 +200,8 @@ func (s *SqliteMigrateSuite) TestMigrateDownFull(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Has data
-	id, err := s.DbMap.SelectInt("SELECT id FROM people")
+	var id int64
+	err = s.Db.QueryRow("SELECT id FROM people").Scan(&id)
 	c.Assert(err, IsNil)
 	c.Assert(id, Equals, int64(1))
 
@@ -209,7 +211,7 @@ func (s *SqliteMigrateSuite) TestMigrateDownFull(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// Cannot query it anymore
-	_, err = s.DbMap.SelectInt("SELECT COUNT(*) FROM people")
+	err = s.Db.QueryRow("SELECT COUNT(*) FROM people").Scan(&id)
 	c.Assert(err, Not(IsNil))
 
 	// Nothing left to do.
@@ -237,7 +239,8 @@ func (s *SqliteMigrateSuite) TestMigrateTransaction(c *C) {
 	c.Assert(n, Equals, 2)
 
 	// INSERT should be rolled back
-	count, err := s.DbMap.SelectInt("SELECT COUNT(*) FROM people")
+	var count int64
+	err = s.Db.QueryRow("SELECT COUNT(*) FROM people").Scan(&count)
 	c.Assert(err, IsNil)
 	c.Assert(count, Equals, int64(0))
 }
@@ -272,12 +275,12 @@ func (s *SqliteMigrateSuite) TestPlanMigration(c *C) {
 		Down: []string{"ALTER TABLE people DROP COLUMN middle_name"},
 	})
 
-	plannedMigrations, _, err := PlanMigration(s.Db, "sqlite3", migrations, Up, 0)
+	plannedMigrations, err := PlanMigration(s.Db, "sqlite3", migrations, Up, 0)
 	c.Assert(err, IsNil)
 	c.Assert(plannedMigrations, HasLen, 1)
 	c.Assert(plannedMigrations[0].Migration, Equals, migrations.Migrations[3])
 
-	plannedMigrations, _, err = PlanMigration(s.Db, "sqlite3", migrations, Down, 0)
+	plannedMigrations, err = PlanMigration(s.Db, "sqlite3", migrations, Down, 0)
 	c.Assert(err, IsNil)
 	c.Assert(plannedMigrations, HasLen, 3)
 	c.Assert(plannedMigrations[0].Migration, Equals, migrations.Migrations[2])

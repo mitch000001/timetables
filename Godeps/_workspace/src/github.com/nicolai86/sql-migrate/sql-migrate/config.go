@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"io/ioutil"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/go-gorp/gorp"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
+	"github.com/go-gorp/gorp"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate"
 	"gopkg.in/yaml.v1"
 
 	_ "github.com/go-sql-driver/mysql"

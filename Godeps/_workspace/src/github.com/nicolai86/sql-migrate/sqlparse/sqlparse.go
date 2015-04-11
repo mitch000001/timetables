@@ -121,7 +121,7 @@ func SplitSQLStatements(r io.ReadSeeker, direction bool) ([]string, error) {
 
 	if upSections == 0 && downSections == 0 {
 		return nil, errors.New(`ERROR: no Up/Down annotations found, so no statements were executed.
-			See https://github.com/rubenv/sql-migrate for details.`)
+			See https://github.com/nicolai86/sql-migrate for details.`)
 	}
 
 	return stmts, nil

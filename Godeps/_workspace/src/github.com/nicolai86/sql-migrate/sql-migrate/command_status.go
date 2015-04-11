@@ -7,7 +7,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate"
 	"github.com/olekukonko/tablewriter"
 )
 

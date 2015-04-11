@@ -24,14 +24,13 @@ import (
 	_ "github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/lib/pq"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest/auth"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/google"
 )
 
-//go:generate go-bindata migrations/
-
-var funcMap = template.FuncMap{
+var funcMap = template. //go:generate go-bindata migrations/
+FuncMap{
 	"printDate":         printDate,
 	"printTimeframe":    printTimeframe,
 	"printFiscalPeriod": printFiscalPeriod,

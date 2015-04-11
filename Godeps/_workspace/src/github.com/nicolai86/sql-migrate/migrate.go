@@ -3,7 +3,6 @@ package migrate
 import (
 	"bytes"
 	"database/sql"
-	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -14,8 +13,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/go-gorp/gorp"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate/sqlparse"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate/sqlparse"
 )
 
 type MigrationDirection int
@@ -87,14 +85,6 @@ func (b byId) Less(i, j int) bool { return b[i].Less(b[j]) }
 type MigrationRecord struct {
 	Id        string    `db:"id"`
 	AppliedAt time.Time `db:"applied_at"`
-}
-
-var MigrationDialects = map[string]gorp.Dialect{
-	"sqlite3":  gorp.SqliteDialect{},
-	"postgres": gorp.PostgresDialect{},
-	"mysql":    gorp.MySQLDialect{"InnoDB", "UTF8"},
-	"mssql":    gorp.SqlServerDialect{},
-	"oci8":     gorp.OracleDialect{},
 }
 
 type MigrationSource interface {
@@ -239,7 +229,7 @@ func Exec(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection)
 //
 // Returns the number of applied migrations.
 func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) (int, error) {
-	migrations, dbMap, err := PlanMigration(db, dialect, m, dir, max)
+	migrations, err := PlanMigration(db, dialect, m, dir, max)
 	if err != nil {
 		return 0, err
 	}
@@ -247,7 +237,7 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 	// Apply migrations
 	applied := 0
 	for _, migration := range migrations {
-		trans, err := dbMap.Begin()
+		trans, err := db.Begin()
 		if err != nil {
 			return applied, err
 		}
@@ -261,17 +251,12 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 		}
 
 		if dir == Up {
-			err = trans.Insert(&MigrationRecord{
-				Id:        migration.Id,
-				AppliedAt: time.Now(),
-			})
+			_, err = trans.Exec(fmt.Sprintf("INSERT INTO %v (id, applied_at) VALUES ('%v', '%v')", tableName, migration.Id, time.Now().Format("2006-01-02 03:04:05")))
 			if err != nil {
 				return applied, err
 			}
 		} else if dir == Down {
-			_, err := trans.Delete(&MigrationRecord{
-				Id: migration.Id,
-			})
+			_, err := trans.Exec(fmt.Sprintf("DELETE FROM %v WHERE id = '%v'", tableName, migration.Id))
 			if err != nil {
 				return applied, err
 			}
@@ -291,21 +276,29 @@ func ExecMax(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirecti
 }
 
 // Plan a migration.
-func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) ([]*PlannedMigration, *gorp.DbMap, error) {
-	dbMap, err := getMigrationDbMap(db, dialect)
-	if err != nil {
-		return nil, nil, err
+func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationDirection, max int) ([]*PlannedMigration, error) {
+	if err := prepareDatabase(db); err != nil {
+		return nil, err
 	}
 
 	migrations, err := m.FindMigrations()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	var migrationRecords []MigrationRecord
-	_, err = dbMap.Select(&migrationRecords, fmt.Sprintf("SELECT * FROM %s", tableName))
+	rows, err := db.Query(fmt.Sprintf("SELECT id, applied_at FROM %s", tableName))
 	if err != nil {
-		return nil, nil, err
+		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var record MigrationRecord
+		if err := rows.Scan(&record.Id, &record.AppliedAt); err != nil {
+			return nil, err
+		}
+		migrationRecords = append(migrationRecords, record)
 	}
 
 	// Sort migrations that have been run by Id.
@@ -343,7 +336,7 @@ func PlanMigration(db *sql.DB, dialect string, m MigrationSource, dir MigrationD
 		}
 	}
 
-	return result, dbMap, nil
+	return result, nil
 }
 
 // Filter a slice of migrations into ones that should be applied.
@@ -377,56 +370,34 @@ func ToApply(migrations []*Migration, current string, direction MigrationDirecti
 }
 
 func GetMigrationRecords(db *sql.DB, dialect string) ([]*MigrationRecord, error) {
-	dbMap, err := getMigrationDbMap(db, dialect)
-	if err != nil {
+	if err := prepareDatabase(db); err != nil {
 		return nil, err
 	}
 
 	var records []*MigrationRecord
-	query := fmt.Sprintf("SELECT * FROM %s ORDER BY id ASC", tableName)
-	_, err = dbMap.Select(&records, query)
+	rows, err := db.Query(fmt.Sprintf("SELECT id, applied_at FROM %s ORDER BY id ASC", tableName))
 	if err != nil {
 		return nil, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var record MigrationRecord
+		if err := rows.Scan(&record.Id, &record.AppliedAt); err != nil {
+			return nil, err
+		}
+		records = append(records, &record)
 	}
 
 	return records, nil
 }
 
-func getMigrationDbMap(db *sql.DB, dialect string) (*gorp.DbMap, error) {
-	d, ok := MigrationDialects[dialect]
-	if !ok {
-		return nil, fmt.Errorf("Unknown dialect: %s", dialect)
-	}
-
-	// When using the mysql driver, make sure that the parseTime option is
-	// configured, otherwise it won't map time columns to time.Time. See
-	// https://github.com/rubenv/sql-migrate/issues/2
-	if dialect == "mysql" {
-		var out *time.Time
-		err := db.QueryRow("SELECT NOW()").Scan(&out)
-		if err != nil {
-			if err.Error() == "sql: Scan error on column index 0: unsupported driver -> Scan pair: []uint8 -> *time.Time" {
-				return nil, errors.New(`Cannot parse dates.
-
-Make sure that the parseTime option is supplied to your database connection.
-Check https://github.com/go-sql-driver/mysql#parsetime for more info.`)
-			} else {
-				return nil, err
-			}
-		}
-	}
-
-	// Create migration database map
-	dbMap := &gorp.DbMap{Db: db, Dialect: d}
-	dbMap.AddTableWithName(MigrationRecord{}, tableName).SetKeys(false, "Id")
-	//dbMap.TraceOn("", log.New(os.Stdout, "migrate: ", log.Lmicroseconds))
-
-	err := dbMap.CreateTablesIfNotExists()
+func prepareDatabase(db *sql.DB) error {
+	_, err := db.Exec(fmt.Sprintf("CREATE TABLE IF NOT EXISTS %v (id text not null, applied_at timestamp not null)", tableName))
 	if err != nil {
-		return nil, err
+		return err
 	}
-
-	return dbMap, nil
+	return nil
 }
 
 // TODO: Run migration + record insert in transaction.

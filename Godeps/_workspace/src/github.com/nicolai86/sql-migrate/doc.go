@@ -5,7 +5,7 @@ SQL Schema migration tool for Go.
 Key features:
 
 	* Usable as a CLI tool or as a library
-	* Supports SQLite, PostgreSQL, MySQL, MSSQL and Oracle databases (through gorp)
+	* Supports all SQL03 compatible databases
 	* Can embed migrations into your application
 	* Migrations are defined with SQL for full flexibility
 	* Atomic migrations
@@ -16,7 +16,7 @@ Installation
 
 To install the library and command line program, use the following:
 
-	go get github.com/rubenv/sql-migrate/...
+	go get github.com/nicolai86/sql-migrate/...
 
 Command-line tool
 
@@ -80,7 +80,7 @@ Library
 
 Import sql-migrate into your application:
 
-	import "github.com/rubenv/sql-migrate"
+	import "github.com/nicolai86/sql-migrate"
 
 Set up a source of migrations, this can be from memory, from a set of files or from bindata (more on that later):
 

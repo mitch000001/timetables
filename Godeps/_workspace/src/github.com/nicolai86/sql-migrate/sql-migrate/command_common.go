@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/rubenv/sql-migrate"
+	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/nicolai86/sql-migrate"
 )
 
 func ApplyMigrations(dir migrate.MigrationDirection, dryrun bool, limit int) error {
@@ -22,7 +22,7 @@ func ApplyMigrations(dir migrate.MigrationDirection, dryrun bool, limit int) err
 	}
 
 	if dryrun {
-		migrations, _, err := migrate.PlanMigration(db, dialect, source, dir, limit)
+		migrations, err := migrate.PlanMigration(db, dialect, source, dir, limit)
 		if err != nil {
 			return fmt.Errorf("Cannot plan migration: %s", err)
 		}
