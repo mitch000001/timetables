@@ -10,7 +10,7 @@ func NewFiscalApp(db *sql.DB) *FiscalApp {
 	return &FiscalApp{db}
 }
 
-func (f *FiscalApp) saveFiscalYear(fiscalYear *FiscalYear) error {
+func (f *FiscalApp) SaveFiscalYear(fiscalYear *FiscalYear) error {
 	err := InsertFiscalYear(f.db, fiscalYear)
 	if err != nil {
 		return err
@@ -24,7 +24,15 @@ func (f *FiscalApp) saveFiscalYear(fiscalYear *FiscalYear) error {
 	return nil
 }
 
-func (f *FiscalApp) loadFiscalYear(year int) (*FiscalYear, error) {
+func (f *FiscalApp) SaveFiscalPeriod(fiscalPeriod *FiscalPeriod, fiscalYear *FiscalYear) error {
+	err := InsertFiscalPeriod(f.db, fiscalPeriod, fiscalYear)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (f *FiscalApp) LoadFiscalYear(year int) (*FiscalYear, error) {
 	fiscalYear, err := FindFiscalYearForYear(f.db, year)
 	if err != nil {
 		return nil, err

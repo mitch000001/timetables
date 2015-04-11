@@ -101,6 +101,46 @@ func migrations_20150410204602_create_fiscalperiods_sql() (*asset, error) {
 	return a, nil
 }
 
+var _migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\x8c\xcd\xb1\xae\xc2\x20\x14\x80\xe1\x9d\xa7\x38\x5b\x87\x9b\xde\x17\x68\x1c\xaa\x74\x43\x6b\x2a\x9d\x09\xd2\x23\x39\x09\x9c\x12\xc0\x34\xbe\xbd\x0e\x0e\x0e\x0e\xce\x7f\xf2\xfd\x6d\x0b\x7f\x91\x7c\xb6\x15\x61\x4e\xe2\x32\x68\x70\x81\x90\xab\x89\xc4\x26\x62\x29\xd6\x63\x81\x1d\x34\x9b\xcd\x4c\xec\x9b\x4e\x88\x5e\xe9\x61\x02\xdd\xef\xd5\x00\xe9\x7e\x0d\xe4\xfe\x6f\x54\x9c\x0d\x26\x61\xa6\x75\x29\xd0\x4b\x09\x87\x51\xcd\xc7\x13\xbc\xcb\x03\x6d\x36\xb4\x00\x71\x45\x8f\xf9\xa5\x7c\xae\xe5\xba\xf1\x0f\xac\x9c\xc6\xf3\x77\xb7\x13\xcf\x00\x00\x00\xff\xff\x61\xe0\xac\x37\xca\x00\x00\x00")
+
+func migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql_bytes() ([]byte, error) {
+	return bindata_read(
+		_migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql,
+		"migrations/20150411142140-add-fiscalYear-foreignKey-to-fiscalPeriods.sql",
+	)
+}
+
+func migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql() (*asset, error) {
+	bytes, err := migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql_bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindata_file_info{name: "migrations/20150411142140-add-fiscalYear-foreignKey-to-fiscalPeriods.sql", size: 202, mode: os.FileMode(420), modTime: time.Unix(1428755005, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
+var _migrations_20150411171420_create_planyears_sql = []byte("\x1f\x8b\x08\x00\x00\x09\x6e\x88\x00\xff\xa4\x91\xcd\x6e\xea\x30\x10\x85\xd7\xd7\x4f\x31\x3b\x40\x17\xfa\x02\xa8\x8b\xb4\x18\x29\x6a\xf8\x51\x62\xd4\xd2\x8d\x35\x75\x86\x74\x24\xc7\x44\xb6\x03\xe2\xed\x1b\x28\x95\x22\x81\xba\xa9\x57\x63\x69\xce\x99\x99\xf3\x4d\x26\xf0\xbf\xe6\xca\x63\x24\xd8\x34\xa2\x90\x0a\x8c\x65\x72\x51\xd7\xec\x74\x4d\x21\x60\x45\x01\x1e\x61\x70\x44\xef\xd8\x55\x83\xa9\x10\xcf\xb9\x4c\x94\x04\x95\x3c\x65\x12\xd2\x39\x2c\x57\x0a\xe4\x5b\x5a\xa8\x02\x9a\xf6\xc3\xb2\x79\x68\x2c\x3a\x7d\x22\xf4\x01\x86\x02\x80\x4b\xf8\xe5\x15\x32\x4f\x93\xec\xbb\x5e\xe7\xe9\x22\xc9\xb7\xf0\x22\xb7\xe3\x4e\x68\x3c\x75\x9b\x95\x1a\xe3\x3d\xa1\x4a\x17\xb2\x50\xc9\x62\xad\xde\x2f\x3b\x2c\x37\x59\x06\x33\x39\x4f\x36\x59\xf7\x59\xbd\x0e\x47\x67\x8f\xb6\x29\xff\xec\xb1\xe3\x60\xd0\x5e\x2e\xd2\xb7\xc7\xb0\x8b\x54\x91\xbf\xd4\x3f\x1e\x63\xf1\x0f\x0f\xe4\xbb\xf4\x74\x89\xa7\xa0\xf7\x3b\xcd\xd6\xba\x2e\xd0\xab\xc8\xb5\x35\x79\x36\x77\xfa\xcc\x27\xdb\xd2\x93\xd3\x06\x3d\xf5\xfa\x4a\xda\x61\x6b\xa3\x3e\xa0\xc1\xc8\x7b\xa7\xcf\x73\x3d\x85\xd8\xf7\x13\xa3\x0e\x50\x9f\xea\x6c\x7f\x74\x62\x96\xaf\xd6\x57\x5e\x37\x84\xa6\xe2\x2b\x00\x00\xff\xff\x77\x16\xbc\xba\x05\x02\x00\x00")
+
+func migrations_20150411171420_create_planyears_sql_bytes() ([]byte, error) {
+	return bindata_read(
+		_migrations_20150411171420_create_planyears_sql,
+		"migrations/20150411171420-create-planYears.sql",
+	)
+}
+
+func migrations_20150411171420_create_planyears_sql() (*asset, error) {
+	bytes, err := migrations_20150411171420_create_planyears_sql_bytes()
+	if err != nil {
+		return nil, err
+	}
+
+	info := bindata_file_info{name: "migrations/20150411171420-create-planYears.sql", size: 517, mode: os.FileMode(420), modTime: time.Unix(1428765563, 0)}
+	a := &asset{bytes: bytes, info:  info}
+	return a, nil
+}
+
 // Asset loads and returns the asset for the given name.
 // It returns an error if the asset could not be found or
 // could not be loaded.
@@ -155,6 +195,8 @@ func AssetNames() []string {
 var _bindata = map[string]func() (*asset, error){
 	"migrations/20150410193710-create-fiscalYear.sql": migrations_20150410193710_create_fiscalyear_sql,
 	"migrations/20150410204602-create-fiscalPeriods.sql": migrations_20150410204602_create_fiscalperiods_sql,
+	"migrations/20150411142140-add-fiscalYear-foreignKey-to-fiscalPeriods.sql": migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql,
+	"migrations/20150411171420-create-planYears.sql": migrations_20150411171420_create_planyears_sql,
 }
 
 // AssetDir returns the file names below a certain
@@ -201,6 +243,10 @@ var _bintree = &_bintree_t{nil, map[string]*_bintree_t{
 		"20150410193710-create-fiscalYear.sql": &_bintree_t{migrations_20150410193710_create_fiscalyear_sql, map[string]*_bintree_t{
 		}},
 		"20150410204602-create-fiscalPeriods.sql": &_bintree_t{migrations_20150410204602_create_fiscalperiods_sql, map[string]*_bintree_t{
+		}},
+		"20150411142140-add-fiscalYear-foreignKey-to-fiscalPeriods.sql": &_bintree_t{migrations_20150411142140_add_fiscalyear_foreignkey_to_fiscalperiods_sql, map[string]*_bintree_t{
+		}},
+		"20150411171420-create-planYears.sql": &_bintree_t{migrations_20150411171420_create_planyears_sql, map[string]*_bintree_t{
 		}},
 	}},
 }}

@@ -75,14 +75,13 @@ func googleRedirectHandler(config *oauth2.Config) http.HandlerFunc {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		session.googleToken = token
 		id := token.Extra("id_token")
 		idToken, err := decode(id.(string))
 		if err != nil {
 			http.Redirect(w, r, "/login", http.StatusFound)
 			return
 		}
-		user := NewUser(idToken)
+		user := NewUser(token, idToken)
 		session.User = user
 		defer func() {
 			http.SetCookie(w, newSessionCookie(session.id))

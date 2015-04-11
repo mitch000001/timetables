@@ -228,6 +228,10 @@ func planYearsHandler() authHandlerFunc {
 				http.Redirect(w, r, "/plan_years/new", http.StatusFound)
 				return
 			}
+			job := func() error {
+				return planApp.SavePlanYear(planYear)
+			}
+			workerQueue.AddJob(job)
 			cachedPlanYears[planYear.FiscalYear.Year] = planYear
 			cache.Store("PlanYears", cachedPlanYears)
 			http.Redirect(w, r, "/plan_years", http.StatusFound)
@@ -245,14 +249,6 @@ func planYearsNewHandler() authHandlerFunc {
 
 func planYearsShowHandler() authHandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request, s *session) {
-		var cachedPlanYears PlanYears
-		planYears := cache.Get("PlanYears")
-		if planYears == nil {
-			s.AddError(fmt.Errorf("Keine Planungsjahre vorhanden."))
-			http.Redirect(w, r, "/plan_years", http.StatusFound)
-			return
-		}
-		cachedPlanYears = planYears.(PlanYears)
 		yearString := path.Base(r.URL.Path)
 		year, err := strconv.Atoi(yearString)
 		if err != nil {
@@ -260,11 +256,35 @@ func planYearsShowHandler() authHandlerFunc {
 			http.Redirect(w, r, "/plan_years", http.StatusFound)
 			return
 		}
-		planYear := cachedPlanYears.FindByYear(year)
-		if planYear == nil {
-			s.AddError(fmt.Errorf("Kein Planjahr für %d gefunden.", year))
-			http.Redirect(w, r, "/plan_years", http.StatusFound)
-			return
+		var planYear *PlanYear
+		var cachedPlanYears PlanYears
+		planYears := cache.Get("PlanYears")
+		if planYears != nil {
+			cachedPlanYears = planYears.(PlanYears)
+			planYear = cachedPlanYears.FindByYear(year)
+			if planYear == nil {
+				s.AddError(fmt.Errorf("Kein Planjahr für %d gefunden.", year))
+				http.Redirect(w, r, "/plan_years", http.StatusFound)
+				return
+			}
+		} else {
+			job := func() error {
+				planYear, err := planApp.LoadPlanYear(year)
+				if err != nil {
+					return err
+				}
+				cachedPlanYears = make(PlanYears)
+				cachedPlanYears[planYear.FiscalYear.Year] = planYear
+				return cache.Store("PlanYears", cachedPlanYears)
+			}
+			status := workerQueue.AddJob(job)
+			if ok, err := status.Success(); !ok {
+				if err != nil {
+					s.AddError(fmt.Errorf("Kein Planjahr für %d gefunden.", year))
+					http.Redirect(w, r, "/plan_years", http.StatusFound)
+					return
+				}
+			}
 		}
 		page := PageForSession(s)
 		page.Set("PlanYear", planYear)

@@ -2,8 +2,6 @@ package main
 
 import (
 	"bytes"
-	"crypto/rand"
-	"crypto/sha256"
 	"database/sql"
 	"flag"
 	"fmt"
@@ -11,7 +9,6 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	runtimeDebug "runtime/debug"
@@ -29,16 +26,14 @@ import (
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/google"
 )
 
-var funcMap = template. //go:generate go-bindata migrations/
-FuncMap{
+//go:generate go-bindata migrations/
+
+var funcMap = template.FuncMap{
 	"printDate":         printDate,
 	"printTimeframe":    printTimeframe,
 	"printFiscalPeriod": printFiscalPeriod,
 	"startsWith":        strings.HasPrefix,
 }
-
-var databaseUrl string
-var db *sql.DB
 
 var layoutPattern = filepath.Join(mustString(os.Getwd()), "templates", "layout.html.tmpl")
 var partialTemplatePattern = filepath.Join(mustString(os.Getwd()), "templates", "_*.tmpl")
@@ -66,6 +61,8 @@ func mustString(str string, err error) string {
 
 var debug *log.Logger
 var debugMode bool
+var databaseUrl string
+var planApp *PlanApp
 var cache Cache
 var googleOauth2Config *oauth2.Config
 var harvestOauth2Config *oauth2.Config
@@ -88,10 +85,12 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error while opening database: %T: %v\n", err, err)
 	}
+	defer db.Close()
 	err = runMigrations(db)
 	if err != nil {
 		log.Fatalf("Error while migrating database: %T: %v\n", err, err)
 	}
+	planApp = NewPlanApp(db, cache)
 	hostAddress := strings.TrimLeft(strings.TrimSuffix(httpAddr, ":"), "https://") + ":" + strings.TrimPrefix(httpPort, ":")
 	host = "http://" + hostAddress
 	hostEnv := os.Getenv("HOST")
@@ -257,10 +256,10 @@ func timeframeTableHandler() harvestHandlerFunc {
 			http.Redirect(w, r, "/", http.StatusFound)
 			return
 		}
-		calcFn := func() {
-			invalidateTableCacheForTimeframe(tf, c)
+		calcFn := func() error {
+			return invalidateTableCacheForTimeframe(tf, c)
 		}
-		workerQueue.addJob(calcFn)
+		workerQueue.AddJob(calcFn)
 		page := PageForSession(s)
 		page.Set("Table", cache.Get(fmt.Sprintf("table:timeframe=%s", tf)))
 		renderTemplate(w, "timeframe-table", page)
@@ -554,68 +553,6 @@ func (sm *sessionMap) Remove(s *session) {
 	delete(*sm, s.id)
 }
 
-type session struct {
-	Stack       string
-	URL         *url.URL
-	location    string
-	googleToken *oauth2.Token
-	User        *User
-	id          string
-	errors      []error
-}
-
-func (s *session) LoggedIn() bool {
-	return s.User != nil
-}
-
-func (s *session) GetHarvestClient() (*harvest.Harvest, error) {
-	config := s.User.HarvestOauth2Config()
-	if config == nil {
-		return nil, fmt.Errorf("Missing harvest oauth config")
-	}
-	token := s.User.HarvestToken()
-	if token == nil {
-		return nil, fmt.Errorf("Missing harvest token")
-	}
-	// TODO(mw): validate that the token is valid and if not, exchange a new token!
-	client, err := harvest.New(config.Subdomain, func() harvest.HttpClient { return config.Client(oauth2.NoContext, token) })
-	if err != nil {
-		return nil, fmt.Errorf("Error while creating new harvest client: %T(%v)", err, err)
-	}
-	return client, nil
-}
-
-func (s *session) AddError(err error) {
-	if s.errors == nil {
-		s.errors = make([]error, 0)
-	}
-	s.errors = append(s.errors, err)
-}
-
-func (s *session) AddDebugError(err error) {
-	if debugMode {
-		s.AddError(err)
-	}
-}
-
-func (s *session) GetErrors() []error {
-	return s.errors
-}
-
-func (s *session) ResetErrors() {
-	s.errors = make([]error, 0)
-}
-
-func newSession() *session {
-	b := make([]byte, 30)
-	_, err := rand.Read(b)
-	if err != nil {
-		panic(err)
-	}
-	id := fmt.Sprintf("%x", sha256.Sum256(b))
-	return &session{id: id}
-}
-
 var contentTemplateString = `{{define "content"}}{{template "%s" .}}{{end}}`
 
 func renderTemplate(w http.ResponseWriter, tmpl string, page *pageObject) {
@@ -724,37 +661,6 @@ func schedule(d time.Duration, fn func()) {
 			fn()
 		}
 	}
-}
-
-type worker struct {
-	queue chan func()
-}
-
-func newWorker(size int) *worker {
-	var queue chan func()
-	if size <= 0 {
-		queue = make(chan func())
-	} else {
-		queue = make(chan func(), size)
-	}
-	w := &worker{queue: queue}
-	w.run()
-	return w
-}
-
-func (w *worker) run() {
-	go func() {
-		for {
-			select {
-			case fn := <-w.queue:
-				go fn()
-			}
-		}
-	}()
-}
-
-func (w *worker) addJob(fn func()) {
-	w.queue <- fn
 }
 
 type multiError []error

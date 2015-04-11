@@ -50,7 +50,7 @@ type row struct {
 	CumulatedBillingDegree float64
 }
 
-func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) {
+func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harvest.Harvest) error {
 	log.Printf("Invalidating table cache for timeframe %s\n", timeframe)
 	start := time.Now()
 	var t *table
@@ -63,9 +63,10 @@ func invalidateTableCacheForTimeframe(timeframe harvest.Timeframe, client *harve
 	err := populateTable(t, timeframe, client)
 	if err != nil {
 		log.Printf("%T: %v\n", err, err)
+		return err
 	}
-	cache.Store(fmt.Sprintf("table:timeframe=%s", timeframe), t)
-	log.Printf("Table cache invalidated, took %s", time.Since(start))
+	defer log.Printf("Table cache invalidated, took %s", time.Since(start))
+	return cache.Store(fmt.Sprintf("table:timeframe=%s", timeframe), t)
 }
 
 func populateTable(t *table, timeframe harvest.Timeframe, client *harvest.Harvest) error {

@@ -7,18 +7,23 @@ import (
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
 )
 
-func NewUser(idToken *googleIdToken) *User {
+func NewUser(authToken *oauth2.Token, idToken *googleIdToken) *User {
 	company := CompanyForGoogleToken(idToken)
-	return &User{idToken: idToken, company: company}
+	return &User{
+		googleOauthToken: authToken,
+		idToken:          idToken,
+		company:          company,
+	}
 }
 
 type User struct {
-	idToken *googleIdToken
-	profile *googleProfile
-	company *Company
 	*harvest.AccountUser
-	backOffice bool
-	admin      bool
+	googleOauthToken *oauth2.Token
+	idToken          *googleIdToken
+	profile          *googleProfile
+	company          *Company
+	backOffice       bool
+	admin            bool
 }
 
 func (u *User) SetProfile(profile *googleProfile) {
