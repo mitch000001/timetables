@@ -105,7 +105,7 @@ func main() {
 
 	cache = &InMemoryCache{}
 	workerQueue = newWorker(5)
-	sessions = make(sessionMap)
+	sessions = make(SessionManager)
 
 	// TODO(mw): find a more readable way to compose handler
 	http.HandleFunc("/", logHandler(htmlHandler(getHandler(authHandler(errorHandler(indexHandler()))))))
@@ -420,28 +420,7 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 
 type authHandlerFunc func(http.ResponseWriter, *http.Request, *Session)
 
-var sessions sessionMap
-
-type sessionMap map[string]*Session
-
-func (s *sessionMap) init() {
-	if s == nil {
-		*s = make(map[string]*Session)
-	}
-}
-
-func (sm *sessionMap) Add(s *Session) {
-	sm.init()
-	(*sm)[s.id] = s
-}
-
-func (sm *sessionMap) Find(sessionId string) *Session {
-	return (*sm)[sessionId]
-}
-
-func (sm *sessionMap) Remove(s *Session) {
-	delete(*sm, s.id)
-}
+var sessions SessionManager
 
 type session struct {
 	Stack       string

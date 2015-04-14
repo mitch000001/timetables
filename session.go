@@ -10,6 +10,27 @@ import (
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
 )
 
+type SessionManager map[string]*Session
+
+func (s *SessionManager) init() {
+	if s == nil {
+		*s = make(map[string]*Session)
+	}
+}
+
+func (sm *SessionManager) Add(s *Session) {
+	sm.init()
+	(*sm)[s.id] = s
+}
+
+func (sm *SessionManager) Find(sessionId string) *Session {
+	return (*sm)[sessionId]
+}
+
+func (sm *SessionManager) Remove(s *Session) {
+	delete(*sm, s.id)
+}
+
 type Session struct {
 	Stack    string
 	URL      *url.URL
