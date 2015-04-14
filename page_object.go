@@ -6,7 +6,7 @@ import (
 	"unicode/utf8"
 )
 
-func PageForSession(s *session) *PageObject {
+func PageForSession(s *Session) *PageObject {
 	p := make(PageObject)
 	p["session"] = s
 	p["RequestPath"] = s.URL.Path
@@ -28,7 +28,7 @@ func (p *PageObject) LoggedIn() bool {
 	if !ok {
 		return false
 	}
-	return s.(*session).LoggedIn()
+	return s.(*Session).LoggedIn()
 }
 
 func (p *PageObject) Debug() bool {

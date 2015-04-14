@@ -139,7 +139,7 @@ func indexHandler() authHandlerFunc {
 	if fiscalYear == nil {
 		fiscalYear = &FiscalYear{Year: time.Now().Year()}
 	}
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		if r.URL.Path != "/" {
 			s.AddError(fmt.Errorf("Die eingegebene Seite existiert nicht: '%s'", r.URL.Path))
 			http.Redirect(w, r, "/", http.StatusFound)
@@ -150,7 +150,7 @@ func indexHandler() authHandlerFunc {
 }
 
 func timeframesNewHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		page := PageForSession(s)
 		renderTemplate(w, "timeframes-new", page)
 		return
@@ -158,7 +158,7 @@ func timeframesNewHandler() authHandlerFunc {
 }
 
 func timeframesHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		if r.Method == "GET" {
 			page := PageForSession(s)
 			page.Set("CurrentTimeframe", fiscalYear.CurrentFiscalPeriod())
@@ -214,7 +214,7 @@ func timeframesHandler() authHandlerFunc {
 }
 
 func timeframeTableHandler() harvestHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session, c *harvest.Harvest) {
 		params := r.URL.Query()
 		tf, err := harvest.TimeframeFromQuery(params)
 		if err != nil {
@@ -237,7 +237,7 @@ func timeframeTableHandler() harvestHandlerFunc {
 var htmlReplacer = strings.NewReplacer("\n", "<br>", "\r", "<br>")
 
 func internalServerError() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		page := PageForSession(s)
 		page.Set("Request", r)
 		page.Set("Stack", template.HTML(s.Stack))
@@ -262,7 +262,7 @@ func loginHandler() http.HandlerFunc {
 }
 
 func logoutHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		sessions.Remove(s)
 		http.Redirect(w, r, "/", http.StatusFound)
 	}
@@ -296,10 +296,10 @@ func authHandler(fn authHandlerFunc) http.HandlerFunc {
 	}
 }
 
-type harvestHandlerFunc func(http.ResponseWriter, *http.Request, *session, *harvest.Harvest)
+type harvestHandlerFunc func(http.ResponseWriter, *http.Request, *Session, *harvest.Harvest)
 
 func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		client, err := s.GetHarvestClient()
 		if err != nil {
 			debug.Printf("no client found: sessionId='%s', error=%T:%v\n", s.id, err, err)
@@ -315,7 +315,7 @@ func harvestHandler(fn harvestHandlerFunc) authHandlerFunc {
 }
 
 func harvestConnectHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		page := PageForSession(s)
 		renderTemplate(w, "harvest-connect", page)
 		return
@@ -323,7 +323,7 @@ func harvestConnectHandler() authHandlerFunc {
 }
 
 func harvestOauthHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		err := r.ParseForm()
 		if err != nil {
 			s.AddError(err)
@@ -368,7 +368,7 @@ func oauth2ConfigForEndpoint(endpoint oauth2.Endpoint) *oauth2.Config {
 }
 
 func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		params := r.URL.Query()
 		state := params.Get("state")
 		if state == "" {
@@ -418,28 +418,28 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 	}
 }
 
-type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
+type authHandlerFunc func(http.ResponseWriter, *http.Request, *Session)
 
 var sessions sessionMap
 
-type sessionMap map[string]*session
+type sessionMap map[string]*Session
 
 func (s *sessionMap) init() {
 	if s == nil {
-		*s = make(map[string]*session)
+		*s = make(map[string]*Session)
 	}
 }
 
-func (sm *sessionMap) Add(s *session) {
+func (sm *sessionMap) Add(s *Session) {
 	sm.init()
 	(*sm)[s.id] = s
 }
 
-func (sm *sessionMap) Find(sessionId string) *session {
+func (sm *sessionMap) Find(sessionId string) *Session {
 	return (*sm)[sessionId]
 }
 
-func (sm *sessionMap) Remove(s *session) {
+func (sm *sessionMap) Remove(s *Session) {
 	delete(*sm, s.id)
 }
 
@@ -568,7 +568,7 @@ func logHandler(fn http.HandlerFunc) http.HandlerFunc {
 }
 
 func errorHandler(fn authHandlerFunc) authHandlerFunc {
-	return func(w http.ResponseWriter, request *http.Request, s *session) {
+	return func(w http.ResponseWriter, request *http.Request, s *Session) {
 		defer func() {
 			if r := recover(); r != nil {
 				debug.Printf("Recovered: %+#v\n", r)

@@ -79,7 +79,7 @@ func (u *User) SetHarvestAccount(account *harvest.Account) {
 }
 
 func usersShowHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		page := PageForSession(s)
 		page.Set("User", s.User)
 		renderTemplate(w, "users-show", page)
