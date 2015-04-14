@@ -175,7 +175,7 @@ func NewPlanUserFromForm(parser *FormParser, user *PlanUser) (*PlanUserDataEntry
 }
 
 func planYearsHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		var cachedPlanYears PlanYears
 		planYears := cache.Get("PlanYears")
 		if planYears == nil {
@@ -241,14 +241,14 @@ func planYearsHandler() authHandlerFunc {
 }
 
 func planYearsNewHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		page := PageForSession(s)
 		renderTemplate(w, "plan-years-new", page)
 	}
 }
 
 func planYearsShowHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		yearString := path.Base(r.URL.Path)
 		year, err := strconv.Atoi(yearString)
 		if err != nil {
@@ -294,7 +294,7 @@ func planYearsShowHandler() authHandlerFunc {
 }
 
 func planItemshandler() harvestHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session, c *harvest.Harvest) {
 		var cachedPlanItems PlanItems
 		planItems := cache.Get("PlanItems")
 		if planItems == nil {
@@ -348,7 +348,7 @@ func planItemshandler() harvestHandlerFunc {
 }
 
 func planItemNewHandler() harvestHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session, c *harvest.Harvest) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session, c *harvest.Harvest) {
 		var users []*harvest.User
 		err := c.Users.All(&users, nil)
 		if err != nil {
@@ -365,7 +365,7 @@ func planItemNewHandler() harvestHandlerFunc {
 }
 
 func planItemsShowHandler() authHandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request, s *session) {
+	return func(w http.ResponseWriter, r *http.Request, s *Session) {
 		var cachedPlanItems PlanItems
 		planItems := cache.Get("PlanItems")
 		if planItems == nil {
