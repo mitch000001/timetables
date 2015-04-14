@@ -15,8 +15,6 @@ import (
 	"strconv"
 	"strings"
 	"time"
-	"unicode"
-	"unicode/utf8"
 
 	_ "github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/lib/pq"
 	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
@@ -280,7 +278,7 @@ func internalServerError() authHandlerFunc {
 func loginHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
-			renderTemplate(w, "login", &pageObject{})
+			renderTemplate(w, "login", &PageObject{})
 			return
 		}
 		if r.Method == "POST" {
@@ -452,84 +450,6 @@ func harvestOauthRedirectHandler(harvestConfig *oauth2.Config) authHandlerFunc {
 
 type authHandlerFunc func(http.ResponseWriter, *http.Request, *session)
 
-func PageForSession(s *session) *pageObject {
-	p := make(pageObject)
-	p["session"] = s
-	p["RequestPath"] = s.URL.Path
-	if s.User != nil {
-		p["user"] = s.User
-	}
-	sessErrors := s.GetErrors()
-	if len(sessErrors) > 0 {
-		p.AddErrors(sessErrors)
-		s.ResetErrors()
-	}
-	return &p
-}
-
-type pageObject map[string]interface{}
-
-func (p *pageObject) LoggedIn() bool {
-	s, ok := (*p)["session"]
-	if !ok {
-		return false
-	}
-	return s.(*session).LoggedIn()
-}
-
-func (p *pageObject) Debug() bool {
-	return debugMode
-}
-
-func (p *pageObject) CurrentUser() *User {
-	return (*p)["user"].(*User)
-}
-
-func (p *pageObject) Errors() []error {
-	errs, ok := (*p)["errors"]
-	if !ok {
-		return nil
-	} else {
-		return errs.([]error)
-	}
-}
-
-func (p *pageObject) AddError(err error) {
-	errs, ok := (*p)["errors"]
-	var errors []error
-	if !ok || errs == nil {
-		errors = make([]error, 0)
-	} else {
-		errors = errs.([]error)
-	}
-	errors = append(errors, err)
-	(*p)["errors"] = errors
-}
-
-func (p *pageObject) AddErrors(errs []error) {
-	pErrs, ok := (*p)["errors"]
-	var errors []error
-	if !ok || errs == nil {
-		errors = make([]error, 0)
-	} else {
-		errors = pErrs.([]error)
-	}
-	errors = append(errors, errs...)
-	(*p)["errors"] = errors
-}
-
-func (p *pageObject) Set(key string, value interface{}) {
-	if isLower(key) {
-		panic(fmt.Errorf("Key must begin with a capital letter"))
-	}
-	(*p)[key] = value
-}
-
-func isLower(input string) bool {
-	c, _ := utf8.DecodeRuneInString(input)
-	return unicode.IsLower(c)
-}
-
 var sessions sessionMap
 
 type sessionMap map[string]*session
@@ -555,7 +475,7 @@ func (sm *sessionMap) Remove(s *session) {
 
 var contentTemplateString = `{{define "content"}}{{template "%s" .}}{{end}}`
 
-func renderTemplate(w http.ResponseWriter, tmpl string, page *pageObject) {
+func renderTemplate(w http.ResponseWriter, tmpl string, page *PageObject) {
 	formattedTemplateString := fmt.Sprintf(contentTemplateString, tmpl)
 	contentTemplate := template.Must(template.Must(layout.Clone()).Parse(formattedTemplateString))
 	var buf bytes.Buffer
