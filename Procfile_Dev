@@ -1,1 +1,1 @@
-web: rerun github.com/mitch000001/timetables -debug
+web: rerun github.com/mitch000001/timetables/cmd/timetables -debug
