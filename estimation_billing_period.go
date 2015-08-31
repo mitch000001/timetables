@@ -11,6 +11,7 @@ type PlanConfig struct {
 
 type UserConfig struct {
 	userID                    string
+	hasChild                  bool
 	timeframe                 harvest.Timeframe
 	billingDegree             float64
 	workingDegree             float64
@@ -27,7 +28,7 @@ func CreateEstimationBillingPeriod(planConfig PlanConfig, userConfig UserConfig)
 		BusinessDays:                    userConfig.businessDays,
 		CumulatedBusinessDays:           10.0,
 		CumulatedVacationInterest:       1.71,
-		RemainingVacationInterest:       0,
+		RemainingVacationInterest:       userConfig.remainingVacationInterest,
 		CumulatedSicknessInterest:       1.08,
 		CumulatedBilledDays:             10.57,
 		CumulatedEffectiveBillingDegree: 0.66,
@@ -36,9 +37,12 @@ func CreateEstimationBillingPeriod(planConfig PlanConfig, userConfig UserConfig)
 
 	period.VacationInterest = NewFloat(userConfig.workingDegree).Mul(NewFloat(planConfig.VacationInterest)).Mul(shareOfYear)
 
-	sicknessInterestIncludingChildCare := NewFloat(planConfig.SicknessInterest).Add(NewFloat(planConfig.ChildCareInterest))
-	sicknessInterestIncludingChildCareShare := sicknessInterestIncludingChildCare.Mul(shareOfYear)
-	period.SicknessInterest = sicknessInterestIncludingChildCareShare.Mul(NewFloat(userConfig.workingDegree))
+	sicknessInterest := NewFloat(planConfig.SicknessInterest)
+	if userConfig.hasChild {
+		sicknessInterest = NewFloat(planConfig.SicknessInterest).Add(NewFloat(planConfig.ChildCareInterest))
+	}
+	sicknessInterestShare := sicknessInterest.Mul(shareOfYear)
+	period.SicknessInterest = sicknessInterestShare.Mul(NewFloat(userConfig.workingDegree))
 
 	unbilled := period.SicknessInterest.Add(period.VacationInterest).Add(NewFloat(period.RemainingVacationInterest))
 	period.BilledDays = NewFloat(userConfig.businessDays).Sub(unbilled).Mul(NewFloat(userConfig.billingDegree))
