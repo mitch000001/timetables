@@ -15,7 +15,6 @@ type UserConfig struct {
 	billingDegree             float64
 	workingDegree             float64
 	businessDays              float64
-	cumulatedBusinessDays     float64
 	remainingVacationInterest float64
 }
 
