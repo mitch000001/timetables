@@ -3,10 +3,15 @@ package timetables
 import "github.com/mitch000001/go-harvest/harvest"
 
 type PlanConfig struct {
-	BusinessDays      float64
-	VacationInterest  float64
-	SicknessInterest  float64
-	ChildCareInterest float64
+	Year                      int
+	BusinessDays              float64
+	VacationInterest          float64
+	SicknessInterest          float64
+	ChildCareInterest         float64
+	CumulatedBusinessDays     float64
+	CumulatedVacationInterest float64
+	CumulatedSicknessInterest float64
+	CumulatedBilledDays       float64
 }
 
 type UserConfig struct {
@@ -19,20 +24,18 @@ type UserConfig struct {
 
 func CreateEstimationBillingPeriod(period Period, planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriod, interface{}) {
 	var estimationPeriod = EstimationBillingPeriod{
-		ID:                              "10",
-		Timeframe:                       period.Timeframe,
-		UserID:                          "1",
-		BusinessDays:                    period.BusinessDays,
-		CumulatedBusinessDays:           10.0,
-		CumulatedVacationInterest:       1.71,
-		RemainingVacationInterest:       userConfig.remainingVacationInterest,
-		CumulatedSicknessInterest:       1.08,
-		CumulatedBilledDays:             10.57,
-		CumulatedEffectiveBillingDegree: 0.66,
+		ID:                        "10",
+		Timeframe:                 period.Timeframe,
+		UserID:                    "1",
+		BusinessDays:              NewFloat(period.BusinessDays),
+		CumulatedBusinessDays:     NewFloat(period.BusinessDays).Add(NewFloat(planConfig.CumulatedBusinessDays)),
+		RemainingVacationInterest: NewFloat(userConfig.remainingVacationInterest),
 	}
 	shareOfYear := NewFloat(period.BusinessDays).Div(NewFloat(planConfig.BusinessDays))
 
 	estimationPeriod.VacationInterest = NewFloat(userConfig.workingDegree).Mul(NewFloat(planConfig.VacationInterest)).Mul(shareOfYear)
+
+	estimationPeriod.CumulatedVacationInterest = estimationPeriod.VacationInterest.Add(NewFloat(planConfig.CumulatedVacationInterest))
 
 	sicknessInterest := NewFloat(planConfig.SicknessInterest)
 	if userConfig.hasChild {
@@ -41,10 +44,16 @@ func CreateEstimationBillingPeriod(period Period, planConfig PlanConfig, userCon
 	sicknessInterestShare := sicknessInterest.Mul(shareOfYear)
 	estimationPeriod.SicknessInterest = sicknessInterestShare.Mul(NewFloat(userConfig.workingDegree))
 
-	unbilled := estimationPeriod.SicknessInterest.Add(estimationPeriod.VacationInterest).Add(NewFloat(estimationPeriod.RemainingVacationInterest))
+	estimationPeriod.CumulatedSicknessInterest = estimationPeriod.SicknessInterest.Add(NewFloat(planConfig.CumulatedSicknessInterest))
+
+	unbilled := estimationPeriod.SicknessInterest.Add(estimationPeriod.VacationInterest).Add(estimationPeriod.RemainingVacationInterest)
 	estimationPeriod.BilledDays = NewFloat(period.BusinessDays).Sub(unbilled).Mul(NewFloat(userConfig.billingDegree))
 
+	estimationPeriod.CumulatedBilledDays = estimationPeriod.BilledDays.Add(NewFloat(planConfig.CumulatedBilledDays))
+
 	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BilledDays.Div(NewFloat(period.BusinessDays))
+
+	estimationPeriod.CumulatedEffectiveBillingDegree = estimationPeriod.CumulatedBilledDays.Div(estimationPeriod.CumulatedBusinessDays)
 
 	return estimationPeriod, nil
 }
@@ -53,15 +62,15 @@ type EstimationBillingPeriod struct {
 	ID                              string
 	Timeframe                       harvest.Timeframe
 	UserID                          string
-	BusinessDays                    float64
-	CumulatedBusinessDays           float64
+	BusinessDays                    *Float
+	CumulatedBusinessDays           *Float
 	VacationInterest                *Float
-	CumulatedVacationInterest       float64
-	RemainingVacationInterest       float64
+	CumulatedVacationInterest       *Float
+	RemainingVacationInterest       *Float
 	SicknessInterest                *Float
-	CumulatedSicknessInterest       float64
+	CumulatedSicknessInterest       *Float
 	BilledDays                      *Float
-	CumulatedBilledDays             float64
+	CumulatedBilledDays             *Float
 	EffectiveBillingDegree          *Float
-	CumulatedEffectiveBillingDegree float64
+	CumulatedEffectiveBillingDegree *Float
 }
