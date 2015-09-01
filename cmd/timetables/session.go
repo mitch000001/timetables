@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/url"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
+	"github.com/mitch000001/go-harvest/harvest"
+	"golang.org/x/oauth2"
 )
 
 type SessionManager map[string]*Session

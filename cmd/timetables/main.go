@@ -15,10 +15,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/github.com/mitch000001/go-harvest/harvest/auth"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2"
-	"github.com/mitch000001/timetables/Godeps/_workspace/src/golang.org/x/oauth2/google"
+	"github.com/mitch000001/go-harvest/harvest"
+	"github.com/mitch000001/go-harvest/harvest/auth"
+	"golang.org/x/oauth2"
+	"golang.org/x/oauth2/google"
 )
 
 var funcMap = template.FuncMap{
