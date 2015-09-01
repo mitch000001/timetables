@@ -12,7 +12,6 @@ type PlanConfig struct {
 type UserConfig struct {
 	userID                    string
 	hasChild                  bool
-	timeframe                 harvest.Timeframe
 	billingDegree             float64
 	workingDegree             float64
 	businessDays              float64
@@ -20,10 +19,10 @@ type UserConfig struct {
 	remainingVacationInterest float64
 }
 
-func CreateEstimationBillingPeriod(planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriod, interface{}) {
+func CreateEstimationBillingPeriod(timeframe harvest.Timeframe, planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriod, interface{}) {
 	var period = EstimationBillingPeriod{
 		ID:                              "10",
-		Timeframe:                       userConfig.timeframe,
+		Timeframe:                       timeframe,
 		UserID:                          "1",
 		BusinessDays:                    userConfig.businessDays,
 		CumulatedBusinessDays:           10.0,
