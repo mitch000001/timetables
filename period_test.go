@@ -20,4 +20,9 @@ func TestNewPeriod(t *testing.T) {
 		t.Logf("Expected period timeframe to equal\n%s\n\tgot\n%s\n", expectedTimeframe, p.Timeframe)
 		t.Fail()
 	}
+
+	if p.BusinessDays != 25.0 {
+		t.Logf("Expected period BusinessDays to equal 25, got %d\n", p.BusinessDays)
+		t.Fail()
+	}
 }

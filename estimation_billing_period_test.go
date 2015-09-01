@@ -10,13 +10,13 @@ import (
 
 func TestEstimationBillingPeriodCreate(t *testing.T) {
 	tests := []struct {
-		timeframe       harvest.Timeframe
+		period          Period
 		planConfigInput PlanConfig
 		userConfigInput UserConfig
 		output          EstimationBillingPeriod
 	}{
 		{
-			harvest.Timeframe{StartDate: harvest.Date(2015, 1, 1, time.Local), EndDate: harvest.Date(2015, 25, 1, time.Local)},
+			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 1, 1, time.Local), EndDate: harvest.Date(2015, 25, 1, time.Local)}, 10},
 			PlanConfig{
 				BusinessDays:      250,
 				VacationInterest:  25,
@@ -28,7 +28,6 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				hasChild:                  true,
 				billingDegree:             0.8,
 				workingDegree:             1.0,
-				businessDays:              10,
 				remainingVacationInterest: 0.0,
 			},
 			EstimationBillingPeriod{
@@ -49,7 +48,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				BusinessDays:      200,
 				VacationInterest:  25,
@@ -61,7 +60,6 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				hasChild:                  true,
 				billingDegree:             0.8,
 				workingDegree:             1.0,
-				businessDays:              20,
 				remainingVacationInterest: 0.0,
 			},
 			EstimationBillingPeriod{
@@ -82,7 +80,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				BusinessDays:      200,
 				VacationInterest:  25,
@@ -94,7 +92,6 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				hasChild:                  false,
 				billingDegree:             0.8,
 				workingDegree:             1.0,
-				businessDays:              20,
 				remainingVacationInterest: 0,
 			},
 			EstimationBillingPeriod{
@@ -115,7 +112,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				BusinessDays:      200,
 				VacationInterest:  25,
@@ -127,7 +124,6 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				hasChild:                  false,
 				billingDegree:             0.8,
 				workingDegree:             1.0,
-				businessDays:              20,
 				remainingVacationInterest: 5.0,
 			},
 			EstimationBillingPeriod{
@@ -150,7 +146,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		period, err := CreateEstimationBillingPeriod(test.timeframe, test.planConfigInput, test.userConfigInput)
+		period, err := CreateEstimationBillingPeriod(test.period, test.planConfigInput, test.userConfigInput)
 
 		if err != nil {
 			t.Logf("Expected no error, got %T:%v", err, err)
