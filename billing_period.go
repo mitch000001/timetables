@@ -14,80 +14,84 @@ type TrackedEntries struct {
 	nonbillableEntries []*harvest.DayEntry
 }
 
-func (t TrackedEntries) Billable() []*harvest.DayEntry {
-	return t.billableEntries
+func (t TrackedEntries) BillableHours() *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.billableEntries {
+		hours = hours.Add(NewFloat(entry.Hours))
+	}
+	return hours
 }
 
-func (t TrackedEntries) BillableForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) BillableHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.billableEntries {
 		if timeframe.IsInTimeframe(entry.SpentAt) {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) VacationInterest() []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) VacationInterestHours() *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId == t.billingConfig.VacationTaskID {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) VacationInterestForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) VacationInterestHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId == t.billingConfig.VacationTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) SicknessInterest() []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) SicknessInterestHours() *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId == t.billingConfig.SicknessTaskID {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) SicknessInterestForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) SicknessInterestHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId == t.billingConfig.SicknessTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) NonBillableRemainder() []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) NonBillableRemainderHours() *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
-			entries = append(entries, entry)
+			hours = hours.Add(NewFloat(entry.Hours))
 		}
 	}
-	return entries
+	return hours
 }
 
-func (t TrackedEntries) NonBillableRemainderForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
-	var entries []*harvest.DayEntry
+func (t TrackedEntries) NonBillableRemainderHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+	hours := NewFloat(0)
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
 			if timeframe.IsInTimeframe(entry.SpentAt) {
-				entries = append(entries, entry)
+				hours = hours.Add(NewFloat(entry.Hours))
 			}
 		}
 	}
-	return entries
+	return hours
 }
 
 func CreateBillingPeriod(period Period, entries TrackedEntries) (BillingPeriod, interface{}) {

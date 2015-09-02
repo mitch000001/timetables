@@ -129,7 +129,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 	}
 }
 
-func TestTrackedEntriesBillable(t *testing.T) {
+func TestTrackedEntriesBillableDays(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
@@ -145,20 +145,17 @@ func TestTrackedEntriesBillable(t *testing.T) {
 		nonbillableEntries: nonbillableEntries,
 	}
 
-	res := trackedEntries.Billable()
+	res := trackedEntries.BillableHours()
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
+	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesBillableForTimeframe(t *testing.T) {
+func TestTrackedEntriesBillableHoursForTimeframe(t *testing.T) {
 	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -174,20 +171,19 @@ func TestTrackedEntriesBillableForTimeframe(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.BillableForTimeframe(timeframe)
+	res = trackedEntries.BillableHoursForTimeframe(timeframe)
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
+	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesVacationInterest(t *testing.T) {
+func TestTrackedEntriesVacationInterestHours(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
@@ -206,21 +202,19 @@ func TestTrackedEntriesVacationInterest(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.VacationInterest()
+	res = trackedEntries.VacationInterestHours()
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
+	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesVacationInterestForTimeframe(t *testing.T) {
+func TestTrackedEntriesVacationInterestHoursForTimeframe(t *testing.T) {
 	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -240,20 +234,19 @@ func TestTrackedEntriesVacationInterestForTimeframe(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.VacationInterestForTimeframe(timeframe)
+	res = trackedEntries.VacationInterestHoursForTimeframe(timeframe)
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
+	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesSicknessInterest(t *testing.T) {
+func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
@@ -273,21 +266,19 @@ func TestTrackedEntriesSicknessInterest(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.SicknessInterest()
+	res = trackedEntries.SicknessInterestHours()
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
+	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesSicknessInterestForTimeframe(t *testing.T) {
+func TestTrackedEntriesSicknessInterestHoursForTimeframe(t *testing.T) {
 	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -308,20 +299,19 @@ func TestTrackedEntriesSicknessInterestForTimeframe(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.SicknessInterestForTimeframe(timeframe)
+	res = trackedEntries.SicknessInterestHoursForTimeframe(timeframe)
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
+	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesNonBillableRemainder(t *testing.T) {
+func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
@@ -342,21 +332,19 @@ func TestTrackedEntriesNonBillableRemainder(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.NonBillableRemainder()
+	res = trackedEntries.NonBillableRemainderHours()
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
+	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
 
-func TestTrackedEntriesNonBillableRemainderForTimeframe(t *testing.T) {
+func TestTrackedEntriesNonBillableRemainderHoursForTimeframe(t *testing.T) {
 	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	billableEntries := []*harvest.DayEntry{
 		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -378,15 +366,14 @@ func TestTrackedEntriesNonBillableRemainderForTimeframe(t *testing.T) {
 		billableEntries:    billableEntries,
 		nonbillableEntries: nonbillableEntries,
 	}
+	var res *Float
 
-	res := trackedEntries.NonBillableRemainderForTimeframe(timeframe)
+	res = trackedEntries.NonBillableRemainderHoursForTimeframe(timeframe)
 
-	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
+	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
 		t.Fail()
 	}
 }
