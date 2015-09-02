@@ -1,47 +1,38 @@
 package timetables
 
-import "github.com/mitch000001/go-harvest/harvest"
+import (
+	"math/big"
 
 	"github.com/mitch000001/go-harvest/harvest"
 )
 
 func CreateBillingPeriod(period Period, entries TrackedEntries) (BillingPeriod, interface{}) {
 	var billingPeriod = BillingPeriod{
-		UserID:                entries.billingConfig.UserID,
-		Timeframe:             period.Timeframe,
-		BusinessDays:          NewFloat(period.BusinessDays),
-		CumulatedBusinessDays: NewFloat(period.BusinessDays),
-		VacationInterest:      NewFloat(0),
+		UserID:       entries.billingConfig.UserID,
+		Timeframe:    period.Timeframe,
+		BusinessDays: NewFloat(period.BusinessDays),
 	}
-	billingPeriod.CumulatedVacationInterest = billingPeriod.VacationInterest
-	billingPeriod.SicknessInterest = NewFloat(0)
-	billingPeriod.CumulatedSicknessInterest = billingPeriod.SicknessInterest
-	billingPeriod.BilledDays = NewFloat(2)
-	billingPeriod.CumulatedBilledDays = billingPeriod.BilledDays
-	billingPeriod.OfficeDays = NewFloat(3)
-	billingPeriod.CumulatedOfficeDays = billingPeriod.OfficeDays
-	billingPeriod.OverheadAndSlacktime = NewFloat(1)
-	billingPeriod.CumulatedOverheadAndSlacktime = billingPeriod.OverheadAndSlacktime
-	billingPeriod.BillingDegree = billingPeriod.BilledDays.Div(billingPeriod.OfficeDays)
-	billingPeriod.CumulatedBillingDegree = billingPeriod.CumulatedBilledDays.Div(billingPeriod.CumulatedOfficeDays)
+	billingPeriod.VacationInterestHours = entries.VacationInterestHoursForTimeframe(period.Timeframe)
+	billingPeriod.SicknessInterestHours = entries.SicknessInterestHoursForTimeframe(period.Timeframe)
+	billingPeriod.BilledHours = entries.BillableHoursForTimeframe(period.Timeframe)
+	billingPeriod.OverheadAndSlacktimeHours = entries.NonBillableRemainderHoursForTimeframe(period.Timeframe)
+	billingPeriod.OfficeHours = billingPeriod.BilledHours.Add(billingPeriod.OverheadAndSlacktimeHours)
+	if billingPeriod.OfficeHours.Cmp(big.NewFloat(0)) != 0 {
+		billingPeriod.BillingDegree = billingPeriod.BilledHours.Div(billingPeriod.OfficeHours)
+	} else {
+		billingPeriod.BillingDegree = NewFloat(0)
+	}
 	return billingPeriod, nil
 }
 
 type BillingPeriod struct {
-	UserID                        string
-	Timeframe                     harvest.Timeframe
-	BusinessDays                  *Float
-	CumulatedBusinessDays         *Float
-	VacationInterest              *Float
-	CumulatedVacationInterest     *Float
-	SicknessInterest              *Float
-	CumulatedSicknessInterest     *Float
-	BilledDays                    *Float
-	CumulatedBilledDays           *Float
-	OfficeDays                    *Float
-	CumulatedOfficeDays           *Float
-	OverheadAndSlacktime          *Float
-	CumulatedOverheadAndSlacktime *Float
-	BillingDegree                 *Float
-	CumulatedBillingDegree        *Float
+	UserID                    string
+	Timeframe                 harvest.Timeframe
+	BusinessDays              *Float
+	VacationInterestHours     *Float
+	SicknessInterestHours     *Float
+	BilledHours               *Float
+	OfficeHours               *Float
+	OverheadAndSlacktimeHours *Float
+	BillingDegree             *Float
 }
