@@ -131,11 +131,11 @@ func TestCreateBillingPeriod(t *testing.T) {
 
 func TestTrackedEntriesBillable(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
 	}
 	billingConfig := BillingConfig{}
 
@@ -148,24 +148,54 @@ func TestTrackedEntriesBillable(t *testing.T) {
 	res := trackedEntries.Billable()
 
 	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesBillableForTimeframe(t *testing.T) {
+	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	nonbillableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
+	}
+	billingConfig := BillingConfig{}
+
+	trackedEntries := TrackedEntries{
+		billingConfig:      billingConfig,
+		billableEntries:    billableEntries,
+		nonbillableEntries: nonbillableEntries,
+	}
+
+	res := trackedEntries.BillableForTimeframe(timeframe)
+
+	expected := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+	}
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
 		t.Fail()
 	}
 }
 
 func TestTrackedEntriesVacationInterest(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 	}
 	billingConfig := BillingConfig{
 		VacationTaskID: 12,
@@ -180,23 +210,58 @@ func TestTrackedEntriesVacationInterest(t *testing.T) {
 	res := trackedEntries.VacationInterest()
 
 	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected TrackedEntries Billable to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesVacationInterestForTimeframe(t *testing.T) {
+	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	nonbillableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+	}
+	billingConfig := BillingConfig{
+		VacationTaskID: 12,
+	}
+
+	trackedEntries := TrackedEntries{
+		billingConfig:      billingConfig,
+		billableEntries:    billableEntries,
+		nonbillableEntries: nonbillableEntries,
+	}
+
+	res := trackedEntries.VacationInterestForTimeframe(timeframe)
+
+	expected := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+	}
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
 		t.Fail()
 	}
 }
 
 func TestTrackedEntriesSicknessInterest(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	billingConfig := BillingConfig{
 		VacationTaskID: 12,
@@ -212,7 +277,42 @@ func TestTrackedEntriesSicknessInterest(t *testing.T) {
 	res := trackedEntries.SicknessInterest()
 
 	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesSicknessInterestForTimeframe(t *testing.T) {
+	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	nonbillableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	billingConfig := BillingConfig{
+		VacationTaskID: 12,
+		SicknessTaskID: 14,
+	}
+
+	trackedEntries := TrackedEntries{
+		billingConfig:      billingConfig,
+		billableEntries:    billableEntries,
+		nonbillableEntries: nonbillableEntries,
+	}
+
+	res := trackedEntries.SicknessInterestForTimeframe(timeframe)
+
+	expected := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expected, res) {
@@ -223,13 +323,14 @@ func TestTrackedEntriesSicknessInterest(t *testing.T) {
 
 func TestTrackedEntriesNonBillableRemainder(t *testing.T) {
 	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, IsBilled: true, IsClosed: true},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 	}
 	billingConfig := BillingConfig{
 		VacationTaskID: 12,
@@ -245,7 +346,43 @@ func TestTrackedEntriesNonBillableRemainder(t *testing.T) {
 	res := trackedEntries.NonBillableRemainder()
 
 	expected := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, IsBilled: true, IsClosed: true},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected TrackedEntries Billable to equal\n%s\n\tgot:\n%s\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesNonBillableRemainderForTimeframe(t *testing.T) {
+	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	nonbillableEntries := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+	billingConfig := BillingConfig{
+		VacationTaskID: 12,
+		SicknessTaskID: 14,
+	}
+
+	trackedEntries := TrackedEntries{
+		billingConfig:      billingConfig,
+		billableEntries:    billableEntries,
+		nonbillableEntries: nonbillableEntries,
+	}
+
+	res := trackedEntries.NonBillableRemainderForTimeframe(timeframe)
+
+	expected := []*harvest.DayEntry{
+		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expected, res) {

@@ -18,10 +18,30 @@ func (t TrackedEntries) Billable() []*harvest.DayEntry {
 	return t.billableEntries
 }
 
+func (t TrackedEntries) BillableForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
+	var entries []*harvest.DayEntry
+	for _, entry := range t.billableEntries {
+		if timeframe.IsInTimeframe(entry.SpentAt) {
+			entries = append(entries, entry)
+		}
+	}
+	return entries
+}
+
 func (t TrackedEntries) VacationInterest() []*harvest.DayEntry {
 	var entries []*harvest.DayEntry
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId == t.billingConfig.VacationTaskID {
+			entries = append(entries, entry)
+		}
+	}
+	return entries
+}
+
+func (t TrackedEntries) VacationInterestForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
+	var entries []*harvest.DayEntry
+	for _, entry := range t.nonbillableEntries {
+		if entry.TaskId == t.billingConfig.VacationTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
 			entries = append(entries, entry)
 		}
 	}
@@ -38,11 +58,33 @@ func (t TrackedEntries) SicknessInterest() []*harvest.DayEntry {
 	return entries
 }
 
+func (t TrackedEntries) SicknessInterestForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
+	var entries []*harvest.DayEntry
+	for _, entry := range t.nonbillableEntries {
+		if entry.TaskId == t.billingConfig.SicknessTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
+			entries = append(entries, entry)
+		}
+	}
+	return entries
+}
+
 func (t TrackedEntries) NonBillableRemainder() []*harvest.DayEntry {
 	var entries []*harvest.DayEntry
 	for _, entry := range t.nonbillableEntries {
 		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
 			entries = append(entries, entry)
+		}
+	}
+	return entries
+}
+
+func (t TrackedEntries) NonBillableRemainderForTimeframe(timeframe harvest.Timeframe) []*harvest.DayEntry {
+	var entries []*harvest.DayEntry
+	for _, entry := range t.nonbillableEntries {
+		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
+			if timeframe.IsInTimeframe(entry.SpentAt) {
+				entries = append(entries, entry)
+			}
 		}
 	}
 	return entries
