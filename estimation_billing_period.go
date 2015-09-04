@@ -16,12 +16,11 @@ type UserConfig struct {
 	remainingVacationInterestDays float64
 }
 
-func CreateEstimationBillingPeriod(period Period, planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriod, interface{}) {
-	var estimationPeriod = EstimationBillingPeriod{
-		ID:                            "10",
-		Timeframe:                     period.Timeframe,
-		UserID:                        "1",
-		BusinessDays:                  NewFloat(period.BusinessDays),
+func CreateEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriodUserEntry, interface{}) {
+	var estimationPeriod = EstimationBillingPeriodUserEntry{
+		ID:     "10",
+		Period: period,
+		UserID: "1",
 		RemainingVacationInterestDays: NewFloat(userConfig.remainingVacationInterestDays),
 	}
 	shareOfYear := NewFloat(period.BusinessDays).Div(NewFloat(planConfig.BusinessDays))
@@ -43,11 +42,10 @@ func CreateEstimationBillingPeriod(period Period, planConfig PlanConfig, userCon
 	return estimationPeriod, nil
 }
 
-type EstimationBillingPeriod struct {
+type EstimationBillingPeriodUserEntry struct {
 	ID                            string
-	Timeframe                     Timeframe
+	Period                        Period
 	UserID                        string
-	BusinessDays                  *Float
 	VacationInterestDays          *Float
 	RemainingVacationInterestDays *Float
 	SicknessInterestDays          *Float

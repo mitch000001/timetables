@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func TestEstimationBillingPeriodCreate(t *testing.T) {
+func TestCreateEstimationBillingPeriodUserEntry(t *testing.T) {
 	tests := []struct {
 		period          Period
 		planConfigInput PlanConfig
 		userConfigInput UserConfig
-		output          EstimationBillingPeriod
+		output          EstimationBillingPeriodUserEntry
 	}{
 		{
 			Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)}, 10},
@@ -29,11 +29,10 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0.0,
 			},
-			EstimationBillingPeriod{
+			EstimationBillingPeriodUserEntry{
 				ID:                            "10",
-				Timeframe:                     Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)},
+				Period:                        Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)}, 10},
 				UserID:                        "1",
-				BusinessDays:                  NewFloat(10.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(10).Div(NewFloat(250))),
 				RemainingVacationInterestDays: NewFloat(0),
 				SicknessInterestDays:          NewFloat(5).Add(NewFloat(5)).Mul(NewFloat(10).Div(NewFloat(250))),
@@ -57,11 +56,10 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0.0,
 			},
-			EstimationBillingPeriod{
+			EstimationBillingPeriodUserEntry{
 				ID:                            "10",
-				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
+				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
-				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
 				RemainingVacationInterestDays: NewFloat(0),
 				SicknessInterestDays:          NewFloat(5).Add(NewFloat(5)).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -85,11 +83,10 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0,
 			},
-			EstimationBillingPeriod{
+			EstimationBillingPeriodUserEntry{
 				ID:                            "10",
-				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
+				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
-				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
 				RemainingVacationInterestDays: NewFloat(0),
 				SicknessInterestDays:          NewFloat(5).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -113,11 +110,10 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 5.0,
 			},
-			EstimationBillingPeriod{
+			EstimationBillingPeriodUserEntry{
 				ID:                            "10",
-				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
+				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
-				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
 				RemainingVacationInterestDays: NewFloat(5),
 				SicknessInterestDays:          NewFloat(5).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -128,7 +124,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		period, err := CreateEstimationBillingPeriod(test.period, test.planConfigInput, test.userConfigInput)
+		period, err := CreateEstimationBillingPeriodUserEntry(test.period, test.planConfigInput, test.userConfigInput)
 
 		if err != nil {
 			t.Logf("Expected no error, got %T:%v", err, err)

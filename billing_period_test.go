@@ -6,12 +6,12 @@ import (
 	"time"
 )
 
-func TestCreateBillingPeriod(t *testing.T) {
+func TestCreateBillingPeriodUserEntry(t *testing.T) {
 	tests := []struct {
 		period         Period
 		userId         string
 		trackedEntries TrackedHours
-		output         BillingPeriod
+		output         BillingPeriodUserEntry
 	}{
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
@@ -25,10 +25,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(8), Type: NonBillable, UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "1",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(0),
 				SicknessInterestHours:     NewFloat(0),
 				BilledHours:               NewFloat(16),
@@ -49,10 +48,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(8), Type: NonBillable, UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "1",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(0),
 				SicknessInterestHours:     NewFloat(0),
 				BilledHours:               NewFloat(8),
@@ -73,10 +71,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(6), Type: NonBillable, UserID: "2", TrackedAt: Date(2015, 1, 3, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "2",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(0),
 				SicknessInterestHours:     NewFloat(0),
 				BilledHours:               NewFloat(12),
@@ -98,10 +95,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(8), Type: Vacation, UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "1",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(8),
 				SicknessInterestHours:     NewFloat(0),
 				BilledHours:               NewFloat(16),
@@ -124,10 +120,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(8), Type: Sickness, UserID: "1", TrackedAt: Date(2015, 1, 5, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "1",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(8),
 				SicknessInterestHours:     NewFloat(8),
 				BilledHours:               NewFloat(16),
@@ -150,10 +145,9 @@ func TestCreateBillingPeriod(t *testing.T) {
 					TrackingEntry{Hours: NewFloat(8), Type: Sickness, UserID: "1", TrackedAt: Date(2015, 2, 5, time.Local)},
 				},
 			},
-			output: BillingPeriod{
+			output: BillingPeriodUserEntry{
 				UserID:                    "1",
-				Timeframe:                 NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
-				BusinessDays:              NewFloat(10),
+				Period:                    Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:     NewFloat(0),
 				SicknessInterestHours:     NewFloat(0),
 				BilledHours:               NewFloat(0),
@@ -164,7 +158,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		res, _ := CreateBillingPeriod(test.period, test.userId, test.trackedEntries)
+		res, _ := CreateBillingPeriodUserEntry(test.period, test.userId, test.trackedEntries)
 
 		// TODO: reflect.DeepEqual won't work with big.Float
 		if fmt.Sprintf("%#v", test.output) != fmt.Sprintf("%#v", res) {
