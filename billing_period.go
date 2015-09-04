@@ -1,6 +1,6 @@
 package timetables
 
-func CreateBillingPeriod(period Period, userID string, entries TrackedEntries) (BillingPeriod, interface{}) {
+func CreateBillingPeriod(period Period, userID string, entries TrackedHours) (BillingPeriod, interface{}) {
 	var billingPeriod = BillingPeriod{
 		UserID:       userID,
 		Timeframe:    period.Timeframe,

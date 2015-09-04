@@ -10,13 +10,13 @@ func TestCreateBillingPeriod(t *testing.T) {
 	tests := []struct {
 		period         Period
 		userId         string
-		trackedEntries TrackedEntries
+		trackedEntries TrackedHours
 		output         BillingPeriod
 	}{
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "1",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local)},
@@ -40,7 +40,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "1",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local)},
@@ -64,7 +64,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "2",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(6), Type: Billable, UserID: "2", TrackedAt: Date(2015, 1, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(6), Type: Billable, UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local)},
@@ -88,7 +88,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "1",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local)},
@@ -113,7 +113,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "1",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local)},
@@ -139,7 +139,7 @@ func TestCreateBillingPeriod(t *testing.T) {
 		{
 			period: Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 1, 25, time.Local)}, 10},
 			userId: "1",
-			trackedEntries: TrackedEntries{
+			trackedEntries: TrackedHours{
 				billableHours: []TrackingEntry{
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 2, 1, time.Local)},
 					TrackingEntry{Hours: NewFloat(8), Type: Billable, UserID: "1", TrackedAt: Date(2015, 2, 2, time.Local)},
