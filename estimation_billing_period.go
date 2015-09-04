@@ -1,7 +1,5 @@
 package timetables
 
-import "github.com/mitch000001/go-harvest/harvest"
-
 type PlanConfig struct {
 	Year                  int
 	BusinessDays          float64
@@ -47,7 +45,7 @@ func CreateEstimationBillingPeriod(period Period, planConfig PlanConfig, userCon
 
 type EstimationBillingPeriod struct {
 	ID                            string
-	Timeframe                     harvest.Timeframe
+	Timeframe                     Timeframe
 	UserID                        string
 	BusinessDays                  *Float
 	VacationInterestDays          *Float

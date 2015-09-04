@@ -1,8 +1,9 @@
 package timetables
 
-import "github.com/mitch000001/go-harvest/harvest"
-
-func NewPeriod(timeframe harvest.Timeframe, businessDays float64) Period {
+func NewPeriod(timeframe Timeframe, businessDays float64) Period {
+	if businessDays <= 0 {
+		businessDays = float64(timeframe.Days())
+	}
 	return Period{
 		Timeframe:    timeframe,
 		BusinessDays: businessDays,
@@ -10,6 +11,6 @@ func NewPeriod(timeframe harvest.Timeframe, businessDays float64) Period {
 }
 
 type Period struct {
-	Timeframe    harvest.Timeframe
+	Timeframe    Timeframe
 	BusinessDays float64
 }

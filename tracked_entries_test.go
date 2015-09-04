@@ -4,24 +4,20 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/mitch000001/go-harvest/harvest"
 )
 
 func TestTrackedEntriesBillableHours(t *testing.T) {
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
-	billingConfig := BillingConfig{}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 
 	res := trackedEntries.BillableHours()
@@ -35,20 +31,18 @@ func TestTrackedEntriesBillableHours(t *testing.T) {
 }
 
 func TestTrackedEntriesBillableHoursForTimeframe(t *testing.T) {
-	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
-	billingConfig := BillingConfig{}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -62,24 +56,47 @@ func TestTrackedEntriesBillableHoursForTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedEntriesVacationInterestHours(t *testing.T) {
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+func TestTrackedEntriesBillableHoursForUserAndTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
+	}
+	var res *Float
+
+	res = trackedEntries.BillableHoursForUserAndTimeframe("1", timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesVacationInterestHours(t *testing.T) {
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	}
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	}
+
+	trackedEntries := TrackedEntries{
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -94,24 +111,20 @@ func TestTrackedEntriesVacationInterestHours(t *testing.T) {
 }
 
 func TestTrackedEntriesVacationInterestHoursForTimeframe(t *testing.T) {
-	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -125,25 +138,49 @@ func TestTrackedEntriesVacationInterestHoursForTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+func TestTrackedEntriesVacationInterestHoursForUserAndTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
-		SicknessTaskID: 14,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
+	}
+	var res *Float
+
+	res = trackedEntries.VacationInterestHoursForUserAndTimeframe("1", timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	}
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	}
+
+	trackedEntries := TrackedEntries{
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -158,25 +195,20 @@ func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
 }
 
 func TestTrackedEntriesSicknessInterestHoursForTimeframe(t *testing.T) {
-	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
-		SicknessTaskID: 14,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -190,26 +222,50 @@ func TestTrackedEntriesSicknessInterestHoursForTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+func TestTrackedEntriesSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
-		SicknessTaskID: 14,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
+	}
+	var res *Float
+
+	res = trackedEntries.SicknessInterestHoursForUserAndTimeframe("1", timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	}
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+	}
+
+	trackedEntries := TrackedEntries{
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
@@ -224,30 +280,55 @@ func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
 }
 
 func TestTrackedEntriesNonBillableRemainderHoursForTimeframe(t *testing.T) {
-	timeframe := harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 5, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableEntries := []*harvest.DayEntry{
-		&harvest.DayEntry{Hours: 8, TaskId: 12, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 14, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-		&harvest.DayEntry{Hours: 8, TaskId: 16, UserId: 2, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
-	}
-	billingConfig := BillingConfig{
-		VacationTaskID: 12,
-		SicknessTaskID: 14,
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
-		billingConfig:      billingConfig,
-		billableEntries:    billableEntries,
-		nonbillableEntries: nonbillableEntries,
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
 	}
 	var res *Float
 
 	res = trackedEntries.NonBillableRemainderHoursForTimeframe(timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedEntriesNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	billableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	}
+	nonbillableHours := []TrackedHours{
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 5, time.Local), Type: NonBillable},
+	}
+
+	trackedEntries := TrackedEntries{
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
+	}
+	var res *Float
+
+	res = trackedEntries.NonBillableRemainderHoursForUserAndTimeframe("1", timeframe)
 
 	expected := NewFloat(8)
 

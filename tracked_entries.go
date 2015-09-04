@@ -1,32 +1,62 @@
 package timetables
 
-import "github.com/mitch000001/go-harvest/harvest"
-
 type BillingConfig struct {
 	UserID         string
 	VacationTaskID int
 	SicknessTaskID int
 }
 
+type TrackedHours struct {
+	UserID    string
+	Hours     *Float
+	TrackedAt ShortDate
+	Type      TrackedHoursType
+}
+
+type TrackedHoursType int
+
+const (
+	Billable TrackedHoursType = iota
+	Vacation
+	Sickness
+	NonBillable
+)
+
+type TrackedHoursProvider interface {
+	BillableHours() []TrackedHours
+	NonbillableHours() []TrackedHours
+}
+
 type TrackedEntries struct {
-	billingConfig      BillingConfig
-	billableEntries    []*harvest.DayEntry
-	nonbillableEntries []*harvest.DayEntry
+	billableHours    []TrackedHours
+	nonbillableHours []TrackedHours
 }
 
 func (t TrackedEntries) BillableHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.billableEntries {
-		hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.billableHours {
+		hours = hours.Add(entry.Hours)
 	}
 	return hours
 }
 
-func (t TrackedEntries) BillableHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+func (t TrackedEntries) BillableHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.billableEntries {
-		if timeframe.IsInTimeframe(entry.SpentAt) {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.billableHours {
+		if timeframe.IsInTimeframe(entry.TrackedAt) {
+			hours = hours.Add(entry.Hours)
+		}
+	}
+	return hours
+}
+
+func (t TrackedEntries) BillableHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.billableHours {
+		if timeframe.IsInTimeframe(entry.TrackedAt) {
+			if entry.UserID == userId {
+				hours = hours.Add(entry.Hours)
+			}
 		}
 	}
 	return hours
@@ -34,19 +64,31 @@ func (t TrackedEntries) BillableHoursForTimeframe(timeframe harvest.Timeframe) *
 
 func (t TrackedEntries) VacationInterestHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId == t.billingConfig.VacationTaskID {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Vacation {
+			hours = hours.Add(entry.Hours)
 		}
 	}
 	return hours
 }
 
-func (t TrackedEntries) VacationInterestHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+func (t TrackedEntries) VacationInterestHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId == t.billingConfig.VacationTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
+			hours = hours.Add(entry.Hours)
+		}
+	}
+	return hours
+}
+
+func (t TrackedEntries) VacationInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
+			if entry.UserID == userId {
+				hours = hours.Add(entry.Hours)
+			}
 		}
 	}
 	return hours
@@ -54,19 +96,31 @@ func (t TrackedEntries) VacationInterestHoursForTimeframe(timeframe harvest.Time
 
 func (t TrackedEntries) SicknessInterestHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId == t.billingConfig.SicknessTaskID {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Sickness {
+			hours = hours.Add(entry.Hours)
 		}
 	}
 	return hours
 }
 
-func (t TrackedEntries) SicknessInterestHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+func (t TrackedEntries) SicknessInterestHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId == t.billingConfig.SicknessTaskID && timeframe.IsInTimeframe(entry.SpentAt) {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
+			hours = hours.Add(entry.Hours)
+		}
+	}
+	return hours
+}
+
+func (t TrackedEntries) SicknessInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.nonbillableHours {
+		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
+			if entry.UserID == userId {
+				hours = hours.Add(entry.Hours)
+			}
 		}
 	}
 	return hours
@@ -74,20 +128,34 @@ func (t TrackedEntries) SicknessInterestHoursForTimeframe(timeframe harvest.Time
 
 func (t TrackedEntries) NonBillableRemainderHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
-			hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type != Sickness && entry.Type != Vacation {
+			hours = hours.Add(entry.Hours)
 		}
 	}
 	return hours
 }
 
-func (t TrackedEntries) NonBillableRemainderHoursForTimeframe(timeframe harvest.Timeframe) *Float {
+func (t TrackedEntries) NonBillableRemainderHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableEntries {
-		if entry.TaskId != t.billingConfig.SicknessTaskID && entry.TaskId != t.billingConfig.VacationTaskID {
-			if timeframe.IsInTimeframe(entry.SpentAt) {
-				hours = hours.Add(NewFloat(entry.Hours))
+	for _, entry := range t.nonbillableHours {
+		if entry.Type != Sickness && entry.Type != Vacation {
+			if timeframe.IsInTimeframe(entry.TrackedAt) {
+				hours = hours.Add(entry.Hours)
+			}
+		}
+	}
+	return hours
+}
+
+func (t TrackedEntries) NonBillableRemainderHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.nonbillableHours {
+		if entry.Type != Sickness && entry.Type != Vacation {
+			if timeframe.IsInTimeframe(entry.TrackedAt) {
+				if entry.UserID == userId {
+					hours = hours.Add(entry.Hours)
+				}
 			}
 		}
 	}

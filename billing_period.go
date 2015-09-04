@@ -1,14 +1,8 @@
 package timetables
 
-import (
-	"math/big"
-
-	"github.com/mitch000001/go-harvest/harvest"
-)
-
-func CreateBillingPeriod(period Period, entries TrackedEntries) (BillingPeriod, interface{}) {
+func CreateBillingPeriod(period Period, userID string, entries TrackedEntries) (BillingPeriod, interface{}) {
 	var billingPeriod = BillingPeriod{
-		UserID:       entries.billingConfig.UserID,
+		UserID:       userID,
 		Timeframe:    period.Timeframe,
 		BusinessDays: NewFloat(period.BusinessDays),
 	}
@@ -17,7 +11,7 @@ func CreateBillingPeriod(period Period, entries TrackedEntries) (BillingPeriod, 
 	billingPeriod.BilledHours = entries.BillableHoursForTimeframe(period.Timeframe)
 	billingPeriod.OverheadAndSlacktimeHours = entries.NonBillableRemainderHoursForTimeframe(period.Timeframe)
 	billingPeriod.OfficeHours = billingPeriod.BilledHours.Add(billingPeriod.OverheadAndSlacktimeHours)
-	if billingPeriod.OfficeHours.Cmp(big.NewFloat(0)) != 0 {
+	if billingPeriod.OfficeHours.Cmp(NewFloat(0)) != 0 {
 		billingPeriod.BillingDegree = billingPeriod.BilledHours.Div(billingPeriod.OfficeHours)
 	} else {
 		billingPeriod.BillingDegree = NewFloat(0)
@@ -27,7 +21,7 @@ func CreateBillingPeriod(period Period, entries TrackedEntries) (BillingPeriod, 
 
 type BillingPeriod struct {
 	UserID                    string
-	Timeframe                 harvest.Timeframe
+	Timeframe                 Timeframe
 	BusinessDays              *Float
 	VacationInterestHours     *Float
 	SicknessInterestHours     *Float

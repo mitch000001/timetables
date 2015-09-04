@@ -61,3 +61,33 @@ func TestFloatSub(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestFloatCmp(t *testing.T) {
+	f := NewFloat(12)
+
+	tests := []struct {
+		in  *Float
+		out int
+	}{
+		{
+			NewFloat(12),
+			0,
+		},
+		{
+			NewFloat(12.01),
+			-1,
+		},
+		{
+			NewFloat(11),
+			1,
+		},
+	}
+	for _, test := range tests {
+		res := f.Cmp(test.in)
+
+		if test.out != res {
+			t.Logf("Expected result to equal %d, got %d\n", test.out, res)
+			t.Fail()
+		}
+	}
+}

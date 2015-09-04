@@ -4,8 +4,6 @@ import (
 	"fmt"
 	"testing"
 	"time"
-
-	"github.com/mitch000001/go-harvest/harvest"
 )
 
 func TestEstimationBillingPeriodCreate(t *testing.T) {
@@ -16,7 +14,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 		output          EstimationBillingPeriod
 	}{
 		{
-			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 1, 1, time.Local), EndDate: harvest.Date(2015, 25, 1, time.Local)}, 10},
+			Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)}, 10},
 			PlanConfig{
 				Year:                  2015,
 				BusinessDays:          250,
@@ -33,7 +31,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 			EstimationBillingPeriod{
 				ID:                            "10",
-				Timeframe:                     harvest.Timeframe{StartDate: harvest.Date(2015, 1, 1, time.Local), EndDate: harvest.Date(2015, 25, 1, time.Local)},
+				Timeframe:                     Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)},
 				UserID:                        "1",
 				BusinessDays:                  NewFloat(10.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(10).Div(NewFloat(250))),
@@ -44,7 +42,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
+			Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -61,7 +59,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 			EstimationBillingPeriod{
 				ID:                            "10",
-				Timeframe:                     harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
 				UserID:                        "1",
 				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -72,7 +70,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
+			Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -89,7 +87,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 			EstimationBillingPeriod{
 				ID:                            "10",
-				Timeframe:                     harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
 				UserID:                        "1",
 				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -100,7 +98,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 		},
 		{
-			Period{harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)}, 20},
+			Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 			PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -117,7 +115,7 @@ func TestEstimationBillingPeriodCreate(t *testing.T) {
 			},
 			EstimationBillingPeriod{
 				ID:                            "10",
-				Timeframe:                     harvest.Timeframe{StartDate: harvest.Date(2015, 26, 1, time.Local), EndDate: harvest.Date(2015, 22, 2, time.Local)},
+				Timeframe:                     Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)},
 				UserID:                        "1",
 				BusinessDays:                  NewFloat(20.0),
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),

@@ -29,3 +29,8 @@ func (f *Float) Sub(x *Float) *Float {
 	res := new(big.Float).Sub(f.Float, x.Float)
 	return &Float{res}
 }
+
+func (f *Float) Cmp(x *Float) int {
+	res := f.Float.Cmp(x.Float)
+	return res
+}

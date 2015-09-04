@@ -4,16 +4,14 @@ import (
 	"reflect"
 	"testing"
 	"time"
-
-	"github.com/mitch000001/go-harvest/harvest"
 )
 
 func TestNewPeriod(t *testing.T) {
-	p := NewPeriod(harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 25)
+	p := NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 25)
 
-	expectedTimeframe := harvest.Timeframe{
-		StartDate: harvest.Date(2015, 1, 1, time.Local),
-		EndDate:   harvest.Date(2015, 2, 1, time.Local),
+	expectedTimeframe := Timeframe{
+		StartDate: Date(2015, 1, 1, time.Local),
+		EndDate:   Date(2015, 2, 1, time.Local),
 	}
 
 	if !reflect.DeepEqual(expectedTimeframe, p.Timeframe) {
@@ -23,6 +21,26 @@ func TestNewPeriod(t *testing.T) {
 
 	if p.BusinessDays != 25.0 {
 		t.Logf("Expected period BusinessDays to equal 25, got %d\n", p.BusinessDays)
+		t.Fail()
+	}
+
+	// invalid businessDays
+
+	p = NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 0)
+
+	expectedBusinessDays := 32
+
+	if float64(expectedBusinessDays) != p.BusinessDays {
+		t.Logf("Expected period BusinessDays to equal %f, got %f\n", float64(expectedBusinessDays), p.BusinessDays)
+		t.Fail()
+	}
+
+	p = NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), -10)
+
+	expectedBusinessDays = 32
+
+	if float64(expectedBusinessDays) != p.BusinessDays {
+		t.Logf("Expected period BusinessDays to equal %f, got %f\n", float64(expectedBusinessDays), p.BusinessDays)
 		t.Fail()
 	}
 }
