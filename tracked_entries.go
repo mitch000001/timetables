@@ -6,30 +6,30 @@ type BillingConfig struct {
 	SicknessTaskID int
 }
 
-type TrackedHours struct {
+type TrackingEntry struct {
 	UserID    string
 	Hours     *Float
 	TrackedAt ShortDate
-	Type      TrackedHoursType
+	Type      TrackingEntryType
 }
 
-type TrackedHoursType int
+type TrackingEntryType int
 
 const (
-	Billable TrackedHoursType = iota
+	Billable TrackingEntryType = iota
 	Vacation
 	Sickness
 	NonBillable
 )
 
 type TrackedHoursProvider interface {
-	BillableHours() []TrackedHours
-	NonbillableHours() []TrackedHours
+	BillableHours() []TrackingEntry
+	NonbillableHours() []TrackingEntry
 }
 
 type TrackedEntries struct {
-	billableHours    []TrackedHours
-	nonbillableHours []TrackedHours
+	billableHours    []TrackingEntry
+	nonbillableHours []TrackingEntry
 }
 
 func (t TrackedEntries) BillableHours() *Float {

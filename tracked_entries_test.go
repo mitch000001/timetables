@@ -7,12 +7,12 @@ import (
 )
 
 func TestTrackedEntriesBillableHours(t *testing.T) {
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -32,12 +32,12 @@ func TestTrackedEntriesBillableHours(t *testing.T) {
 
 func TestTrackedEntriesBillableHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -58,13 +58,13 @@ func TestTrackedEntriesBillableHoursForTimeframe(t *testing.T) {
 
 func TestTrackedEntriesBillableHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -84,14 +84,14 @@ func TestTrackedEntriesBillableHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedEntriesVacationInterestHours(t *testing.T) {
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -112,14 +112,14 @@ func TestTrackedEntriesVacationInterestHours(t *testing.T) {
 
 func TestTrackedEntriesVacationInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -140,15 +140,15 @@ func TestTrackedEntriesVacationInterestHoursForTimeframe(t *testing.T) {
 
 func TestTrackedEntriesVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -168,14 +168,14 @@ func TestTrackedEntriesVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -196,14 +196,14 @@ func TestTrackedEntriesSicknessInterestHours(t *testing.T) {
 
 func TestTrackedEntriesSicknessInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -224,15 +224,15 @@ func TestTrackedEntriesSicknessInterestHoursForTimeframe(t *testing.T) {
 
 func TestTrackedEntriesSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -252,15 +252,15 @@ func TestTrackedEntriesSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -281,15 +281,15 @@ func TestTrackedEntriesNonBillableRemainderHours(t *testing.T) {
 
 func TestTrackedEntriesNonBillableRemainderHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
@@ -310,16 +310,16 @@ func TestTrackedEntriesNonBillableRemainderHoursForTimeframe(t *testing.T) {
 
 func TestTrackedEntriesNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackedHours{
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackedHours{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
-		TrackedHours{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 5, time.Local), Type: NonBillable},
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 5, time.Local), Type: NonBillable},
 	}
 
 	trackedEntries := TrackedEntries{
