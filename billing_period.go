@@ -20,6 +20,7 @@ func CreateBillingPeriod(period Period, userID string, entries TrackedHours) (Bi
 }
 
 type BillingPeriod struct {
+	ID                        string
 	UserID                    string
 	Timeframe                 Timeframe
 	BusinessDays              *Float

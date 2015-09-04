@@ -6,6 +6,27 @@ import (
 	"time"
 )
 
+func TestNewTrackedHours(t *testing.T) {
+	billableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+	}
+	nonbillableHours := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	}
+
+	trackedHours := NewTrackedHours(billableHours, nonbillableHours)
+
+	if !reflect.DeepEqual(billableHours, trackedHours.billableHours) {
+		t.Logf("Expected billableHours to equal\n%q\n\tgot\n%q\n", billableHours, trackedHours.billableHours)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(nonbillableHours, trackedHours.nonbillableHours) {
+		t.Logf("Expected nonbillableHours to equal\n%q\n\tgot\n%q\n", nonbillableHours, trackedHours.nonbillableHours)
+		t.Fail()
+	}
+}
+
 func TestTrackedHoursBillableHours(t *testing.T) {
 	billableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},

@@ -22,9 +22,15 @@ const (
 	NonBillable
 )
 
-type TrackingEntryProvider interface {
-	BillableHours() []TrackingEntry
-	NonbillableHours() []TrackingEntry
+type TrackedHoursProvider interface {
+	TrackedHours() TrackedHours
+}
+
+func NewTrackedHours(billableHours, nonbillableHours []TrackingEntry) TrackedHours {
+	return TrackedHours{
+		billableHours:    billableHours,
+		nonbillableHours: nonbillableHours,
+	}
 }
 
 type TrackedHours struct {
