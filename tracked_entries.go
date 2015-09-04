@@ -22,7 +22,7 @@ const (
 	NonBillable
 )
 
-type TrackedHoursProvider interface {
+type TrackingEntryProvider interface {
 	BillableHours() []TrackingEntry
 	NonbillableHours() []TrackingEntry
 }
