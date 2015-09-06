@@ -32,12 +32,13 @@ func (sm *SessionManager) Remove(s *Session) {
 }
 
 type Session struct {
-	Stack    string
-	URL      *url.URL
-	location string
-	User     *User
-	id       string
-	errors   []error
+	Stack       string
+	URL         *url.URL
+	location    string
+	googleToken *oauth2.Token
+	User        *User
+	id          string
+	errors      []error
 }
 
 func (s *Session) LoggedIn() bool {
