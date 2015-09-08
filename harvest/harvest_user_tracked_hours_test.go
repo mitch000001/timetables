@@ -31,10 +31,11 @@ func TestNewHarvestUserTrackedHours(t *testing.T) {
 		SicknessID: 8,
 	}
 	dayEntryService := &harvest.DayEntryService{}
+	year := 2015
 
-	trackedHours := NewHarvestUserTrackedHours(dayEntryService, taskConfig)
+	trackedHours := NewHarvestUserTrackedHours(year, dayEntryService, taskConfig)
 
-	if !reflect.DeepEqual(dayEntryService, trackedHours.entryFetcher.dayEntryService) {
+	if !reflect.DeepEqual(dayEntryService, trackedHours.entryFetcher.dayEntryService) || year != trackedHours.entryFetcher.year {
 		t.Logf("Expected entryFetcher to be instantiated properly\n")
 		t.Fail()
 	}
@@ -58,6 +59,7 @@ func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{
+		year:            2015,
 		dayEntryService: mock.NewDayEntryService(dayEntryService),
 	}
 	harvestConverter := HarvestEntryConverter{

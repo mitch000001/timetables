@@ -15,11 +15,13 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
 			&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 3, time.Local)},
+			&harvest.DayEntry{ID: 4, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 		},
 		BillableTasks: []int{5},
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{
+		year:            2015,
 		dayEntryService: mock.NewDayEntryService(dayEntryService),
 	}
 
@@ -29,6 +31,25 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 	}
 
 	trackedEntries, err := harvestFetcher.BillableEntries()
+
+	if err != nil {
+		t.Logf("Expected error to be nil, was %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(expectedEntries, trackedEntries) {
+		t.Logf("Expected trackingEntries to equal\n%q\n\tgot\n%q\n", expectedEntries, trackedEntries)
+		t.Fail()
+	}
+
+	// with changed year
+	harvestFetcher.year = 2014
+
+	expectedEntries = []*harvest.DayEntry{
+		&harvest.DayEntry{ID: 4, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
+	}
+
+	trackedEntries, err = harvestFetcher.BillableEntries()
 
 	if err != nil {
 		t.Logf("Expected error to be nil, was %T:%v\n", err, err)
@@ -52,6 +73,7 @@ func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{
+		year:            2015,
 		dayEntryService: mock.NewDayEntryService(dayEntryService),
 	}
 

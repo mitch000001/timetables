@@ -10,8 +10,8 @@ type TaskConfig struct {
 	SicknessID int
 }
 
-func NewHarvestUserTrackedHours(dayEntryService *harvest.DayEntryService, taskConfig TaskConfig) HarvestUserTrackedHours {
-	entryFetcher := HarvestUserEntryFetcher{dayEntryService}
+func NewHarvestUserTrackedHours(year int, dayEntryService *harvest.DayEntryService, taskConfig TaskConfig) HarvestUserTrackedHours {
+	entryFetcher := HarvestUserEntryFetcher{year, dayEntryService}
 	converter := HarvestEntryConverter{taskConfig}
 	return HarvestUserTrackedHours{
 		entryFetcher: entryFetcher,

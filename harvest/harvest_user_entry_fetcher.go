@@ -7,13 +7,14 @@ import (
 )
 
 type HarvestUserEntryFetcher struct {
+	year            int
 	dayEntryService *harvest.DayEntryService
 }
 
 func (h HarvestUserEntryFetcher) BillableEntries() ([]*harvest.DayEntry, error) {
 	var entries []*harvest.DayEntry
 	var params harvest.Params
-	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)).Billable(true).Values())
+	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(h.year, 1, 1, h.year, 12, 31, time.Local)).Billable(true).Values())
 	if err != nil {
 		return nil, err
 	}
@@ -23,7 +24,7 @@ func (h HarvestUserEntryFetcher) BillableEntries() ([]*harvest.DayEntry, error) 
 func (h HarvestUserEntryFetcher) NonbillableEntries() ([]*harvest.DayEntry, error) {
 	var entries []*harvest.DayEntry
 	var params harvest.Params
-	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)).Billable(false).Values())
+	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(h.year, 1, 1, h.year, 12, 31, time.Local)).Billable(false).Values())
 	if err != nil {
 		return nil, err
 	}
