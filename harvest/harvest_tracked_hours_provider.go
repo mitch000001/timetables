@@ -12,6 +12,10 @@ type HarvestProvider struct {
 	userService *harvest.UserService
 }
 
+func (h HarvestProvider) Fetch(year int) error {
+	return nil
+}
+
 func (h HarvestProvider) TrackedHoursForYear(year int) timetables.TrackedHours {
 	var trackedHours timetables.TrackedHours
 	// TODO: Implement this properly
