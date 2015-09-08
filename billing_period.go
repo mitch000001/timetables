@@ -1,14 +1,14 @@
 package timetables
 
-func CreateBillingPeriodUserEntry(period Period, userID string, entries TrackedHours) (BillingPeriodUserEntry, interface{}) {
+func CreateBillingPeriodUserEntry(period Period, user User) (BillingPeriodUserEntry, interface{}) {
 	var billingPeriod = BillingPeriodUserEntry{
-		UserID: userID,
+		UserID: user.ID,
 		Period: period,
 	}
-	billingPeriod.VacationInterestHours = entries.VacationInterestHoursForUserAndTimeframe(userID, period.Timeframe)
-	billingPeriod.SicknessInterestHours = entries.SicknessInterestHoursForUserAndTimeframe(userID, period.Timeframe)
-	billingPeriod.BilledHours = entries.BillableHoursForUserAndTimeframe(userID, period.Timeframe)
-	billingPeriod.OverheadAndSlacktimeHours = entries.NonBillableRemainderHoursForUserAndTimeframe(userID, period.Timeframe)
+	billingPeriod.VacationInterestHours = user.TrackedHours.VacationInterestHoursForUserAndTimeframe(user.ID, period.Timeframe)
+	billingPeriod.SicknessInterestHours = user.TrackedHours.SicknessInterestHoursForUserAndTimeframe(user.ID, period.Timeframe)
+	billingPeriod.BilledHours = user.TrackedHours.BillableHoursForUserAndTimeframe(user.ID, period.Timeframe)
+	billingPeriod.OverheadAndSlacktimeHours = user.TrackedHours.NonBillableRemainderHoursForUserAndTimeframe(user.ID, period.Timeframe)
 	billingPeriod.OfficeHours = billingPeriod.BilledHours.Add(billingPeriod.OverheadAndSlacktimeHours)
 	if billingPeriod.OfficeHours.Cmp(NewFloat(0)) != 0 {
 		billingPeriod.BillingDegree = billingPeriod.BilledHours.Div(billingPeriod.OfficeHours)
