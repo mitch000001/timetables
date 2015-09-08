@@ -1,10 +1,6 @@
 package timetables
 
-import (
-	"reflect"
-	"testing"
-	"time"
-)
+import "testing"
 
 func TestCreateUser(t *testing.T) {
 	harvestID := 2
@@ -36,27 +32,6 @@ func TestCreateUser(t *testing.T) {
 
 	if user.Email != email {
 		t.Logf("Expected Email to equal %q, got %q\n", email, user.Email)
-		t.Fail()
-	}
-}
-
-func TestUserBillableHoursForTimeframe(t *testing.T) {
-	user := User{
-		ID: "1",
-		TrackedHours: TrackedHours{
-			billableHours: []TrackingEntry{
-				TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-			},
-		},
-	}
-	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-
-	billableHours := user.BillableHoursForTimeframe(timeframe)
-
-	expectedHours := NewFloat(8)
-
-	if !reflect.DeepEqual(expectedHours, billableHours) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expectedHours, billableHours)
 		t.Fail()
 	}
 }

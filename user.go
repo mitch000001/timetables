@@ -11,14 +11,9 @@ func CreateUser(harvestID int, firstName, lastName, email string) User {
 }
 
 type User struct {
-	ID           string
-	HarvestID    int
-	FirstName    string
-	LastName     string
-	Email        string
-	TrackedHours TrackedHours
-}
-
-func (u User) BillableHoursForTimeframe(timeframe Timeframe) *Float {
-	return u.TrackedHours.BillableHoursForTimeframe(timeframe)
+	ID        string
+	HarvestID int
+	FirstName string
+	LastName  string
+	Email     string
 }

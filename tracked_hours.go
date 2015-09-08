@@ -26,30 +26,32 @@ type TrackedHoursProvider interface {
 	TrackedHours() TrackedHours
 }
 
-func NewTrackedHours(billableHours, nonbillableHours []TrackingEntry) TrackedHours {
+func NewTrackedHours(entries []TrackingEntry) TrackedHours {
 	return TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 }
 
 type TrackedHours struct {
+	entries          []TrackingEntry
 	billableHours    []TrackingEntry
 	nonbillableHours []TrackingEntry
 }
 
 func (t TrackedHours) BillableHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.billableHours {
-		hours = hours.Add(entry.Hours)
+	for _, entry := range t.entries {
+		if entry.Type == Billable {
+			hours = hours.Add(entry.Hours)
+		}
 	}
 	return hours
 }
 
 func (t TrackedHours) BillableHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.billableHours {
-		if timeframe.IsInTimeframe(entry.TrackedAt) {
+	for _, entry := range t.entries {
+		if entry.Type == Billable && timeframe.IsInTimeframe(entry.TrackedAt) {
 			hours = hours.Add(entry.Hours)
 		}
 	}
@@ -58,8 +60,8 @@ func (t TrackedHours) BillableHoursForTimeframe(timeframe Timeframe) *Float {
 
 func (t TrackedHours) BillableHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.billableHours {
-		if timeframe.IsInTimeframe(entry.TrackedAt) {
+	for _, entry := range t.entries {
+		if entry.Type == Billable && timeframe.IsInTimeframe(entry.TrackedAt) {
 			if entry.UserID == userId {
 				hours = hours.Add(entry.Hours)
 			}
@@ -70,7 +72,7 @@ func (t TrackedHours) BillableHoursForUserAndTimeframe(userId string, timeframe 
 
 func (t TrackedHours) VacationInterestHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Vacation {
 			hours = hours.Add(entry.Hours)
 		}
@@ -80,7 +82,7 @@ func (t TrackedHours) VacationInterestHours() *Float {
 
 func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
 			hours = hours.Add(entry.Hours)
 		}
@@ -90,7 +92,7 @@ func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe Timeframe) *Fl
 
 func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
 			if entry.UserID == userId {
 				hours = hours.Add(entry.Hours)
@@ -102,7 +104,7 @@ func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, ti
 
 func (t TrackedHours) SicknessInterestHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Sickness {
 			hours = hours.Add(entry.Hours)
 		}
@@ -112,7 +114,7 @@ func (t TrackedHours) SicknessInterestHours() *Float {
 
 func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
 			hours = hours.Add(entry.Hours)
 		}
@@ -122,7 +124,7 @@ func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe Timeframe) *Fl
 
 func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
+	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
 			if entry.UserID == userId {
 				hours = hours.Add(entry.Hours)
@@ -134,8 +136,8 @@ func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, ti
 
 func (t TrackedHours) NonBillableRemainderHours() *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
-		if entry.Type != Sickness && entry.Type != Vacation {
+	for _, entry := range t.entries {
+		if entry.Type == NonBillable {
 			hours = hours.Add(entry.Hours)
 		}
 	}
@@ -144,8 +146,8 @@ func (t TrackedHours) NonBillableRemainderHours() *Float {
 
 func (t TrackedHours) NonBillableRemainderHoursForTimeframe(timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
-		if entry.Type != Sickness && entry.Type != Vacation {
+	for _, entry := range t.entries {
+		if entry.Type == NonBillable {
 			if timeframe.IsInTimeframe(entry.TrackedAt) {
 				hours = hours.Add(entry.Hours)
 			}
@@ -156,8 +158,8 @@ func (t TrackedHours) NonBillableRemainderHoursForTimeframe(timeframe Timeframe)
 
 func (t TrackedHours) NonBillableRemainderHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
 	hours := NewFloat(0)
-	for _, entry := range t.nonbillableHours {
-		if entry.Type != Sickness && entry.Type != Vacation {
+	for _, entry := range t.entries {
+		if entry.Type == NonBillable {
 			if timeframe.IsInTimeframe(entry.TrackedAt) {
 				if entry.UserID == userId {
 					hours = hours.Add(entry.Hours)

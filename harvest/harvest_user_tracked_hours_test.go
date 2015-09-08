@@ -88,8 +88,6 @@ func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 		[]timetables.TrackingEntry{
 			timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 1, time.Local), Type: timetables.Billable},
 			timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 2, time.Local), Type: timetables.Billable},
-		},
-		[]timetables.TrackingEntry{
 			timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 3, time.Local), Type: timetables.Vacation},
 			timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 4, time.Local), Type: timetables.Sickness},
 			timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 5, time.Local), Type: timetables.NonBillable},

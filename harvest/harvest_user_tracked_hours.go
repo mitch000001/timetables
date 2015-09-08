@@ -34,10 +34,10 @@ func (h HarvestUserTrackedHours) TrackedHours() (timetables.TrackedHours, error)
 	if err != nil {
 		return trackedHours, err
 	}
-	trackedHours = timetables.NewTrackedHours(
-		h.converter.ConvertBillable(billableEntries),
-		h.converter.ConvertNonbillable(nonbillableEntries),
-	)
+	trackingEntries := make([]timetables.TrackingEntry, 0)
+	trackingEntries = append(trackingEntries, h.converter.ConvertBillable(billableEntries)...)
+	trackingEntries = append(trackingEntries, h.converter.ConvertNonbillable(nonbillableEntries)...)
+	trackedHours = timetables.NewTrackedHours(trackingEntries)
 	return trackedHours, nil
 }
 
@@ -46,6 +46,6 @@ type HarvestProvider struct {
 
 func (h HarvestProvider) TrackedHours() timetables.TrackedHours {
 	var trackedHours timetables.TrackedHours
-	trackedHours = timetables.NewTrackedHours([]timetables.TrackingEntry{timetables.TrackingEntry{Hours: timetables.NewFloat(8)}}, nil)
+	trackedHours = timetables.NewTrackedHours([]timetables.TrackingEntry{timetables.TrackingEntry{Hours: timetables.NewFloat(8)}})
 	return trackedHours
 }

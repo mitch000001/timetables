@@ -7,38 +7,28 @@ import (
 )
 
 func TestNewTrackedHours(t *testing.T) {
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
-	nonbillableHours := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
-	}
 
-	trackedHours := NewTrackedHours(billableHours, nonbillableHours)
+	trackedHours := NewTrackedHours(entries)
 
-	if !reflect.DeepEqual(billableHours, trackedHours.billableHours) {
-		t.Logf("Expected billableHours to equal\n%q\n\tgot\n%q\n", billableHours, trackedHours.billableHours)
-		t.Fail()
-	}
-
-	if !reflect.DeepEqual(nonbillableHours, trackedHours.nonbillableHours) {
-		t.Logf("Expected nonbillableHours to equal\n%q\n\tgot\n%q\n", nonbillableHours, trackedHours.nonbillableHours)
+	if !reflect.DeepEqual(entries, trackedHours.entries) {
+		t.Logf("Expected entires to equal\n%q\n\tgot\n%q\n", entries, trackedHours.entries)
 		t.Fail()
 	}
 }
 
 func TestTrackedHoursBillableHours(t *testing.T) {
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 
 	res := trackedHours.BillableHours()
@@ -53,17 +43,14 @@ func TestTrackedHoursBillableHours(t *testing.T) {
 
 func TestTrackedHoursBillableHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -79,18 +66,15 @@ func TestTrackedHoursBillableHoursForTimeframe(t *testing.T) {
 
 func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -105,19 +89,16 @@ func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedHoursVacationInterestHours(t *testing.T) {
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -133,19 +114,16 @@ func TestTrackedHoursVacationInterestHours(t *testing.T) {
 
 func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -161,11 +139,9 @@ func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 
 func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
@@ -173,8 +149,7 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -189,19 +164,16 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedHoursSicknessInterestHours(t *testing.T) {
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -217,19 +189,16 @@ func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 
 func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -245,11 +214,9 @@ func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 
 func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
@@ -257,8 +224,7 @@ func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -273,20 +239,17 @@ func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 }
 
 func TestTrackedHoursNonBillableRemainderHours(t *testing.T) {
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -302,20 +265,17 @@ func TestTrackedHoursNonBillableRemainderHours(t *testing.T) {
 
 func TestTrackedHoursNonBillableRemainderHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
@@ -331,11 +291,9 @@ func TestTrackedHoursNonBillableRemainderHoursForTimeframe(t *testing.T) {
 
 func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
-	billableHours := []TrackingEntry{
+	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-	}
-	nonbillableHours := []TrackingEntry{
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
 		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
@@ -344,8 +302,7 @@ func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) 
 	}
 
 	trackedHours := TrackedHours{
-		billableHours:    billableHours,
-		nonbillableHours: nonbillableHours,
+		entries: entries,
 	}
 	var res *Float
 
