@@ -11,8 +11,10 @@ import (
 
 func TestHarvestEntryConverterConvertNonbillable(t *testing.T) {
 	converter := HarvestEntryConverter{
-		VacationTaskID: 5,
-		SicknessTaskID: 8,
+		taskConfig: TaskConfig{
+			VacationID: 5,
+			SicknessID: 8,
+		},
 	}
 
 	harvestEntries := []*harvest.DayEntry{
@@ -37,8 +39,10 @@ func TestHarvestEntryConverterConvertNonbillable(t *testing.T) {
 
 func TestHarvestEntryConverterConvertBillable(t *testing.T) {
 	converter := HarvestEntryConverter{
-		VacationTaskID: 10,
-		SicknessTaskID: 14,
+		taskConfig: TaskConfig{
+			VacationID: 10,
+			SicknessID: 14,
+		},
 	}
 
 	harvestEntries := []*harvest.DayEntry{

@@ -25,6 +25,26 @@ func TestHarvestProviderTrackedHours(t *testing.T) {
 	}
 }
 
+func TestNewHarvestUserTrackedHours(t *testing.T) {
+	taskConfig := TaskConfig{
+		VacationID: 6,
+		SicknessID: 8,
+	}
+	dayEntryService := &harvest.DayEntryService{}
+
+	trackedHours := NewHarvestUserTrackedHours(dayEntryService, taskConfig)
+
+	if !reflect.DeepEqual(dayEntryService, trackedHours.entryFetcher.dayEntryService) {
+		t.Logf("Expected entryFetcher to be instantiated properly\n")
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(taskConfig, trackedHours.converter.taskConfig) {
+		t.Logf("Expected converter to be instantiated properly\n")
+		t.Fail()
+	}
+}
+
 func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 	dayEntryService := mock.DayEntryService{
 		Entries: []*harvest.DayEntry{
@@ -41,8 +61,10 @@ func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 		dayEntryService: mock.NewDayEntryService(dayEntryService),
 	}
 	harvestConverter := HarvestEntryConverter{
-		VacationTaskID: 8,
-		SicknessTaskID: 9,
+		taskConfig: TaskConfig{
+			VacationID: 8,
+			SicknessID: 9,
+		},
 	}
 
 	harvestUserTrackedHours := HarvestUserTrackedHours{

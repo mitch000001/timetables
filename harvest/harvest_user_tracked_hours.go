@@ -1,6 +1,23 @@
 package harvest
 
-import "github.com/mitch000001/timetables"
+import (
+	"github.com/mitch000001/go-harvest/harvest"
+	"github.com/mitch000001/timetables"
+)
+
+type TaskConfig struct {
+	VacationID int
+	SicknessID int
+}
+
+func NewHarvestUserTrackedHours(dayEntryService *harvest.DayEntryService, taskConfig TaskConfig) HarvestUserTrackedHours {
+	entryFetcher := HarvestUserEntryFetcher{dayEntryService}
+	converter := HarvestEntryConverter{taskConfig}
+	return HarvestUserTrackedHours{
+		entryFetcher: entryFetcher,
+		converter:    converter,
+	}
+}
 
 type HarvestUserTrackedHours struct {
 	entryFetcher HarvestUserEntryFetcher
