@@ -10,21 +10,6 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
-func TestHarvestProviderTrackedHours(t *testing.T) {
-	provider := HarvestProvider{}
-
-	trackedHours := provider.TrackedHours()
-
-	expectedBillableHours := timetables.NewFloat(8)
-
-	actualBillableHours := trackedHours.BillableHours()
-
-	if expectedBillableHours.Cmp(actualBillableHours) != 0 {
-		t.Logf("Expected billable Hours to equal\n%q\n\tgot\n%q\n", expectedBillableHours.String(), actualBillableHours.String())
-		t.Fail()
-	}
-}
-
 func TestNewHarvestUserTrackedHours(t *testing.T) {
 	taskConfig := TaskConfig{
 		VacationID: 6,

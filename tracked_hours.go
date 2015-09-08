@@ -23,7 +23,7 @@ const (
 )
 
 type TrackedHoursProvider interface {
-	TrackedHours() TrackedHours
+	TrackedHoursForYear(year int) TrackedHours
 }
 
 func NewTrackedHours(entries []TrackingEntry) TrackedHours {
