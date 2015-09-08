@@ -139,7 +139,7 @@ func getHoursForUserAndTimeframe(userHours *userHours, client *harvest.Harvest) 
 	params := harvest.Params{}
 	params.ForTimeframe(userHours.timeframe).UpdatedSince(lastUpdate)
 	if userHours.billable {
-		params.OnlyBillable(userHours.billable)
+		params.Billable(userHours.billable)
 	}
 	err := client.Users.DayEntries(userHours.user).All(&entries, params.Values())
 	if err != nil {
