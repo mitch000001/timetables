@@ -10,6 +10,47 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
+func TestNewTrackedHoursProvider(t *testing.T) {
+	userEndpoint := mock.UserEndpoint{
+		Users: []*harvest.User{
+			&harvest.User{ID: 1},
+			&harvest.User{ID: 2},
+		},
+		DayEntryEndpoint: mock.DayEntryEndpoint{
+			Entries: []*harvest.DayEntry{
+				&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
+				&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 20, time.Local)},
+				&harvest.DayEntry{ID: 3, UserId: 2, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 17, time.Local)},
+				&harvest.DayEntry{ID: 4, UserId: 2, Hours: 8, TaskId: 8, SpentAt: harvest.Date(2015, 1, 19, time.Local)},
+			},
+			BillableTasks: []int{5},
+			UserId:        1,
+		},
+	}
+	taskConfig := TaskConfig{
+		VacationID: 3,
+		SicknessID: 8,
+	}
+	userService := mock.NewUserService(&userEndpoint)
+
+	provider := NewTrackedHoursProvider(taskConfig, userService)
+
+	if !reflect.DeepEqual(taskConfig, provider.taskConfig) {
+		t.Logf("Expected taskConfig to equal\n%q\n\tgot\n%q\n", taskConfig, provider.taskConfig)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(userService, provider.userService) {
+		t.Logf("Expected userService to equal\n%q\n\tgot\n%q\n", userService, provider.userService)
+		t.Fail()
+	}
+
+	if provider.userEntries == nil {
+		t.Logf("Expected userEntries to be instantiated properly\n")
+		t.Fail()
+	}
+}
+
 func TestTrackedHoursProviderTrackedHours(t *testing.T) {
 	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
@@ -34,6 +75,7 @@ func TestTrackedHoursProviderTrackedHours(t *testing.T) {
 	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
+		userEntries: make(map[int]UserEntry),
 	}
 
 	year := 2015
@@ -93,6 +135,7 @@ func TestTrackedHoursProviderFetch(t *testing.T) {
 	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
+		userEntries: make(map[int]UserEntry),
 	}
 	year := 2015
 
@@ -194,6 +237,7 @@ func TestTrackedHoursProviderFetchUserEntries(t *testing.T) {
 	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
+		userEntries: make(map[int]UserEntry),
 	}
 	year := 2015
 	userId := 1

@@ -5,6 +5,15 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
+func NewTrackedHoursProvider(taskConfig TaskConfig, userService *harvest.UserService) TrackedHoursProvider {
+	provider := TrackedHoursProvider{
+		taskConfig:  taskConfig,
+		userService: userService,
+		userEntries: make(map[int]UserEntry),
+	}
+	return provider
+}
+
 type TrackedHoursProvider struct {
 	taskConfig  TaskConfig
 	userService *harvest.UserService
