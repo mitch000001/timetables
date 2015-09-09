@@ -1,11 +1,5 @@
 package timetables
 
-type BillingConfig struct {
-	UserID         string
-	VacationTaskID int
-	SicknessTaskID int
-}
-
 type TrackingEntry struct {
 	UserID    string
 	Hours     *Float
