@@ -44,3 +44,10 @@ func (h HarvestEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []ti
 	}
 	return trackingEntries
 }
+
+func (h HarvestEntryConverter) ConvertUserEntry(userEntry HarvestUserEntry) []timetables.TrackingEntry {
+	var trackingEntries []timetables.TrackingEntry
+	trackingEntries = append(trackingEntries, h.ConvertBillable(userEntry.BillableEntries)...)
+	trackingEntries = append(trackingEntries, h.ConvertNonbillable(userEntry.NonbillableEntries)...)
+	return trackingEntries
+}

@@ -30,3 +30,25 @@ func (h HarvestUserEntryFetcher) NonbillableEntries() ([]*harvest.DayEntry, erro
 	}
 	return entries, nil
 }
+
+func (h HarvestUserEntryFetcher) FetchUserEntry() (HarvestUserEntry, error) {
+	var entry HarvestUserEntry
+	billable, err := h.BillableEntries()
+	if err != nil {
+		return entry, err
+	}
+	nonbillable, err := h.NonbillableEntries()
+	if err != nil {
+		return entry, err
+	}
+	entry = HarvestUserEntry{
+		BillableEntries:    billable,
+		NonbillableEntries: nonbillable,
+	}
+	return entry, nil
+}
+
+type HarvestUserEntry struct {
+	BillableEntries    []*harvest.DayEntry
+	NonbillableEntries []*harvest.DayEntry
+}

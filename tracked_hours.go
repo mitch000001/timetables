@@ -33,9 +33,7 @@ func NewTrackedHours(entries []TrackingEntry) TrackedHours {
 }
 
 type TrackedHours struct {
-	entries          []TrackingEntry
-	billableHours    []TrackingEntry
-	nonbillableHours []TrackingEntry
+	entries []TrackingEntry
 }
 
 func (t TrackedHours) BillableHours() *Float {
