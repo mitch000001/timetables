@@ -16,7 +16,7 @@ type UserConfig struct {
 	remainingVacationInterestDays float64
 }
 
-func CreateEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) (EstimationBillingPeriodUserEntry, interface{}) {
+func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) EstimationBillingPeriodUserEntry {
 	var estimationPeriod = EstimationBillingPeriodUserEntry{
 		ID:     "10",
 		Period: period,
@@ -39,7 +39,7 @@ func CreateEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig
 
 	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BilledDays.Div(NewFloat(period.BusinessDays))
 
-	return estimationPeriod, nil
+	return estimationPeriod
 }
 
 type EstimationBillingPeriodUserEntry struct {

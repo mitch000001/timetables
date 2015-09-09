@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestCreateEstimationBillingPeriodUserEntry(t *testing.T) {
+func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 	tests := []struct {
 		period          Period
 		planConfigInput PlanConfig
@@ -124,12 +124,7 @@ func TestCreateEstimationBillingPeriodUserEntry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		period, err := CreateEstimationBillingPeriodUserEntry(test.period, test.planConfigInput, test.userConfigInput)
-
-		if err != nil {
-			t.Logf("Expected no error, got %T:%v", err, err)
-			t.Fail()
-		}
+		period := NewEstimationBillingPeriodUserEntry(test.period, test.planConfigInput, test.userConfigInput)
 
 		expectedPeriod := test.output
 

@@ -1,6 +1,6 @@
 package timetables
 
-func CreateBillingPeriodUserEntry(period Period, userID string, entries TrackedHours) (BillingPeriodUserEntry, interface{}) {
+func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHours) BillingPeriodUserEntry {
 	var billingPeriod = BillingPeriodUserEntry{
 		UserID: userID,
 		Period: period,
@@ -15,7 +15,7 @@ func CreateBillingPeriodUserEntry(period Period, userID string, entries TrackedH
 	} else {
 		billingPeriod.BillingDegree = NewFloat(0)
 	}
-	return billingPeriod, nil
+	return billingPeriod
 }
 
 type BillingPeriodUserEntry struct {

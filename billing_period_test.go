@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-func TestCreateBillingPeriodUserEntry(t *testing.T) {
+func TestNewBillingPeriodUserEntry(t *testing.T) {
 	tests := []struct {
 		period         Period
 		userId         string
@@ -146,7 +146,7 @@ func TestCreateBillingPeriodUserEntry(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		res, _ := CreateBillingPeriodUserEntry(test.period, test.userId, test.trackedEntries)
+		res := NewBillingPeriodUserEntry(test.period, test.userId, test.trackedEntries)
 
 		// TODO: reflect.DeepEqual won't work with big.Float
 		if fmt.Sprintf("%#v", test.output) != fmt.Sprintf("%#v", res) {
