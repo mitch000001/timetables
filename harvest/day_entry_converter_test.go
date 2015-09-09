@@ -9,8 +9,8 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
-func TestHarvestEntryConverterConvertNonbillable(t *testing.T) {
-	converter := HarvestEntryConverter{
+func TestDayEntryConverterConvertNonbillable(t *testing.T) {
+	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
 			VacationID: 5,
 			SicknessID: 8,
@@ -37,8 +37,8 @@ func TestHarvestEntryConverterConvertNonbillable(t *testing.T) {
 	}
 }
 
-func TestHarvestEntryConverterConvertBillable(t *testing.T) {
-	converter := HarvestEntryConverter{
+func TestDayEntryConverterConvertBillable(t *testing.T) {
+	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
 			VacationID: 10,
 			SicknessID: 14,
@@ -65,15 +65,15 @@ func TestHarvestEntryConverterConvertBillable(t *testing.T) {
 	}
 }
 
-func TestHarvestEntryConverterConvertUserEntry(t *testing.T) {
-	converter := HarvestEntryConverter{
+func TestDayEntryConverterConvertUserEntry(t *testing.T) {
+	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
 			VacationID: 5,
 			SicknessID: 8,
 		},
 	}
 
-	harvestUserEntry := HarvestUserEntry{
+	harvestUserEntry := UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 4, SpentAt: harvest.Date(2015, 1, 2, time.Local)},

@@ -7,11 +7,16 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
-type HarvestEntryConverter struct {
+type TaskConfig struct {
+	VacationID int
+	SicknessID int
+}
+
+type DayEntryConverter struct {
 	taskConfig TaskConfig
 }
 
-func (h HarvestEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) []timetables.TrackingEntry {
+func (h DayEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) []timetables.TrackingEntry {
 	var trackingEntries []timetables.TrackingEntry
 	for _, entry := range entries {
 		trackingEntry := timetables.TrackingEntry{
@@ -31,7 +36,7 @@ func (h HarvestEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) [
 	return trackingEntries
 }
 
-func (h HarvestEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []timetables.TrackingEntry {
+func (h DayEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []timetables.TrackingEntry {
 	var trackingEntries []timetables.TrackingEntry
 	for _, entry := range entries {
 		trackingEntry := timetables.TrackingEntry{
@@ -45,7 +50,7 @@ func (h HarvestEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []ti
 	return trackingEntries
 }
 
-func (h HarvestEntryConverter) ConvertUserEntry(userEntry HarvestUserEntry) []timetables.TrackingEntry {
+func (h DayEntryConverter) ConvertUserEntry(userEntry UserEntry) []timetables.TrackingEntry {
 	var trackingEntries []timetables.TrackingEntry
 	trackingEntries = append(trackingEntries, h.ConvertBillable(userEntry.BillableEntries)...)
 	trackingEntries = append(trackingEntries, h.ConvertNonbillable(userEntry.NonbillableEntries)...)

@@ -9,7 +9,7 @@ import (
 	"github.com/mitch000001/go-harvest/harvest/mock"
 )
 
-func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
+func TestUserEntryFetcherBillableEntries(t *testing.T) {
 	dayEntryService := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -21,7 +21,7 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 		UserId:        1,
 	}
 
-	harvestFetcher := HarvestUserEntryFetcher{
+	harvestFetcher := UserEntryFetcher{
 		year:            2015,
 		dayEntryService: mock.NewDayEntryService(&dayEntryService),
 	}
@@ -63,7 +63,7 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 	}
 }
 
-func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
+func TestUserEntryFetcherNonbillableEntries(t *testing.T) {
 	dayEntryService := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -74,7 +74,7 @@ func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
 		UserId:        1,
 	}
 
-	harvestFetcher := HarvestUserEntryFetcher{
+	harvestFetcher := UserEntryFetcher{
 		year:            2015,
 		dayEntryService: mock.NewDayEntryService(&dayEntryService),
 	}
@@ -96,7 +96,7 @@ func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
 	}
 }
 
-func TestHarvestEntryFetcherFetchUserEntry(t *testing.T) {
+func TestUserEntryFetcherFetchUserEntry(t *testing.T) {
 	dayEntryService := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
@@ -107,12 +107,12 @@ func TestHarvestEntryFetcherFetchUserEntry(t *testing.T) {
 		UserId:        1,
 	}
 
-	harvestFetcher := HarvestUserEntryFetcher{
+	harvestFetcher := UserEntryFetcher{
 		year:            2015,
 		dayEntryService: mock.NewDayEntryService(&dayEntryService),
 	}
 
-	expectedResult := HarvestUserEntry{
+	expectedResult := UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},

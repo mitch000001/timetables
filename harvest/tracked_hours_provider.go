@@ -5,13 +5,13 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
-type HarvestProvider struct {
+type TrackedHoursProvider struct {
 	taskConfig  TaskConfig
 	userService *harvest.UserService
-	userEntries map[int]HarvestUserEntry
+	userEntries map[int]UserEntry
 }
 
-func (h *HarvestProvider) Fetch(year int) error {
+func (h *TrackedHoursProvider) Fetch(year int) error {
 	var users []*harvest.User
 	err := h.userService.All(&users, nil)
 	if err != nil {
@@ -27,27 +27,27 @@ func (h *HarvestProvider) Fetch(year int) error {
 	return nil
 }
 
-func (h *HarvestProvider) FetchUserEntries(userId, year int) error {
+func (h *TrackedHoursProvider) FetchUserEntries(userId, year int) error {
 	var user harvest.User
 	err := h.userService.Find(userId, &user, nil)
 	if err != nil {
 		return err
 	}
 	dayEntryService := h.userService.DayEntries(&user)
-	harvestUserHours := HarvestUserEntryFetcher{year, dayEntryService}
+	harvestUserHours := UserEntryFetcher{year, dayEntryService}
 	trackedHours, err := harvestUserHours.FetchUserEntry()
 	if err != nil {
 		return err
 	}
 	if h.userEntries == nil {
-		h.userEntries = make(map[int]HarvestUserEntry)
+		h.userEntries = make(map[int]UserEntry)
 	}
 	h.userEntries[userId] = trackedHours
 	return nil
 }
 
-func (h HarvestProvider) TrackedHoursForYear(year int) timetables.TrackedHours {
-	converter := HarvestEntryConverter{h.taskConfig}
+func (h TrackedHoursProvider) TrackedHoursForYear(year int) timetables.TrackedHours {
+	converter := DayEntryConverter{h.taskConfig}
 	var trackedEntries []timetables.TrackingEntry
 	for _, userEntry := range h.userEntries {
 		trackedEntries = append(trackedEntries, converter.ConvertUserEntry(userEntry)...)

@@ -10,7 +10,7 @@ import (
 	"github.com/mitch000001/timetables"
 )
 
-func TestHarvestProviderTrackedHours(t *testing.T) {
+func TestTrackedHoursProviderTrackedHours(t *testing.T) {
 	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
@@ -31,7 +31,7 @@ func TestHarvestProviderTrackedHours(t *testing.T) {
 		VacationID: 3,
 		SicknessID: 8,
 	}
-	provider := HarvestProvider{
+	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
 	}
@@ -69,7 +69,7 @@ func TestHarvestProviderTrackedHours(t *testing.T) {
 	}
 }
 
-func TestHarvestProviderFetch(t *testing.T) {
+func TestTrackedHoursProviderFetch(t *testing.T) {
 	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
@@ -90,7 +90,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 		VacationID: 3,
 		SicknessID: 8,
 	}
-	provider := HarvestProvider{
+	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
 	}
@@ -98,7 +98,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 
 	trackedHours := provider.userEntries[1]
 
-	expectedTrackedHours := HarvestUserEntry{}
+	expectedTrackedHours := UserEntry{}
 
 	if !reflect.DeepEqual(expectedTrackedHours, trackedHours) {
 		t.Logf("Expected tracked hours to equal\n%q\n\tgot\n%q\n", expectedTrackedHours, trackedHours)
@@ -114,7 +114,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 
 	trackedHours = provider.userEntries[1]
 
-	expectedTrackedHours = HarvestUserEntry{
+	expectedTrackedHours = UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
 		},
@@ -130,7 +130,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 
 	trackedHours = provider.userEntries[2]
 
-	expectedTrackedHours = HarvestUserEntry{
+	expectedTrackedHours = UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 3, UserId: 2, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 17, time.Local)},
 		},
@@ -157,7 +157,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 
 	trackedHours = provider.userEntries[3]
 
-	expectedTrackedHours = HarvestUserEntry{
+	expectedTrackedHours = UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 20, UserId: 3, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 23, time.Local)},
 		},
@@ -170,7 +170,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 	}
 }
 
-func TestHarvestProviderFetchUserEntries(t *testing.T) {
+func TestTrackedHoursProviderFetchUserEntries(t *testing.T) {
 	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
@@ -191,7 +191,7 @@ func TestHarvestProviderFetchUserEntries(t *testing.T) {
 		VacationID: 3,
 		SicknessID: 8,
 	}
-	provider := HarvestProvider{
+	provider := TrackedHoursProvider{
 		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
 	}
@@ -207,7 +207,7 @@ func TestHarvestProviderFetchUserEntries(t *testing.T) {
 
 	trackedHours := provider.userEntries[userId]
 
-	expectedTrackedHours := HarvestUserEntry{
+	expectedTrackedHours := UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
 		},
@@ -234,7 +234,7 @@ func TestHarvestProviderFetchUserEntries(t *testing.T) {
 
 	trackedHours = provider.userEntries[userId]
 
-	expectedTrackedHours = HarvestUserEntry{
+	expectedTrackedHours = UserEntry{
 		BillableEntries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 3, UserId: 2, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 17, time.Local)},
 		},

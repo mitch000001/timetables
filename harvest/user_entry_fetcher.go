@@ -6,12 +6,12 @@ import (
 	"github.com/mitch000001/go-harvest/harvest"
 )
 
-type HarvestUserEntryFetcher struct {
+type UserEntryFetcher struct {
 	year            int
 	dayEntryService *harvest.DayEntryService
 }
 
-func (h HarvestUserEntryFetcher) BillableEntries() ([]*harvest.DayEntry, error) {
+func (h UserEntryFetcher) BillableEntries() ([]*harvest.DayEntry, error) {
 	var entries []*harvest.DayEntry
 	var params harvest.Params
 	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(h.year, 1, 1, h.year, 12, 31, time.Local)).Billable(true).Values())
@@ -21,7 +21,7 @@ func (h HarvestUserEntryFetcher) BillableEntries() ([]*harvest.DayEntry, error) 
 	return entries, nil
 }
 
-func (h HarvestUserEntryFetcher) NonbillableEntries() ([]*harvest.DayEntry, error) {
+func (h UserEntryFetcher) NonbillableEntries() ([]*harvest.DayEntry, error) {
 	var entries []*harvest.DayEntry
 	var params harvest.Params
 	err := h.dayEntryService.All(&entries, params.ForTimeframe(harvest.NewTimeframe(h.year, 1, 1, h.year, 12, 31, time.Local)).Billable(false).Values())
@@ -31,8 +31,8 @@ func (h HarvestUserEntryFetcher) NonbillableEntries() ([]*harvest.DayEntry, erro
 	return entries, nil
 }
 
-func (h HarvestUserEntryFetcher) FetchUserEntry() (HarvestUserEntry, error) {
-	var entry HarvestUserEntry
+func (h UserEntryFetcher) FetchUserEntry() (UserEntry, error) {
+	var entry UserEntry
 	billable, err := h.BillableEntries()
 	if err != nil {
 		return entry, err
@@ -41,14 +41,14 @@ func (h HarvestUserEntryFetcher) FetchUserEntry() (HarvestUserEntry, error) {
 	if err != nil {
 		return entry, err
 	}
-	entry = HarvestUserEntry{
+	entry = UserEntry{
 		BillableEntries:    billable,
 		NonbillableEntries: nonbillable,
 	}
 	return entry, nil
 }
 
-type HarvestUserEntry struct {
+type UserEntry struct {
 	BillableEntries    []*harvest.DayEntry
 	NonbillableEntries []*harvest.DayEntry
 }
