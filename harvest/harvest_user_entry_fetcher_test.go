@@ -18,6 +18,7 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 			&harvest.DayEntry{ID: 4, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2014, 1, 1, time.Local)},
 		},
 		BillableTasks: []int{5},
+		UserId:        1,
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{
@@ -70,6 +71,7 @@ func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
 			&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 3, time.Local)},
 		},
 		BillableTasks: []int{5},
+		UserId:        1,
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{

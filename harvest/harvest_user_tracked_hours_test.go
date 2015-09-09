@@ -41,6 +41,7 @@ func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 			&harvest.DayEntry{ID: 5, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 5, time.Local)},
 		},
 		BillableTasks: []int{3, 5},
+		UserId:        1,
 	}
 
 	harvestFetcher := HarvestUserEntryFetcher{
