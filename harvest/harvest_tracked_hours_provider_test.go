@@ -11,12 +11,12 @@ import (
 )
 
 func TestHarvestProviderTrackedHours(t *testing.T) {
-	userService := mock.UserService{
+	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
 			&harvest.User{ID: 2},
 		},
-		DayEntryService: mock.DayEntryService{
+		DayEntryService: mock.DayEntryEndpoint{
 			Entries: []*harvest.DayEntry{
 				&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
 				&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 20, time.Local)},
@@ -32,7 +32,7 @@ func TestHarvestProviderTrackedHours(t *testing.T) {
 	}
 	provider := HarvestProvider{
 		taskConfig:  taskConfig,
-		userService: mock.NewUserService(userService),
+		userService: mock.NewUserService(userEndpoint),
 	}
 
 	year := 2015
@@ -69,12 +69,12 @@ func TestHarvestProviderTrackedHours(t *testing.T) {
 }
 
 func TestHarvestProviderFetch(t *testing.T) {
-	userService := mock.UserService{
+	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
 			&harvest.User{ID: 2},
 		},
-		DayEntryService: mock.DayEntryService{
+		DayEntryService: mock.DayEntryEndpoint{
 			Entries: []*harvest.DayEntry{
 				&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
 				&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 20, time.Local)},
@@ -90,7 +90,7 @@ func TestHarvestProviderFetch(t *testing.T) {
 	}
 	provider := HarvestProvider{
 		taskConfig:  taskConfig,
-		userService: mock.NewUserService(userService),
+		userService: mock.NewUserService(userEndpoint),
 	}
 	year := 2015
 
@@ -126,12 +126,12 @@ func TestHarvestProviderFetch(t *testing.T) {
 }
 
 func TestHarvestProviderFetchUserEntries(t *testing.T) {
-	userService := mock.UserService{
+	userEndpoint := mock.UserEndpoint{
 		Users: []*harvest.User{
 			&harvest.User{ID: 1},
 			&harvest.User{ID: 2},
 		},
-		DayEntryService: mock.DayEntryService{
+		DayEntryService: mock.DayEntryEndpoint{
 			Entries: []*harvest.DayEntry{
 				&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 15, time.Local)},
 				&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 20, time.Local)},
@@ -148,7 +148,7 @@ func TestHarvestProviderFetchUserEntries(t *testing.T) {
 	}
 	provider := HarvestProvider{
 		taskConfig:  taskConfig,
-		userService: mock.NewUserService(userService),
+		userService: mock.NewUserService(userEndpoint),
 	}
 	year := 2015
 	userId := 1

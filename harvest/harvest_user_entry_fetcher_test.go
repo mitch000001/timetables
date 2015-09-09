@@ -10,7 +10,7 @@ import (
 )
 
 func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
-	dayEntryService := mock.DayEntryService{
+	dayEntryService := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
@@ -64,7 +64,7 @@ func TestHarvestEntryFetcherBillableEntries(t *testing.T) {
 }
 
 func TestHarvestEntryFetcherNonbillableEntries(t *testing.T) {
-	dayEntryService := mock.DayEntryService{
+	dayEntryService := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},

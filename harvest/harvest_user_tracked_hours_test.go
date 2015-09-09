@@ -32,7 +32,7 @@ func TestNewHarvestUserTrackedHours(t *testing.T) {
 }
 
 func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
-	dayEntryService := mock.DayEntryService{
+	dayEntryEndpoint := mock.DayEntryEndpoint{
 		Entries: []*harvest.DayEntry{
 			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 3, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
@@ -46,7 +46,7 @@ func TestHarvestUserTrackedHoursTrackedHours(t *testing.T) {
 
 	harvestFetcher := HarvestUserEntryFetcher{
 		year:            2015,
-		dayEntryService: mock.NewDayEntryService(dayEntryService),
+		dayEntryService: mock.NewDayEntryService(dayEntryEndpoint),
 	}
 	harvestConverter := HarvestEntryConverter{
 		taskConfig: TaskConfig{
