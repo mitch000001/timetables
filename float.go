@@ -34,3 +34,17 @@ func (f *Float) Cmp(x *Float) int {
 	res := f.Float.Cmp(x.Float)
 	return res
 }
+
+func (f *Float) MarshalBinary() ([]byte, error) {
+	str := f.Text('b', 53)
+	return []byte(str), nil
+}
+
+func (f *Float) UnmarshalBinary(value []byte) error {
+	float, _, err := new(big.Float).Parse(string(value), 0)
+	if err != nil {
+		return err
+	}
+	f.Float = float
+	return nil
+}

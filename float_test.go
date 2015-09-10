@@ -91,3 +91,40 @@ func TestFloatCmp(t *testing.T) {
 		}
 	}
 }
+
+func TestFloatMarshalBinary(t *testing.T) {
+	float := NewFloat(8)
+
+	floatBytes, err := float.MarshalBinary()
+
+	if err != nil {
+		t.Logf("Expected no error, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	expectedBytes := []byte(float.Text('b', 53))
+
+	if !reflect.DeepEqual(expectedBytes, floatBytes) {
+		t.Logf("Expected marshaled value to equal\n%q\n\tgot\n%q\n", expectedBytes, floatBytes)
+		t.Fail()
+	}
+}
+
+func TestFloatUnmarhsalBinary(t *testing.T) {
+	floatBytes := []byte(NewFloat(8).Text('b', 53))
+
+	float := &Float{}
+	err := float.UnmarshalBinary(floatBytes)
+
+	if err != nil {
+		t.Logf("Expected no error, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	expectedFloat := NewFloat(8)
+
+	if expectedFloat.Cmp(float) != 0 {
+		t.Logf("Expected unmarshaled value to equal\n%q\n\tgot\n%q\n", expectedFloat.Text('f', 53), float.Text('f', 53))
+		t.Fail()
+	}
+}
