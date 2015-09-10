@@ -2,13 +2,13 @@ package timetables
 
 import "testing"
 
-func TestCreateUser(t *testing.T) {
+func TestNewUser(t *testing.T) {
 	harvestID := 2
 	firstName := "Max"
 	lastName := "Forn"
 	email := "max.forn@example.com"
 
-	user := CreateUser(harvestID, firstName, lastName, email)
+	user := NewUser(harvestID, firstName, lastName, email)
 
 	if user.ID == "" {
 		t.Logf("Expected ID to be set properly\n")

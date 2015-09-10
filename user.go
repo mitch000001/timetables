@@ -1,6 +1,6 @@
 package timetables
 
-func CreateUser(harvestID int, firstName, lastName, email string) User {
+func NewUser(harvestID int, firstName, lastName, email string) User {
 	return User{
 		ID:        "1",
 		HarvestID: harvestID,
