@@ -2,7 +2,6 @@ package timetables
 
 func NewUser(harvestID int, firstName, lastName, email string) User {
 	return User{
-		ID:        "1",
 		HarvestID: harvestID,
 		FirstName: firstName,
 		LastName:  lastName,

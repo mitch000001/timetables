@@ -30,7 +30,6 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0.0,
 			},
 			EstimationBillingPeriodUserEntry{
-				ID:                            "10",
 				Period:                        Period{Timeframe{StartDate: Date(2015, 1, 1, time.Local), EndDate: Date(2015, 25, 1, time.Local)}, 10},
 				UserID:                        "1",
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(10).Div(NewFloat(250))),
@@ -57,7 +56,6 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0.0,
 			},
 			EstimationBillingPeriodUserEntry{
-				ID:                            "10",
 				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -84,7 +82,6 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0,
 			},
 			EstimationBillingPeriodUserEntry{
-				ID:                            "10",
 				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),
@@ -111,7 +108,6 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 5.0,
 			},
 			EstimationBillingPeriodUserEntry{
-				ID:                            "10",
 				Period:                        Period{Timeframe{StartDate: Date(2015, 26, 1, time.Local), EndDate: Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewFloat(25).Mul(NewFloat(20).Div(NewFloat(200))),

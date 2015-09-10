@@ -18,7 +18,6 @@ type UserConfig struct {
 
 func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) EstimationBillingPeriodUserEntry {
 	var estimationPeriod = EstimationBillingPeriodUserEntry{
-		ID:     "10",
 		Period: period,
 		UserID: "1",
 		RemainingVacationInterestDays: NewFloat(userConfig.remainingVacationInterestDays),

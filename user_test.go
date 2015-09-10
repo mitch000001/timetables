@@ -10,8 +10,8 @@ func TestNewUser(t *testing.T) {
 
 	user := NewUser(harvestID, firstName, lastName, email)
 
-	if user.ID == "" {
-		t.Logf("Expected ID to be set properly\n")
+	if user.ID != "" {
+		t.Logf("Expected ID not to be set\n")
 		t.Fail()
 	}
 
