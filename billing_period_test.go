@@ -55,6 +55,32 @@ func TestBillingPeriodAddUserEntry(t *testing.T) {
 	}
 }
 
+func TestBilligPeriodUserEntries(t *testing.T) {
+	period := Period{
+		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		BusinessDays: 20,
+	}
+	userId := "1"
+	trackedHours := NewTrackedHours([]TrackingEntry{
+		TrackingEntry{UserID: "1", Hours: NewFloat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
+	})
+
+	billingPeriod := NewBillingPeriod(period)
+
+	billingPeriod.AddUserEntry(userId, trackedHours)
+
+	entries := billingPeriod.UserEntries()
+
+	expectedEntries := []BillingPeriodUserEntry{
+		NewBillingPeriodUserEntry(period, userId, trackedHours),
+	}
+
+	if !reflect.DeepEqual(expectedEntries, entries) {
+		t.Logf("Expected user entry to equal\n%q\n\tgot\n%q\n", expectedEntries, entries)
+		t.Fail()
+	}
+}
+
 func TestBillingPeriodMarshalText(t *testing.T) {
 	period := BillingPeriod{
 		ID:     "17",

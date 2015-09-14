@@ -24,6 +24,10 @@ func (b *BillingPeriod) AddUserEntry(userId string, trackedHours TrackedHours) {
 	b.userEntries = append(b.userEntries, entry)
 }
 
+func (b *BillingPeriod) UserEntries() []BillingPeriodUserEntry {
+	return b.userEntries
+}
+
 func (b BillingPeriod) MarshalText() ([]byte, error) {
 	marshaledPeriod, err := b.Period.MarshalText()
 	if err != nil {
