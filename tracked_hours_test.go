@@ -36,7 +36,7 @@ func TestTrackedHoursBillableHours(t *testing.T) {
 	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -59,7 +59,7 @@ func TestTrackedHoursBillableHoursForTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -83,7 +83,7 @@ func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -107,7 +107,7 @@ func TestTrackedHoursVacationInterestHours(t *testing.T) {
 	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -132,7 +132,7 @@ func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -158,7 +158,7 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -182,7 +182,7 @@ func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -207,7 +207,7 @@ func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -233,7 +233,7 @@ func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -258,7 +258,7 @@ func TestTrackedHoursNonBillableRemainderHours(t *testing.T) {
 	expected := NewFloat(16)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -284,7 +284,7 @@ func TestTrackedHoursNonBillableRemainderHoursForTimeframe(t *testing.T) {
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
 }
@@ -311,7 +311,11 @@ func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) 
 	expected := NewFloat(8)
 
 	if !reflect.DeepEqual(expected, res) {
-		t.Logf("Expected result to equal\n%#v\n\tgot:\n%#v\n", expected, res)
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
+}
+
+func TestTrackedHoursMarshalBinary(t *testing.T) {
+
 }

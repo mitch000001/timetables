@@ -44,3 +44,51 @@ func TestNewPeriod(t *testing.T) {
 		t.Fail()
 	}
 }
+
+func TestPeriodMarshalText(t *testing.T) {
+	period := Period{
+		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		BusinessDays: 20,
+	}
+
+	expected := "{{2015-01-01}:{2015-01-25}}:{20}"
+
+	var marshaled []byte
+	var err error
+
+	marshaled, err = period.MarshalText()
+
+	if err != nil {
+		t.Logf("Expected no error, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	if expected != string(marshaled) {
+		t.Logf("Expected marshaled value to equal\n%q\n\tgot:\n%q\n", expected, marshaled)
+		t.Fail()
+	}
+}
+
+func TestPeriodUnmarshalText(t *testing.T) {
+	expectedPeriod := Period{
+		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		BusinessDays: 20,
+	}
+	marshaled := "{2015-01-01:2015-01-25}:{20}"
+
+	var err error
+
+	period := Period{}
+
+	err = period.UnmarshalText([]byte(marshaled))
+
+	if err != nil {
+		t.Logf("Expected error to be nil, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(expectedPeriod, period) {
+		t.Logf("Expected period to equal\n%+v\n\tgot\n%+v\n", expectedPeriod, period)
+		t.Fail()
+	}
+}

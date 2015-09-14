@@ -219,8 +219,8 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		res := NewBillingPeriodUserEntry(test.period, test.userId, test.trackedEntries)
 
 		// TODO: reflect.DeepEqual won't work with big.Float
-		if fmt.Sprintf("%#v", test.output) != fmt.Sprintf("%#v", res) {
-			t.Logf("Expected billing period to equal\n%#v\n\tgot:\n%#v\n", test.output, res)
+		if fmt.Sprintf("%+v", test.output) != fmt.Sprintf("%+v", res) {
+			t.Logf("Expected billing period to equal\n%+v\n\tgot:\n%+v\n", test.output, res)
 			t.Fail()
 		}
 	}

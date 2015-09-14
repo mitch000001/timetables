@@ -17,7 +17,7 @@ func TestNewBillingPeriod(t *testing.T) {
 	expectedBillingPeriod := BillingPeriod{
 		ID:          "",
 		userEntries: make([]BillingPeriodUserEntry, 0),
-		period:      period,
+		Period:      period,
 	}
 
 	if !reflect.DeepEqual(expectedBillingPeriod, billingPeriod) {
@@ -51,6 +51,53 @@ func TestBillingPeriodAddUserEntry(t *testing.T) {
 
 	if !reflect.DeepEqual(expectedUserEntry, actualEntry) {
 		t.Logf("Expected user entry to equal\n%q\n\tgot\n%q\n", expectedUserEntry, actualEntry)
+		t.Fail()
+	}
+}
+
+func TestBillingPeriodMarshalText(t *testing.T) {
+	period := BillingPeriod{
+		ID:     "17",
+		Period: Period{NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+	}
+
+	expected := "{17}:{{{2015-01-01}:{2015-01-25}}:{25}}:[]"
+
+	var err error
+	var marshaled []byte
+
+	marshaled, err = period.MarshalText()
+
+	if err != nil {
+		t.Logf("Expected error to equal nil, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(expected, string(marshaled)) {
+		t.Logf("Expected marshaled value to equal\n%q\n\tgot:\n%q\n", expected, marshaled)
+		t.Fail()
+	}
+}
+
+func TestBillingPeriodUnmarshalText(t *testing.T) {
+	expectedPeriod := BillingPeriod{
+		ID:     "17",
+		Period: Period{NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+	}
+
+	marshaled := "{17}:{{2015-01-01:2015-01-25}:{25}}:[]"
+
+	period := BillingPeriod{}
+
+	err := period.UnmarshalText([]byte(marshaled))
+
+	if err != nil {
+		t.Logf("Expected error to equal nil, got %T:%v\n", err, err)
+		t.Fail()
+	}
+
+	if !reflect.DeepEqual(expectedPeriod, period) {
+		t.Logf("Expected unmarshaled period to equal\n%+v\n\tgot\n%+v\n", expectedPeriod, period)
 		t.Fail()
 	}
 }

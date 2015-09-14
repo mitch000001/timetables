@@ -1,6 +1,7 @@
 package timetables
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -8,49 +9,6 @@ import (
 	"strings"
 	"time"
 )
-
-type ShortDate struct {
-	time.Time
-}
-
-func NewShortDate(date time.Time) ShortDate {
-	return Date(date.Year(), date.Month(), date.Day(), date.Location())
-}
-
-func Date(year int, month time.Month, day int, location *time.Location) ShortDate {
-	return ShortDate{time.Date(year, month, day, 0, 0, 0, 0, time.UTC)}
-}
-
-func (date *ShortDate) MarshalJSON() ([]byte, error) {
-	if date.IsZero() {
-		return json.Marshal("")
-	}
-	return json.Marshal(date.Format("2006-01-02"))
-}
-
-func (date *ShortDate) UnmarshalJSON(data []byte) error {
-	unquotedData, _ := strconv.Unquote(string(data))
-	time, err := time.Parse("2006-01-02", unquotedData)
-	date.Time = time
-	return err
-}
-
-func (date *ShortDate) String() string {
-	return date.Format("2006-01-02")
-}
-
-func (s *ShortDate) MarshalText() ([]byte, error) {
-	return []byte(s.Format("2006-01-02")), nil
-}
-
-func (s *ShortDate) UnmarshalText(text []byte) error {
-	time, err := time.Parse("2006-01-02", string(text))
-	if err != nil {
-		return err
-	}
-	*s = ShortDate{time}
-	return nil
-}
 
 func NewTimeframe(startYear int, startMonth time.Month, startDay int, endYear int, endMonth time.Month, endDay int, location *time.Location) Timeframe {
 	return Timeframe{
@@ -97,14 +55,14 @@ func (tf Timeframe) IsInTimeframe(date ShortDate) bool {
 	return tf.StartDate.Before(date.Time) && tf.EndDate.After(date.Time)
 }
 
-func (tf *Timeframe) ToQuery() url.Values {
+func (tf Timeframe) ToQuery() url.Values {
 	params := make(url.Values)
 	params.Set("from", tf.StartDate.Format("20060102"))
 	params.Set("to", tf.EndDate.Format("20060102"))
 	return params
 }
 
-func (tf *Timeframe) MarshalJSON() ([]byte, error) {
+func (tf Timeframe) MarshalJSON() ([]byte, error) {
 	if tf.StartDate.IsZero() || tf.EndDate.IsZero() {
 		return json.Marshal("")
 	}
@@ -134,10 +92,36 @@ func (tf Timeframe) Days() int {
 	return int(tf.EndDate.Add(24*time.Hour).Sub(tf.StartDate.Time) / time.Hour / 24)
 }
 
-func (tf *Timeframe) IsZero() bool {
+func (tf Timeframe) IsZero() bool {
 	return tf.StartDate.IsZero() && tf.EndDate.IsZero()
 }
 
-func (tf *Timeframe) String() string {
+func (tf Timeframe) String() string {
 	return fmt.Sprintf("{%s-%s}", tf.StartDate, tf.EndDate)
+}
+
+func (tf Timeframe) MarshalText() ([]byte, error) {
+	marshaledStartDate, err := tf.StartDate.MarshalText()
+	if err != nil {
+		return nil, fmt.Errorf("Error while marshaling StartDate: %v", err)
+	}
+	marshaledEndDate, err := tf.EndDate.MarshalText()
+	if err != nil {
+		return nil, fmt.Errorf("Error while marshaling EndDate: %v", err)
+	}
+	marshaled := fmt.Sprintf("{%s}:{%s}", marshaledStartDate, marshaledEndDate)
+	return []byte(marshaled), nil
+}
+
+func (tf *Timeframe) UnmarshalText(value []byte) error {
+	dates := bytes.SplitN(value, []byte(":"), 2)
+	err := tf.StartDate.UnmarshalText(bytes.Trim(dates[0], "{}"))
+	if err != nil {
+		return fmt.Errorf("Error while unmarshaling StartDate: %v", err)
+	}
+	err = tf.EndDate.UnmarshalText(bytes.Trim(dates[1], "{}"))
+	if err != nil {
+		return fmt.Errorf("Error while unmarshaling EndDate: %v", err)
+	}
+	return nil
 }
