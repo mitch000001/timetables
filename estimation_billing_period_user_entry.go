@@ -34,9 +34,10 @@ func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, u
 	estimationPeriod.SicknessInterestDays = sicknessInterestShare.Mul(NewFloat(userConfig.workingDegree))
 
 	unbilled := estimationPeriod.SicknessInterestDays.Add(estimationPeriod.VacationInterestDays).Add(estimationPeriod.RemainingVacationInterestDays)
-	estimationPeriod.BilledDays = NewFloat(period.BusinessDays).Sub(unbilled).Mul(NewFloat(userConfig.billingDegree))
+	estimationPeriod.BillableDays = NewFloat(period.BusinessDays).Sub(unbilled).Mul(NewFloat(userConfig.billingDegree))
+	estimationPeriod.NonbillableDays = NewFloat(period.BusinessDays).Sub(estimationPeriod.BillableDays)
 
-	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BilledDays.Div(NewFloat(period.BusinessDays))
+	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BillableDays.Div(NewFloat(period.BusinessDays))
 
 	return estimationPeriod
 }
@@ -48,6 +49,7 @@ type EstimationBillingPeriodUserEntry struct {
 	VacationInterestDays          *Float
 	RemainingVacationInterestDays *Float
 	SicknessInterestDays          *Float
-	BilledDays                    *Float
+	BillableDays                  *Float
+	NonbillableDays               *Float
 	EffectiveBillingDegree        *Float
 }
