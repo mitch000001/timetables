@@ -31,7 +31,7 @@ func TestNewTrackingEntryFetcher(t *testing.T) {
 
 	expectedFetcher := TrackingEntryFetcher{
 		dayEntryService: mock.NewDayEntryService(&dayEntryService),
-		config:          config,
+		taskConfig:      config,
 	}
 
 	if !reflect.DeepEqual(expectedFetcher, fetcher) {
@@ -65,7 +65,7 @@ func TestTrackingEntryFetcherFetchForUser(t *testing.T) {
 
 	fetcher := TrackingEntryFetcher{
 		userService: mock.NewUserService(&userEndpoint),
-		config:      config,
+		taskConfig:  config,
 	}
 
 	expectedResult := []timetables.TrackingEntry{
@@ -114,7 +114,7 @@ func TestTrackingEntryFetcherFetch(t *testing.T) {
 		SicknessID: 8,
 	}
 	fetcher := TrackingEntryFetcher{
-		config:      taskConfig,
+		taskConfig:  taskConfig,
 		userService: mock.NewUserService(&userEndpoint),
 	}
 	year := 2015

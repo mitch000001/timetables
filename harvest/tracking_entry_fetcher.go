@@ -8,14 +8,14 @@ import (
 func NewTrackingEntryFetcher(dayEntryService *harvest.DayEntryService, config TaskConfig) TrackingEntryFetcher {
 	return TrackingEntryFetcher{
 		dayEntryService: dayEntryService,
-		config:          config,
+		taskConfig:      config,
 	}
 }
 
 type TrackingEntryFetcher struct {
 	userService     *harvest.UserService
 	dayEntryService *harvest.DayEntryService
-	config          TaskConfig
+	taskConfig      TaskConfig
 }
 
 func (t TrackingEntryFetcher) FetchForUser(userId, year int) ([]timetables.TrackingEntry, error) {
@@ -30,7 +30,7 @@ func (t TrackingEntryFetcher) FetchForUser(userId, year int) ([]timetables.Track
 	if err != nil {
 		return nil, err
 	}
-	convertedEntries := DayEntryConverter{taskConfig: t.config}.ConvertUserEntry(entry)
+	convertedEntries := DayEntryConverter{taskConfig: t.taskConfig}.ConvertUserEntry(entry)
 	return convertedEntries, nil
 }
 
