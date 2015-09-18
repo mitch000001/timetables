@@ -1,25 +1,5 @@
 package timetables
 
-type TrackingEntry struct {
-	UserID    string
-	Hours     *Float
-	TrackedAt ShortDate
-	Type      TrackingEntryType
-}
-
-type TrackingEntryType int
-
-const (
-	Billable TrackingEntryType = iota
-	Vacation
-	Sickness
-	NonBillable
-)
-
-type TrackedHoursProvider interface {
-	TrackedHoursForYear(year int) TrackedHours
-}
-
 func NewTrackedHours(entries []TrackingEntry) TrackedHours {
 	return TrackedHours{
 		entries: entries,
