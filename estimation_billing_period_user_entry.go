@@ -26,16 +26,20 @@ func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, u
 
 	estimationPeriod.VacationInterestDays = NewFloat(userConfig.workingDegree).Mul(NewFloat(planConfig.VacationInterestDays)).Mul(shareOfYear)
 
-	sicknessInterest := NewFloat(planConfig.SicknessInterestDays)
 	if userConfig.hasChild {
-		sicknessInterest = NewFloat(planConfig.SicknessInterestDays).Add(NewFloat(planConfig.ChildCareInterestDays))
+		estimationPeriod.ChildCareDays = NewFloat(planConfig.ChildCareInterestDays).Mul(shareOfYear).Mul(NewFloat(userConfig.workingDegree))
+	} else {
+		estimationPeriod.ChildCareDays = NewFloat(0)
 	}
-	sicknessInterestShare := sicknessInterest.Mul(shareOfYear)
+
+	sicknessInterestShare := NewFloat(planConfig.SicknessInterestDays).Mul(shareOfYear)
 	estimationPeriod.SicknessInterestDays = sicknessInterestShare.Mul(NewFloat(userConfig.workingDegree))
 
-	unbilled := estimationPeriod.SicknessInterestDays.Add(estimationPeriod.VacationInterestDays).Add(estimationPeriod.RemainingVacationInterestDays)
-	estimationPeriod.BillableDays = NewFloat(period.BusinessDays).Sub(unbilled).Mul(NewFloat(userConfig.billingDegree))
-	estimationPeriod.NonbillableDays = NewFloat(period.BusinessDays).Sub(estimationPeriod.BillableDays)
+	nonOfficeDays := estimationPeriod.SicknessInterestDays.Add(estimationPeriod.VacationInterestDays).Add(estimationPeriod.RemainingVacationInterestDays).Add(estimationPeriod.ChildCareDays)
+	estimationPeriod.OfficeDays = NewFloat(period.BusinessDays).Sub(nonOfficeDays)
+
+	estimationPeriod.BillableDays = estimationPeriod.OfficeDays.Mul(NewFloat(userConfig.billingDegree))
+	estimationPeriod.NonbillableDays = estimationPeriod.OfficeDays.Sub(estimationPeriod.BillableDays)
 
 	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BillableDays.Div(NewFloat(period.BusinessDays))
 
@@ -49,7 +53,9 @@ type EstimationBillingPeriodUserEntry struct {
 	VacationInterestDays          *Float
 	RemainingVacationInterestDays *Float
 	SicknessInterestDays          *Float
+	ChildCareDays                 *Float
 	BillableDays                  *Float
 	NonbillableDays               *Float
+	OfficeDays                    *Float
 	EffectiveBillingDegree        *Float
 }
