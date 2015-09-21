@@ -106,6 +106,38 @@ func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, ti
 	return hours
 }
 
+func (t TrackedHours) ChildCareHours() *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.entries {
+		if entry.Type == ChildCare {
+			hours = hours.Add(entry.Hours)
+		}
+	}
+	return hours
+}
+
+func (t TrackedHours) ChildCareHoursForTimeframe(timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.entries {
+		if entry.Type == ChildCare && timeframe.IsInTimeframe(entry.TrackedAt) {
+			hours = hours.Add(entry.Hours)
+		}
+	}
+	return hours
+}
+
+func (t TrackedHours) ChildCareHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Float {
+	hours := NewFloat(0)
+	for _, entry := range t.entries {
+		if entry.Type == ChildCare && timeframe.IsInTimeframe(entry.TrackedAt) {
+			if entry.UserID == userId {
+				hours = hours.Add(entry.Hours)
+			}
+		}
+	}
+	return hours
+}
+
 func (t TrackedHours) NonBillableRemainderHours() *Float {
 	hours := NewFloat(0)
 	for _, entry := range t.entries {

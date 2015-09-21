@@ -9,6 +9,8 @@ func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHour
 		UserID: userID,
 		Period: period,
 	}
+	billingPeriod.ChildCareHours = entries.ChildCareHoursForUserAndTimeframe(userID, period.Timeframe)
+	billingPeriod.CumulatedChildCareHours = entries.ChildCareHoursForUserAndTimeframe(userID, cumulationTimeframe)
 	billingPeriod.VacationInterestHours = entries.VacationInterestHoursForUserAndTimeframe(userID, period.Timeframe)
 	billingPeriod.CumulatedVacationInterestHours = entries.VacationInterestHoursForUserAndTimeframe(userID, cumulationTimeframe)
 	billingPeriod.SicknessInterestHours = entries.SicknessInterestHoursForUserAndTimeframe(userID, period.Timeframe)
@@ -40,6 +42,8 @@ type BillingPeriodUserEntry struct {
 	CumulatedVacationInterestHours *Float
 	SicknessInterestHours          *Float
 	CumulatedSicknessInterestHours *Float
+	ChildCareHours                 *Float
+	CumulatedChildCareHours        *Float
 	BillableHours                  *Float
 	CumulatedBillableHours         *Float
 	OfficeHours                    *Float

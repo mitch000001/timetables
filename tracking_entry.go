@@ -22,6 +22,7 @@ type TrackingEntryType int
 const (
 	Billable TrackingEntryType = iota
 	Vacation
+	ChildCare
 	Sickness
 	NonBillable
 )

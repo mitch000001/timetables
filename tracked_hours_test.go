@@ -316,6 +316,78 @@ func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) 
 	}
 }
 
-func TestTrackedHoursMarshalBinary(t *testing.T) {
+func TestTrackedHoursChildCareHours(t *testing.T) {
+	entries := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
+	}
 
+	trackedHours := TrackedHours{
+		entries: entries,
+	}
+	var res *Float
+
+	res = trackedHours.ChildCareHours()
+
+	expected := NewFloat(16)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedHoursChildCareHoursForTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	entries := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	}
+
+	trackedHours := TrackedHours{
+		entries: entries,
+	}
+	var res *Float
+
+	res = trackedHours.ChildCareHoursForTimeframe(timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
+		t.Fail()
+	}
+}
+
+func TestTrackedHoursChildCareHoursForUserAndTimeframe(t *testing.T) {
+	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
+	entries := []TrackingEntry{
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+	}
+
+	trackedHours := TrackedHours{
+		entries: entries,
+	}
+	var res *Float
+
+	res = trackedHours.ChildCareHoursForUserAndTimeframe("1", timeframe)
+
+	expected := NewFloat(8)
+
+	if !reflect.DeepEqual(expected, res) {
+		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
+		t.Fail()
+	}
 }
