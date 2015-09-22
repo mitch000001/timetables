@@ -12,8 +12,9 @@ import (
 func TestDayEntryConverterConvertNonbillable(t *testing.T) {
 	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
-			VacationID: 5,
-			SicknessID: 8,
+			VacationID:  5,
+			ChildCareID: 11,
+			SicknessID:  8,
 		},
 	}
 
@@ -21,6 +22,7 @@ func TestDayEntryConverterConvertNonbillable(t *testing.T) {
 		&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
 		&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
 		&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 3, time.Local)},
+		&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 11, SpentAt: harvest.Date(2015, 1, 4, time.Local)},
 	}
 
 	entries := converter.ConvertNonbillable(harvestEntries)
@@ -29,6 +31,7 @@ func TestDayEntryConverterConvertNonbillable(t *testing.T) {
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 1, time.Local), Type: timetables.Vacation},
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 2, time.Local), Type: timetables.Vacation},
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 3, time.Local), Type: timetables.NonBillable},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 4, time.Local), Type: timetables.ChildCare},
 	}
 
 	if !reflect.DeepEqual(expectedEntries, entries) {
@@ -40,8 +43,9 @@ func TestDayEntryConverterConvertNonbillable(t *testing.T) {
 func TestDayEntryConverterConvertBillable(t *testing.T) {
 	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
-			VacationID: 10,
-			SicknessID: 14,
+			VacationID:  10,
+			ChildCareID: 20,
+			SicknessID:  14,
 		},
 	}
 
@@ -68,8 +72,9 @@ func TestDayEntryConverterConvertBillable(t *testing.T) {
 func TestDayEntryConverterConvertUserEntry(t *testing.T) {
 	converter := DayEntryConverter{
 		taskConfig: TaskConfig{
-			VacationID: 5,
-			SicknessID: 8,
+			VacationID:  5,
+			ChildCareID: 11,
+			SicknessID:  8,
 		},
 	}
 
@@ -80,9 +85,10 @@ func TestDayEntryConverterConvertUserEntry(t *testing.T) {
 			&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 9, SpentAt: harvest.Date(2015, 1, 3, time.Local)},
 		},
 		NonbillableEntries: []*harvest.DayEntry{
-			&harvest.DayEntry{ID: 1, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 1, time.Local)},
-			&harvest.DayEntry{ID: 2, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 2, time.Local)},
-			&harvest.DayEntry{ID: 3, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 3, time.Local)},
+			&harvest.DayEntry{ID: 4, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 4, time.Local)},
+			&harvest.DayEntry{ID: 5, UserId: 1, Hours: 8, TaskId: 5, SpentAt: harvest.Date(2015, 1, 5, time.Local)},
+			&harvest.DayEntry{ID: 6, UserId: 1, Hours: 8, TaskId: 13, SpentAt: harvest.Date(2015, 1, 6, time.Local)},
+			&harvest.DayEntry{ID: 7, UserId: 1, Hours: 8, TaskId: 11, SpentAt: harvest.Date(2015, 1, 7, time.Local)},
 		},
 	}
 
@@ -92,9 +98,10 @@ func TestDayEntryConverterConvertUserEntry(t *testing.T) {
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 1, time.Local), Type: timetables.Billable},
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 2, time.Local), Type: timetables.Billable},
 		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 3, time.Local), Type: timetables.Billable},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 1, time.Local), Type: timetables.Vacation},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 2, time.Local), Type: timetables.Vacation},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 3, time.Local), Type: timetables.NonBillable},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 4, time.Local), Type: timetables.Vacation},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 5, time.Local), Type: timetables.Vacation},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 6, time.Local), Type: timetables.NonBillable},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), TrackedAt: timetables.Date(2015, 1, 7, time.Local), Type: timetables.ChildCare},
 	}
 
 	if !reflect.DeepEqual(expectedEntries, entries) {

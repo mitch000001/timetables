@@ -8,8 +8,9 @@ import (
 )
 
 type TaskConfig struct {
-	VacationID int
-	SicknessID int
+	VacationID  int
+	ChildCareID int
+	SicknessID  int
 }
 
 type DayEntryConverter struct {
@@ -24,11 +25,14 @@ func (h DayEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) []tim
 			Hours:     timetables.NewFloat(entry.Hours),
 			TrackedAt: timetables.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
 		}
-		if entry.TaskId == h.taskConfig.VacationID {
+		switch entry.TaskId {
+		case h.taskConfig.VacationID:
 			trackingEntry.Type = timetables.Vacation
-		} else if entry.TaskId == h.taskConfig.SicknessID {
+		case h.taskConfig.SicknessID:
 			trackingEntry.Type = timetables.Sickness
-		} else {
+		case h.taskConfig.ChildCareID:
+			trackingEntry.Type = timetables.ChildCare
+		default:
 			trackingEntry.Type = timetables.NonBillable
 		}
 		trackingEntries = append(trackingEntries, trackingEntry)
