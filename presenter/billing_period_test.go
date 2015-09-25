@@ -57,7 +57,7 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 			LastName:  "Muster",
 		},
 		TrackedDays: interaction.TrackedDays{
-			BillableDays: timetables.NewFloat(8),
+			BillableDays: timetables.NewRat(8),
 		},
 	}
 	presenter := BillingPeriodEntryPresenter{

@@ -8,8 +8,8 @@ import (
 
 func TestNewTrackedHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
 	}
 
 	trackedHours := NewTrackedHours(entries)
@@ -22,9 +22,9 @@ func TestNewTrackedHours(t *testing.T) {
 
 func TestTrackedHoursBillableHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
@@ -33,9 +33,9 @@ func TestTrackedHoursBillableHours(t *testing.T) {
 
 	res := trackedHours.BillableHours()
 
-	expected := NewFloat(16)
+	expected := NewRat(16)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -44,21 +44,21 @@ func TestTrackedHoursBillableHours(t *testing.T) {
 func TestTrackedHoursBillableHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.BillableHoursForTimeframe(timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -67,22 +67,22 @@ func TestTrackedHoursBillableHoursForTimeframe(t *testing.T) {
 func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "2", TrackedAt: Date(2015, 1, 2, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.BillableHoursForUserAndTimeframe("1", timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -90,23 +90,23 @@ func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 
 func TestTrackedHoursVacationInterestHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.VacationInterestHours()
 
-	expected := NewFloat(16)
+	expected := NewRat(16)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -115,23 +115,23 @@ func TestTrackedHoursVacationInterestHours(t *testing.T) {
 func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.VacationInterestHoursForTimeframe(timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -140,24 +140,24 @@ func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.VacationInterestHoursForUserAndTimeframe("1", timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -165,23 +165,23 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 
 func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.SicknessInterestHours()
 
-	expected := NewFloat(16)
+	expected := NewRat(16)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -190,23 +190,23 @@ func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.SicknessInterestHoursForTimeframe(timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -215,24 +215,24 @@ func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.SicknessInterestHoursForUserAndTimeframe("1", timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -240,24 +240,24 @@ func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 
 func TestTrackedHoursNonBillableRemainderHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.NonBillableRemainderHours()
 
-	expected := NewFloat(16)
+	expected := NewRat(16)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -266,24 +266,24 @@ func TestTrackedHoursNonBillableRemainderHours(t *testing.T) {
 func TestTrackedHoursNonBillableRemainderHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.NonBillableRemainderHoursForTimeframe(timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -292,25 +292,25 @@ func TestTrackedHoursNonBillableRemainderHoursForTimeframe(t *testing.T) {
 func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 5, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "2", TrackedAt: Date(2015, 1, 5, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.NonBillableRemainderHoursForUserAndTimeframe("1", timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -318,24 +318,24 @@ func TestTrackedHoursNonBillableRemainderHoursForUserAndTimeframe(t *testing.T) 
 
 func TestTrackedHoursChildCareHours(t *testing.T) {
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: Vacation},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: Sickness},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.ChildCareHours()
 
-	expected := NewFloat(16)
+	expected := NewRat(16)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -344,23 +344,23 @@ func TestTrackedHoursChildCareHours(t *testing.T) {
 func TestTrackedHoursChildCareHoursForTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.ChildCareHoursForTimeframe(timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}
@@ -369,24 +369,24 @@ func TestTrackedHoursChildCareHoursForTimeframe(t *testing.T) {
 func TestTrackedHoursChildCareHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
-		TrackingEntry{Hours: NewFloat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 1, time.Local), Type: Billable},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2014, 2, 1, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 2, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "2", TrackedAt: Date(2015, 1, 4, time.Local), Type: ChildCare},
+		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: Date(2015, 1, 3, time.Local), Type: NonBillable},
 	}
 
 	trackedHours := TrackedHours{
 		entries: entries,
 	}
-	var res *Float
+	var res *Rat
 
 	res = trackedHours.ChildCareHoursForUserAndTimeframe("1", timeframe)
 
-	expected := NewFloat(8)
+	expected := NewRat(8)
 
-	if !reflect.DeepEqual(expected, res) {
+	if expected.Cmp(res) != 0 {
 		t.Logf("Expected result to equal\n%+v\n\tgot:\n%+v\n", expected, res)
 		t.Fail()
 	}

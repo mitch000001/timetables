@@ -20,16 +20,16 @@ func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHour
 	billingPeriod.NonbillableHours = entries.NonBillableRemainderHoursForUserAndTimeframe(userID, period.Timeframe)
 	billingPeriod.CumulatedNonbillableHours = entries.NonBillableRemainderHoursForUserAndTimeframe(userID, cumulationTimeframe)
 	billingPeriod.OfficeHours = billingPeriod.BillableHours.Add(billingPeriod.NonbillableHours)
-	if billingPeriod.OfficeHours.Cmp(NewFloat(0)) != 0 {
+	if billingPeriod.OfficeHours.Cmp(NewRat(0)) != 0 {
 		billingPeriod.BillingDegree = billingPeriod.BillableHours.Div(billingPeriod.OfficeHours)
 	} else {
-		billingPeriod.BillingDegree = NewFloat(0)
+		billingPeriod.BillingDegree = NewRat(0)
 	}
 	billingPeriod.CumulatedOfficeHours = billingPeriod.CumulatedBillableHours.Add(billingPeriod.CumulatedNonbillableHours)
-	if billingPeriod.CumulatedOfficeHours.Cmp(NewFloat(0)) != 0 {
+	if billingPeriod.CumulatedOfficeHours.Cmp(NewRat(0)) != 0 {
 		billingPeriod.CumulatedBillingDegree = billingPeriod.CumulatedBillableHours.Div(billingPeriod.CumulatedOfficeHours)
 	} else {
-		billingPeriod.CumulatedBillingDegree = NewFloat(0)
+		billingPeriod.CumulatedBillingDegree = NewRat(0)
 	}
 	return billingPeriod
 }
@@ -38,18 +38,18 @@ type BillingPeriodUserEntry struct {
 	ID                             string
 	UserID                         string
 	Period                         Period
-	VacationInterestHours          *Float
-	CumulatedVacationInterestHours *Float
-	SicknessInterestHours          *Float
-	CumulatedSicknessInterestHours *Float
-	ChildCareHours                 *Float
-	CumulatedChildCareHours        *Float
-	BillableHours                  *Float
-	CumulatedBillableHours         *Float
-	OfficeHours                    *Float
-	CumulatedOfficeHours           *Float
-	NonbillableHours               *Float
-	CumulatedNonbillableHours      *Float
-	BillingDegree                  *Float
-	CumulatedBillingDegree         *Float
+	VacationInterestHours          *Rat
+	CumulatedVacationInterestHours *Rat
+	SicknessInterestHours          *Rat
+	CumulatedSicknessInterestHours *Rat
+	ChildCareHours                 *Rat
+	CumulatedChildCareHours        *Rat
+	BillableHours                  *Rat
+	CumulatedBillableHours         *Rat
+	OfficeHours                    *Rat
+	CumulatedOfficeHours           *Rat
+	NonbillableHours               *Rat
+	CumulatedNonbillableHours      *Rat
+	BillingDegree                  *Rat
+	CumulatedBillingDegree         *Rat
 }

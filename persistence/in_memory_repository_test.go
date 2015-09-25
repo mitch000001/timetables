@@ -130,7 +130,7 @@ func TestInMemoryBillingPeriodRepositoryUpdate(t *testing.T) {
 	}
 
 	entry.AddUserEntry("1", timetables.NewTrackedHours([]timetables.TrackingEntry{
-		timetables.TrackingEntry{Hours: timetables.NewFloat(8), UserID: "1", TrackedAt: timetables.Date(2015, 1, 15, time.Local), Type: timetables.Billable},
+		timetables.TrackingEntry{Hours: timetables.NewRat(8), UserID: "1", TrackedAt: timetables.Date(2015, 1, 15, time.Local), Type: timetables.Billable},
 	}))
 
 	err = store.Update(key, entry)

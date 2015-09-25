@@ -22,7 +22,7 @@ func (h DayEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) []tim
 	for _, entry := range entries {
 		trackingEntry := timetables.TrackingEntry{
 			UserID:    fmt.Sprintf("%d", entry.UserId),
-			Hours:     timetables.NewFloat(entry.Hours),
+			Hours:     timetables.NewRat(entry.Hours),
 			TrackedAt: timetables.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
 		}
 		switch entry.TaskId {
@@ -45,7 +45,7 @@ func (h DayEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []timeta
 	for _, entry := range entries {
 		trackingEntry := timetables.TrackingEntry{
 			UserID:    fmt.Sprintf("%d", entry.UserId),
-			Hours:     timetables.NewFloat(entry.Hours),
+			Hours:     timetables.NewRat(entry.Hours),
 			TrackedAt: timetables.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
 			Type:      timetables.Billable,
 		}

@@ -33,7 +33,7 @@ func TestBillingPeriodAddUserEntry(t *testing.T) {
 	}
 	userId := "1"
 	trackedHours := NewTrackedHours([]TrackingEntry{
-		TrackingEntry{UserID: "1", Hours: NewFloat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
+		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
 	})
 
 	billingPeriod := NewBillingPeriod(period)
@@ -62,7 +62,7 @@ func TestBilligPeriodUserEntries(t *testing.T) {
 	}
 	userId := "1"
 	trackedHours := NewTrackedHours([]TrackingEntry{
-		TrackingEntry{UserID: "1", Hours: NewFloat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
+		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
 	})
 
 	billingPeriod := NewBillingPeriod(period)

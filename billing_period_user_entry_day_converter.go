@@ -4,7 +4,7 @@ type BillingPeriodUserEntryConverter struct {
 }
 
 func (b BillingPeriodUserEntryConverter) Convert(userEntry BillingPeriodUserEntry, workingDegree float64) BillingPeriodDayUserEntry {
-	workingDegreeDayFactor := NewFloat(workingDegree).Mul(NewFloat(8))
+	workingDegreeDayFactor := NewRat(workingDegree).Mul(NewRat(8))
 	return BillingPeriodDayUserEntry{
 		UserID:                        userEntry.UserID,
 		Period:                        userEntry.Period,
@@ -26,16 +26,16 @@ func (b BillingPeriodUserEntryConverter) Convert(userEntry BillingPeriodUserEntr
 type BillingPeriodDayUserEntry struct {
 	UserID                        string
 	Period                        Period
-	VacationInterestDays          *Float
-	CumulatedVacationInterestDays *Float
-	SicknessInterestDays          *Float
-	CumulatedSicknessInterestDays *Float
-	BillableDays                  *Float
-	CumulatedBillableDays         *Float
-	OfficeDays                    *Float
-	CumulatedOfficeDays           *Float
-	NonbillableDays               *Float
-	CumulatedNonbillableDays      *Float
-	BillingDegree                 *Float
-	CumulatedBillingDegree        *Float
+	VacationInterestDays          *Rat
+	CumulatedVacationInterestDays *Rat
+	SicknessInterestDays          *Rat
+	CumulatedSicknessInterestDays *Rat
+	BillableDays                  *Rat
+	CumulatedBillableDays         *Rat
+	OfficeDays                    *Rat
+	CumulatedOfficeDays           *Rat
+	NonbillableDays               *Rat
+	CumulatedNonbillableDays      *Rat
+	BillingDegree                 *Rat
+	CumulatedBillingDegree        *Rat
 }

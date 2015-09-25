@@ -18,13 +18,13 @@ type User struct {
 }
 
 type TrackedDays struct {
-	BillableDays *timetables.Float
+	BillableDays *timetables.Rat
 }
 
 type Delta struct {
-	Tracked   *timetables.Float
-	Estimated *timetables.Float
-	Delta     *timetables.Float
+	Tracked   *timetables.Rat
+	Estimated *timetables.Rat
+	Delta     *timetables.Rat
 }
 
 type TrackingEntryFetcher interface {

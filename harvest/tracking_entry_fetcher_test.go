@@ -69,11 +69,11 @@ func TestTrackingEntryFetcherFetchForUser(t *testing.T) {
 	}
 
 	expectedResult := []timetables.TrackingEntry{
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 1, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 2, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 3, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.NonBillable, TrackedAt: timetables.Date(2015, 1, 4, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 5, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 1, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 2, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 3, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.NonBillable, TrackedAt: timetables.Date(2015, 1, 4, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 5, time.Local)},
 	}
 
 	var result []timetables.TrackingEntry
@@ -127,10 +127,10 @@ func TestTrackingEntryFetcherFetch(t *testing.T) {
 	}
 
 	expectedTrackingEntries := []timetables.TrackingEntry{
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 15, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 20, time.Local)},
-		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 17, time.Local)},
-		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewFloat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 19, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 15, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 20, time.Local)},
+		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 17, time.Local)},
+		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewRat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 19, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expectedTrackingEntries, entries) {
@@ -150,11 +150,11 @@ func TestTrackingEntryFetcherFetch(t *testing.T) {
 	}
 
 	expectedTrackingEntries = []timetables.TrackingEntry{
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 15, time.Local)},
-		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewFloat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 20, time.Local)},
-		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 17, time.Local)},
-		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewFloat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 19, time.Local)},
-		timetables.TrackingEntry{UserID: "3", Hours: timetables.NewFloat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 23, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 15, time.Local)},
+		timetables.TrackingEntry{UserID: "1", Hours: timetables.NewRat(8), Type: timetables.Vacation, TrackedAt: timetables.Date(2015, 1, 20, time.Local)},
+		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 17, time.Local)},
+		timetables.TrackingEntry{UserID: "2", Hours: timetables.NewRat(8), Type: timetables.Sickness, TrackedAt: timetables.Date(2015, 1, 19, time.Local)},
+		timetables.TrackingEntry{UserID: "3", Hours: timetables.NewRat(8), Type: timetables.Billable, TrackedAt: timetables.Date(2015, 1, 23, time.Local)},
 	}
 
 	if !reflect.DeepEqual(expectedTrackingEntries, entries) {

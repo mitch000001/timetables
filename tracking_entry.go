@@ -4,7 +4,7 @@ import "sort"
 
 type TrackingEntry struct {
 	UserID    string
-	Hours     *Float
+	Hours     *Rat
 	TrackedAt ShortDate
 	Type      TrackingEntryType
 }
