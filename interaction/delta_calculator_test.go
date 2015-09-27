@@ -15,6 +15,8 @@ func TestDeltaCalculatorCalculate(t *testing.T) {
 		NonbillableDays:      timetables.NewRat(1),
 		VacationInterestDays: timetables.NewRat(5),
 		SicknessInterestDays: timetables.NewRat(1),
+		ChildCareDays:        timetables.NewRat(3),
+		OfficeDays:           timetables.NewRat(5),
 	}
 
 	estimated := timetables.EstimationBillingPeriodUserEntry{
@@ -23,6 +25,8 @@ func TestDeltaCalculatorCalculate(t *testing.T) {
 		NonbillableDays:      timetables.NewRat(3),
 		VacationInterestDays: timetables.NewRat(2),
 		SicknessInterestDays: timetables.NewRat(1),
+		ChildCareDays:        timetables.NewRat(3),
+		OfficeDays:           timetables.NewRat(13),
 	}
 
 	deltaCalculator := DeltaCalculator{

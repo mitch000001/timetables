@@ -19,3 +19,7 @@ func (e *EstimationBillingPeriod) AddUserEntry(userConfig UserConfig) {
 	userEntry := NewEstimationBillingPeriodUserEntry(e.Period, e.planConfig, userConfig)
 	e.userEntries = append(e.userEntries, userEntry)
 }
+
+func (e *EstimationBillingPeriod) UserEntries() []EstimationBillingPeriodUserEntry {
+	return e.userEntries
+}

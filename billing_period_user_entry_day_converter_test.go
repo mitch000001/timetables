@@ -15,6 +15,8 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 		CumulatedVacationInterestHours: NewRat(8),
 		SicknessInterestHours:          NewRat(8),
 		CumulatedSicknessInterestHours: NewRat(8),
+		ChildCareHours:                 NewRat(8),
+		CumulatedChildCareHours:        NewRat(8),
 		BillableHours:                  NewRat(8),
 		CumulatedBillableHours:         NewRat(8),
 		OfficeHours:                    NewRat(8),
@@ -36,6 +38,8 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 		CumulatedVacationInterestDays: NewRat(1),
 		SicknessInterestDays:          NewRat(1),
 		CumulatedSicknessInterestDays: NewRat(1),
+		ChildCareDays:                 NewRat(1),
+		CumulatedChildCareDays:        NewRat(1),
 		BillableDays:                  NewRat(1),
 		CumulatedBillableDays:         NewRat(1),
 		OfficeDays:                    NewRat(1),
@@ -47,7 +51,7 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 	}
 
 	if !reflect.DeepEqual(expectedEntries, dayEntries) {
-		t.Logf("Expected day entries to equal\n%q\n\tgot:\n%q\n", expectedEntries, dayEntries)
+		t.Logf("Expected day entries to equal\n%+v\n\tgot:\n%+v\n", expectedEntries, dayEntries)
 		t.Fail()
 	}
 }

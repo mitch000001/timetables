@@ -12,6 +12,8 @@ func (b BillingPeriodUserEntryConverter) Convert(userEntry BillingPeriodUserEntr
 		CumulatedVacationInterestDays: userEntry.CumulatedVacationInterestHours.Div(workingDegreeDayFactor),
 		SicknessInterestDays:          userEntry.SicknessInterestHours.Div(workingDegreeDayFactor),
 		CumulatedSicknessInterestDays: userEntry.CumulatedSicknessInterestHours.Div(workingDegreeDayFactor),
+		ChildCareDays:                 userEntry.ChildCareHours.Div(workingDegreeDayFactor),
+		CumulatedChildCareDays:        userEntry.CumulatedChildCareHours.Div(workingDegreeDayFactor),
 		BillableDays:                  userEntry.BillableHours.Div(workingDegreeDayFactor),
 		CumulatedBillableDays:         userEntry.CumulatedBillableHours.Div(workingDegreeDayFactor),
 		OfficeDays:                    userEntry.OfficeHours.Div(workingDegreeDayFactor),
@@ -30,6 +32,8 @@ type BillingPeriodDayUserEntry struct {
 	CumulatedVacationInterestDays *Rat
 	SicknessInterestDays          *Rat
 	CumulatedSicknessInterestDays *Rat
+	ChildCareDays                 *Rat
+	CumulatedChildCareDays        *Rat
 	BillableDays                  *Rat
 	CumulatedBillableDays         *Rat
 	OfficeDays                    *Rat
