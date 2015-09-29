@@ -9,13 +9,20 @@ import (
 
 func TestBillingDeltaFormatterFormat(t *testing.T) {
 	billingDelta := BillingDelta{
-		BillableDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		NonbillableDaysDelta: Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		VacationDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		SicknessDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		ChildCareDaysDelta:   Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		OfficeDaysDelta:      Delta{timetables.NewRat(8), timetables.NewRat(7)},
-		BillingDegreeDelta:   Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		BillableDaysDelta:             Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedBillableDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		NonbillableDaysDelta:          Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedNonbillableDaysDelta: Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		VacationDaysDelta:             Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedVacationDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		SicknessDaysDelta:             Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedSicknessDaysDelta:    Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		ChildCareDaysDelta:            Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedChildCareDaysDelta:   Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		OfficeDaysDelta:               Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedOfficeDaysDelta:      Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		BillingDegreeDelta:            Delta{timetables.NewRat(8), timetables.NewRat(7)},
+		CumulatedBillingDegreeDelta:   Delta{timetables.NewRat(8), timetables.NewRat(7)},
 	}
 
 	formatter := BillingDeltaFormatter{}
@@ -23,13 +30,20 @@ func TestBillingDeltaFormatterFormat(t *testing.T) {
 	formatted := formatter.Format(billingDelta, 2)
 
 	expectedDelta := FormattedBillingDelta{
-		BillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
-		NonbillableDaysDelta: FormattedDelta{"8.00", "7.00", "1.00"},
-		VacationDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
-		SicknessDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
-		ChildCareDaysDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
-		OfficeDaysDelta:      FormattedDelta{"8.00", "7.00", "1.00"},
-		BillingDegreeDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+		BillableDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedBillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+		NonbillableDaysDelta:          FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedNonbillableDaysDelta: FormattedDelta{"8.00", "7.00", "1.00"},
+		VacationDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedVacationDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+		SicknessDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedSicknessDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+		ChildCareDaysDelta:            FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedChildCareDaysDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+		OfficeDaysDelta:               FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedOfficeDaysDelta:      FormattedDelta{"8.00", "7.00", "1.00"},
+		BillingDegreeDelta:            FormattedDelta{"8.00", "7.00", "1.00"},
+		CumulatedBillingDegreeDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
 	}
 
 	if !reflect.DeepEqual(expectedDelta, formatted) {
@@ -53,6 +67,21 @@ func TestDeltaFormatterFormat(t *testing.T) {
 			precision:      5,
 			delta:          Delta{timetables.NewRat(6.123456), timetables.NewRat(8.123454)},
 			formattedDelta: FormattedDelta{"6.12346", "8.12345", "-2.00000"},
+		},
+		{
+			precision:      2,
+			delta:          Delta{},
+			formattedDelta: FormattedDelta{},
+		},
+		{
+			precision:      2,
+			delta:          Delta{Tracked: timetables.NewRat(4)},
+			formattedDelta: FormattedDelta{},
+		},
+		{
+			precision:      2,
+			delta:          Delta{Estimated: timetables.NewRat(4)},
+			formattedDelta: FormattedDelta{},
 		},
 	}
 

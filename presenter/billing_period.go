@@ -42,23 +42,37 @@ type BillingPeriodEntry struct {
 }
 
 type BillingDelta struct {
-	BillableDaysDelta    Delta
-	NonbillableDaysDelta Delta
-	VacationDaysDelta    Delta
-	SicknessDaysDelta    Delta
-	ChildCareDaysDelta   Delta
-	OfficeDaysDelta      Delta
-	BillingDegreeDelta   Delta
+	BillableDaysDelta             Delta
+	CumulatedBillableDaysDelta    Delta
+	NonbillableDaysDelta          Delta
+	CumulatedNonbillableDaysDelta Delta
+	VacationDaysDelta             Delta
+	CumulatedVacationDaysDelta    Delta
+	SicknessDaysDelta             Delta
+	CumulatedSicknessDaysDelta    Delta
+	ChildCareDaysDelta            Delta
+	CumulatedChildCareDaysDelta   Delta
+	OfficeDaysDelta               Delta
+	CumulatedOfficeDaysDelta      Delta
+	BillingDegreeDelta            Delta
+	CumulatedBillingDegreeDelta   Delta
 }
 
 type FormattedBillingDelta struct {
-	BillableDaysDelta    FormattedDelta
-	NonbillableDaysDelta FormattedDelta
-	VacationDaysDelta    FormattedDelta
-	SicknessDaysDelta    FormattedDelta
-	ChildCareDaysDelta   FormattedDelta
-	OfficeDaysDelta      FormattedDelta
-	BillingDegreeDelta   FormattedDelta
+	BillableDaysDelta             FormattedDelta
+	CumulatedBillableDaysDelta    FormattedDelta
+	NonbillableDaysDelta          FormattedDelta
+	CumulatedNonbillableDaysDelta FormattedDelta
+	VacationDaysDelta             FormattedDelta
+	CumulatedVacationDaysDelta    FormattedDelta
+	SicknessDaysDelta             FormattedDelta
+	CumulatedSicknessDaysDelta    FormattedDelta
+	ChildCareDaysDelta            FormattedDelta
+	CumulatedChildCareDaysDelta   FormattedDelta
+	OfficeDaysDelta               FormattedDelta
+	CumulatedOfficeDaysDelta      FormattedDelta
+	BillingDegreeDelta            FormattedDelta
+	CumulatedBillingDegreeDelta   FormattedDelta
 }
 
 func NewBillingPeriodEntryPresenter(entry interaction.BillingPeriodEntry) BillingPeriodEntryPresenter {

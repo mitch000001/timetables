@@ -20,13 +20,20 @@ type User struct {
 }
 
 type Days struct {
-	BillableDays    *timetables.Rat
-	NonbillableDays *timetables.Rat
-	VacationDays    *timetables.Rat
-	SicknessDays    *timetables.Rat
-	ChildCareDays   *timetables.Rat
-	OfficeDays      *timetables.Rat
-	BillingDegree   *timetables.Rat
+	BillableDays             *timetables.Rat
+	CumulatedBillableDays    *timetables.Rat
+	NonbillableDays          *timetables.Rat
+	CumulatedNonbillableDays *timetables.Rat
+	VacationDays             *timetables.Rat
+	CumulatedVacationDays    *timetables.Rat
+	SicknessDays             *timetables.Rat
+	CumulatedSicknessDays    *timetables.Rat
+	ChildCareDays            *timetables.Rat
+	CumulatedChildCareDays   *timetables.Rat
+	OfficeDays               *timetables.Rat
+	CumulatedOfficeDays      *timetables.Rat
+	BillingDegree            *timetables.Rat
+	CumulatedBillingDegree   *timetables.Rat
 }
 
 type TrackingEntryFetcher interface {
