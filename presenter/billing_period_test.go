@@ -16,9 +16,28 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 		EndDate:   timetables.Date(2015, 1, 1, time.Local),
 		Entries: []interaction.BillingPeriodEntry{
 			interaction.BillingPeriodEntry{
-				User:          interaction.User{FirstName: "Max"},
-				TrackedDays:   interaction.Days{BillableDays: timetables.NewRat(8)},
-				EstimatedDays: interaction.Days{BillableDays: timetables.NewRat(8)},
+				User: interaction.User{
+					FirstName: "Max",
+					LastName:  "Muster",
+				},
+				TrackedDays: interaction.Days{
+					BillableDays:    timetables.NewRat(8),
+					NonbillableDays: timetables.NewRat(8),
+					VacationDays:    timetables.NewRat(8),
+					SicknessDays:    timetables.NewRat(8),
+					ChildCareDays:   timetables.NewRat(8),
+					OfficeDays:      timetables.NewRat(8),
+					BillingDegree:   timetables.NewRat(8),
+				},
+				EstimatedDays: interaction.Days{
+					BillableDays:    timetables.NewRat(7),
+					NonbillableDays: timetables.NewRat(7),
+					VacationDays:    timetables.NewRat(7),
+					SicknessDays:    timetables.NewRat(7),
+					ChildCareDays:   timetables.NewRat(7),
+					OfficeDays:      timetables.NewRat(7),
+					BillingDegree:   timetables.NewRat(7),
+				},
 			},
 		},
 	}
@@ -26,7 +45,8 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 	presenter = NewBillingPeriodPresenter(billingPeriod)
 
 	expectedPresenter := BillingPeriodPresenter{
-		model: billingPeriod,
+		DateFormat: DefaultDateFormat,
+		model:      billingPeriod,
 	}
 
 	if !reflect.DeepEqual(expectedPresenter, presenter) {
@@ -37,8 +57,36 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 
 func TestBillingPeriodPresenterPresent(t *testing.T) {
 	presenter := BillingPeriodPresenter{
+		DateFormat: DefaultDateFormat,
 		model: interaction.BillingPeriod{
 			StartDate: timetables.Date(2015, 1, 1, time.Local),
+			EndDate:   timetables.Date(2015, 1, 22, time.Local),
+			Entries: []interaction.BillingPeriodEntry{
+				interaction.BillingPeriodEntry{
+					User: interaction.User{
+						FirstName: "Max",
+						LastName:  "Muster",
+					},
+					TrackedDays: interaction.Days{
+						BillableDays:    timetables.NewRat(8),
+						NonbillableDays: timetables.NewRat(8),
+						VacationDays:    timetables.NewRat(8),
+						SicknessDays:    timetables.NewRat(8),
+						ChildCareDays:   timetables.NewRat(8),
+						OfficeDays:      timetables.NewRat(8),
+						BillingDegree:   timetables.NewRat(8),
+					},
+					EstimatedDays: interaction.Days{
+						BillableDays:    timetables.NewRat(7),
+						NonbillableDays: timetables.NewRat(7),
+						VacationDays:    timetables.NewRat(7),
+						SicknessDays:    timetables.NewRat(7),
+						ChildCareDays:   timetables.NewRat(7),
+						OfficeDays:      timetables.NewRat(7),
+						BillingDegree:   timetables.NewRat(7),
+					},
+				},
+			},
 		},
 	}
 
@@ -47,7 +95,52 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 	viewModel = presenter.Present()
 
 	expectedViewModel := BillingPeriod{
-		Entries: []BillingPeriodEntry{},
+		StartDate: "01.01.2015",
+		EndDate:   "22.01.2015",
+		Entries: []BillingPeriodEntry{
+			BillingPeriodEntry{
+				Name: "Max",
+				FormattedBillingDelta: FormattedBillingDelta{
+					BillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					NonbillableDaysDelta: FormattedDelta{"8.00", "7.00", "1.00"},
+					VacationDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					SicknessDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					ChildCareDaysDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+					OfficeDaysDelta:      FormattedDelta{"8.00", "7.00", "1.00"},
+					BillingDegreeDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+				},
+			},
+		},
+	}
+
+	if !reflect.DeepEqual(expectedViewModel, viewModel) {
+		t.Logf("Expected viewModel to equal\n%+#v\n\tgot:\n%+#v\n", expectedViewModel, viewModel)
+		t.Fail()
+	}
+
+	// Changed DateFormat
+
+	presenter.DateFormat = "02/01/2006"
+
+	viewModel = presenter.Present()
+
+	expectedViewModel = BillingPeriod{
+		StartDate: "01/01/2015",
+		EndDate:   "22/01/2015",
+		Entries: []BillingPeriodEntry{
+			BillingPeriodEntry{
+				Name: "Max",
+				FormattedBillingDelta: FormattedBillingDelta{
+					BillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					NonbillableDaysDelta: FormattedDelta{"8.00", "7.00", "1.00"},
+					VacationDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					SicknessDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
+					ChildCareDaysDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+					OfficeDaysDelta:      FormattedDelta{"8.00", "7.00", "1.00"},
+					BillingDegreeDelta:   FormattedDelta{"8.00", "7.00", "1.00"},
+				},
+			},
+		},
 	}
 
 	if !reflect.DeepEqual(expectedViewModel, viewModel) {

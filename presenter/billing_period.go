@@ -3,25 +3,37 @@ package presenter
 import "github.com/mitch000001/timetables/interaction"
 
 const DefaultDayPrecision = 2
+const DefaultDateFormat = "02.01.2006"
 
 func NewBillingPeriodPresenter(billingPeriod interaction.BillingPeriod) BillingPeriodPresenter {
 	return BillingPeriodPresenter{
-		model: billingPeriod,
+		model:      billingPeriod,
+		DateFormat: DefaultDateFormat,
 	}
 }
 
 type BillingPeriodPresenter struct {
-	model interaction.BillingPeriod
+	model      interaction.BillingPeriod
+	DateFormat string
 }
 
 func (b BillingPeriodPresenter) Present() BillingPeriod {
+	var entries []BillingPeriodEntry
+	for _, entry := range b.model.Entries {
+		entryPresenter := NewBillingPeriodEntryPresenter(entry)
+		entries = append(entries, entryPresenter.Present())
+	}
 	return BillingPeriod{
-		Entries: []BillingPeriodEntry{},
+		StartDate: b.model.StartDate.Format(b.DateFormat),
+		EndDate:   b.model.EndDate.Format(b.DateFormat),
+		Entries:   entries,
 	}
 }
 
 type BillingPeriod struct {
-	Entries []BillingPeriodEntry
+	StartDate string
+	EndDate   string
+	Entries   []BillingPeriodEntry
 }
 
 type BillingPeriodEntry struct {
