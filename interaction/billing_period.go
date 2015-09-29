@@ -5,11 +5,13 @@ import "github.com/mitch000001/timetables"
 type BillingPeriod struct {
 	StartDate timetables.ShortDate
 	EndDate   timetables.ShortDate
+	Entries   []BillingPeriodEntry
 }
 
 type BillingPeriodEntry struct {
-	User        User
-	TrackedDays TrackedDays
+	User          User
+	TrackedDays   Days
+	EstimatedDays Days
 }
 
 type User struct {
@@ -17,14 +19,14 @@ type User struct {
 	LastName  string
 }
 
-type TrackedDays struct {
-	BillableDays *timetables.Rat
-}
-
-type Delta struct {
-	Tracked   *timetables.Rat
-	Estimated *timetables.Rat
-	Delta     *timetables.Rat
+type Days struct {
+	BillableDays    *timetables.Rat
+	NonbillableDays *timetables.Rat
+	VacationDays    *timetables.Rat
+	SicknessDays    *timetables.Rat
+	ChildCareDays   *timetables.Rat
+	OfficeDays      *timetables.Rat
+	BillingDegree   *timetables.Rat
 }
 
 type TrackingEntryFetcher interface {
