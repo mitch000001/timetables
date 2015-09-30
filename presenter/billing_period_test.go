@@ -20,7 +20,7 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 					FirstName: "Max",
 					LastName:  "Muster",
 				},
-				TrackedDays: interaction.Days{
+				TrackedDays: interaction.PeriodData{
 					BillableDays:    timetables.NewRat(8),
 					NonbillableDays: timetables.NewRat(8),
 					VacationDays:    timetables.NewRat(8),
@@ -29,7 +29,7 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 					OfficeDays:      timetables.NewRat(8),
 					BillingDegree:   timetables.NewRat(8),
 				},
-				EstimatedDays: interaction.Days{
+				EstimatedDays: interaction.PeriodData{
 					BillableDays:    timetables.NewRat(7),
 					NonbillableDays: timetables.NewRat(7),
 					VacationDays:    timetables.NewRat(7),
@@ -67,7 +67,7 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 						FirstName: "Max",
 						LastName:  "Muster",
 					},
-					TrackedDays: interaction.Days{
+					TrackedDays: interaction.PeriodData{
 						BillableDays:             timetables.NewRat(8),
 						CumulatedBillableDays:    timetables.NewRat(8),
 						NonbillableDays:          timetables.NewRat(8),
@@ -83,7 +83,7 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 						BillingDegree:            timetables.NewRat(8),
 						CumulatedBillingDegree:   timetables.NewRat(8),
 					},
-					EstimatedDays: interaction.Days{
+					EstimatedDays: interaction.PeriodData{
 						BillableDays:             timetables.NewRat(7),
 						CumulatedBillableDays:    timetables.NewRat(7),
 						NonbillableDays:          timetables.NewRat(7),
@@ -204,7 +204,7 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 			FirstName: "Max",
 			LastName:  "Muster",
 		},
-		TrackedDays: interaction.Days{
+		TrackedDays: interaction.PeriodData{
 			BillableDays:             timetables.NewRat(8),
 			CumulatedBillableDays:    timetables.NewRat(8),
 			NonbillableDays:          timetables.NewRat(8),
@@ -220,7 +220,7 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 			BillingDegree:            timetables.NewRat(8),
 			CumulatedBillingDegree:   timetables.NewRat(8),
 		},
-		EstimatedDays: interaction.Days{
+		EstimatedDays: interaction.PeriodData{
 			BillableDays:             timetables.NewRat(7),
 			CumulatedBillableDays:    timetables.NewRat(7),
 			NonbillableDays:          timetables.NewRat(7),

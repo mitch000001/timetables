@@ -9,7 +9,7 @@ import (
 )
 
 func TestDeltaConverterConvert(t *testing.T) {
-	tracked := interaction.Days{
+	tracked := interaction.PeriodData{
 		BillableDays:             timetables.NewRat(4),
 		CumulatedBillableDays:    timetables.NewRat(4),
 		NonbillableDays:          timetables.NewRat(1),
@@ -26,7 +26,7 @@ func TestDeltaConverterConvert(t *testing.T) {
 		CumulatedBillingDegree:   timetables.NewRat(0.8),
 	}
 
-	estimated := interaction.Days{
+	estimated := interaction.PeriodData{
 		BillableDays:             timetables.NewRat(10),
 		CumulatedBillableDays:    timetables.NewRat(10),
 		NonbillableDays:          timetables.NewRat(3),

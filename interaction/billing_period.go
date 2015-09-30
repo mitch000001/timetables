@@ -10,8 +10,8 @@ type BillingPeriod struct {
 
 type BillingPeriodEntry struct {
 	User          User
-	TrackedDays   Days
-	EstimatedDays Days
+	TrackedDays   PeriodData
+	EstimatedDays PeriodData
 }
 
 type User struct {
@@ -19,7 +19,7 @@ type User struct {
 	LastName  string
 }
 
-type Days struct {
+type PeriodData struct {
 	BillableDays             *timetables.Rat
 	CumulatedBillableDays    *timetables.Rat
 	NonbillableDays          *timetables.Rat

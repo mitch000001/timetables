@@ -5,7 +5,7 @@ import "github.com/mitch000001/timetables/interaction"
 type DeltaConverter struct {
 }
 
-func (d DeltaConverter) Convert(tracked, estimated interaction.Days) BillingDelta {
+func (d DeltaConverter) Convert(tracked, estimated interaction.PeriodData) BillingDelta {
 	return BillingDelta{
 		BillableDaysDelta: Delta{
 			tracked.BillableDays,
