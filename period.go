@@ -23,6 +23,7 @@ func NewPeriod(timeframe date.Timeframe, businessDays float64) Period {
 }
 
 type Period struct {
+	ID           string
 	Timeframe    date.Timeframe
 	BusinessDays float64
 }
