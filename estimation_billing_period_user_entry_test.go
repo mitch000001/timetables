@@ -18,7 +18,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 	}{
 		{
 			description: "Has child, no remaining vacation, 250 business days, 10 in period",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          250,
@@ -34,7 +34,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0.0,
 			},
 			output: EstimationBillingPeriodUserEntry{
-				Period:                        Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(10).Div(NewRat(250))),
 				RemainingVacationInterestDays: NewRat(0),
@@ -48,7 +48,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Has child, no remaining vacation, 200 business days, 20 in period",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -64,7 +64,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0.0,
 			},
 			output: EstimationBillingPeriodUserEntry{
-				Period:                        Period{date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
 				RemainingVacationInterestDays: NewRat(0),
@@ -78,7 +78,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Has no child, no remaining vacation, 200 business days, 20 in period",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -94,7 +94,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 0,
 			},
 			output: EstimationBillingPeriodUserEntry{
-				Period:                        Period{date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
 				RemainingVacationInterestDays: NewRat(0),
@@ -108,7 +108,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Has no child, 5 vacation days remaining, 200 business days, 20 in period",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
@@ -124,7 +124,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				remainingVacationInterestDays: 5.0,
 			},
 			output: EstimationBillingPeriodUserEntry{
-				Period:                        Period{date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
+				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
 				RemainingVacationInterestDays: NewRat(5),

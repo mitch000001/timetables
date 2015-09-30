@@ -18,7 +18,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 	}{
 		{
 			description: "Two billable and one nonbillabe Day, no sickness, no vacation, no childcare",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -29,7 +29,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(0),
 				CumulatedVacationInterestHours: NewRat(0),
 				SicknessInterestHours:          NewRat(0),
@@ -48,7 +48,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "One billable and one nonbillabe Day, no sickness, no vacation, no childcare, TrackedHours contain data of other user",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -59,7 +59,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(0),
 				CumulatedVacationInterestHours: NewRat(0),
 				SicknessInterestHours:          NewRat(0),
@@ -78,7 +78,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable and one nonbillabe Day, no sickness, no vacation, no childcare, only six hours a day",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "2",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -89,7 +89,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "2",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(0),
 				CumulatedVacationInterestHours: NewRat(0),
 				SicknessInterestHours:          NewRat(0),
@@ -108,7 +108,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable, one nonbillabe and one vacation Day",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -120,7 +120,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(8),
 				CumulatedVacationInterestHours: NewRat(8),
 				SicknessInterestHours:          NewRat(0),
@@ -139,7 +139,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable, one nonbillabe, one sickness and one vacation Day",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -152,7 +152,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(8),
 				CumulatedVacationInterestHours: NewRat(8),
 				SicknessInterestHours:          NewRat(8),
@@ -171,7 +171,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable, one nonbillabe, one sickness, one childCare and one vacation Day",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -185,7 +185,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(8),
 				CumulatedVacationInterestHours: NewRat(8),
 				SicknessInterestHours:          NewRat(8),
@@ -204,7 +204,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable, one nonbillabe, one sickness and one vacation Day, but not in timeframe",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -217,7 +217,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(0),
 				CumulatedVacationInterestHours: NewRat(0),
 				SicknessInterestHours:          NewRat(0),
@@ -236,7 +236,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 		},
 		{
 			description: "Two billable, one nonbillabe, one sickness and one vacation Day, and the same one month ago",
-			period:      Period{date.Timeframe{StartDate: date.Date(2015, 2, 1, time.Local), EndDate: date.Date(2015, 2, 25, time.Local)}, 10},
+			period:      Period{"1", date.Timeframe{StartDate: date.Date(2015, 2, 1, time.Local), EndDate: date.Date(2015, 2, 25, time.Local)}, 10},
 			userId:      "1",
 			trackedEntries: TrackedHours{
 				entries: []TrackingEntry{
@@ -254,7 +254,7 @@ func TestNewBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: BillingPeriodUserEntry{
 				UserID:                         "1",
-				Period:                         Period{date.Timeframe{StartDate: date.Date(2015, 2, 1, time.Local), EndDate: date.Date(2015, 2, 25, time.Local)}, 10},
+				Period:                         Period{"1", date.Timeframe{StartDate: date.Date(2015, 2, 1, time.Local), EndDate: date.Date(2015, 2, 25, time.Local)}, 10},
 				VacationInterestHours:          NewRat(8),
 				CumulatedVacationInterestHours: NewRat(16),
 				SicknessInterestHours:          NewRat(8),

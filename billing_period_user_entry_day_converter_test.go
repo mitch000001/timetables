@@ -12,7 +12,7 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 	userEntry := BillingPeriodUserEntry{
 		ID:                             "17",
 		UserID:                         "1",
-		Period:                         Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 20},
+		Period:                         Period{"1", date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 20},
 		VacationInterestHours:          NewRat(8),
 		CumulatedVacationInterestHours: NewRat(8),
 		SicknessInterestHours:          NewRat(8),
@@ -35,7 +35,7 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 
 	expectedEntries := BillingPeriodDayUserEntry{
 		UserID:                        "1",
-		Period:                        Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 20},
+		Period:                        Period{"1", date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 20},
 		VacationInterestDays:          NewRat(1),
 		CumulatedVacationInterestDays: NewRat(1),
 		SicknessInterestDays:          NewRat(1),

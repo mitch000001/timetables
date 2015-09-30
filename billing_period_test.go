@@ -86,7 +86,7 @@ func TestBilligPeriodUserEntries(t *testing.T) {
 func TestBillingPeriodMarshalText(t *testing.T) {
 	period := BillingPeriod{
 		ID:     "17",
-		Period: Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+		Period: Period{"1", date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
 	}
 
 	expected := "{17}:{{{2015-01-01}:{2015-01-25}}:{25}}:[]"
@@ -110,7 +110,7 @@ func TestBillingPeriodMarshalText(t *testing.T) {
 func TestBillingPeriodUnmarshalText(t *testing.T) {
 	expectedPeriod := BillingPeriod{
 		ID:     "17",
-		Period: Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+		Period: Period{"", date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
 	}
 
 	marshaled := "{17}:{{2015-01-01:2015-01-25}:{25}}:[]"
