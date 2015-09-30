@@ -4,14 +4,16 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/mitch000001/timetables/date"
 )
 
 func TestNewPeriod(t *testing.T) {
-	p := NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 25)
+	p := NewPeriod(date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 25)
 
-	expectedTimeframe := Timeframe{
-		StartDate: Date(2015, 1, 1, time.Local),
-		EndDate:   Date(2015, 2, 1, time.Local),
+	expectedTimeframe := date.Timeframe{
+		StartDate: date.Date(2015, 1, 1, time.Local),
+		EndDate:   date.Date(2015, 2, 1, time.Local),
 	}
 
 	if !reflect.DeepEqual(expectedTimeframe, p.Timeframe) {
@@ -26,7 +28,7 @@ func TestNewPeriod(t *testing.T) {
 
 	// invalid businessDays
 
-	p = NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 0)
+	p = NewPeriod(date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), 0)
 
 	expectedBusinessDays := 32
 
@@ -35,7 +37,7 @@ func TestNewPeriod(t *testing.T) {
 		t.Fail()
 	}
 
-	p = NewPeriod(NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), -10)
+	p = NewPeriod(date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local), -10)
 
 	expectedBusinessDays = 32
 
@@ -47,7 +49,7 @@ func TestNewPeriod(t *testing.T) {
 
 func TestPeriodMarshalText(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 
@@ -71,7 +73,7 @@ func TestPeriodMarshalText(t *testing.T) {
 
 func TestPeriodUnmarshalText(t *testing.T) {
 	expectedPeriod := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	marshaled := "{2015-01-01:2015-01-25}:{20}"

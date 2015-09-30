@@ -6,14 +6,15 @@ import (
 	"time"
 
 	"github.com/mitch000001/timetables"
+	"github.com/mitch000001/timetables/date"
 	"github.com/mitch000001/timetables/interaction"
 )
 
 func TestNewBillingPeriodPresenter(t *testing.T) {
 	var presenter BillingPeriodPresenter
 	var billingPeriod = interaction.BillingPeriod{
-		StartDate: timetables.Date(2015, 1, 1, time.Local),
-		EndDate:   timetables.Date(2015, 1, 1, time.Local),
+		StartDate: date.Date(2015, 1, 1, time.Local),
+		EndDate:   date.Date(2015, 1, 1, time.Local),
 		Entries: []interaction.BillingPeriodEntry{
 			interaction.BillingPeriodEntry{
 				User: interaction.User{
@@ -59,8 +60,8 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 	presenter := BillingPeriodPresenter{
 		DateFormat: DefaultDateFormat,
 		model: interaction.BillingPeriod{
-			StartDate: timetables.Date(2015, 1, 1, time.Local),
-			EndDate:   timetables.Date(2015, 1, 22, time.Local),
+			StartDate: date.Date(2015, 1, 1, time.Local),
+			EndDate:   date.Date(2015, 1, 22, time.Local),
 			Entries: []interaction.BillingPeriodEntry{
 				interaction.BillingPeriodEntry{
 					User: interaction.User{

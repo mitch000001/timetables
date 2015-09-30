@@ -1,4 +1,4 @@
-package timetables
+package date
 
 import (
 	"bytes"

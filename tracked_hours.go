@@ -1,5 +1,7 @@
 package timetables
 
+import "github.com/mitch000001/timetables/date"
+
 func NewTrackedHours(entries []TrackingEntry) TrackedHours {
 	return TrackedHours{
 		entries: entries,
@@ -20,7 +22,7 @@ func (t TrackedHours) BillableHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) BillableHoursForTimeframe(timeframe Timeframe) *Rat {
+func (t TrackedHours) BillableHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Billable && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -30,7 +32,7 @@ func (t TrackedHours) BillableHoursForTimeframe(timeframe Timeframe) *Rat {
 	return hours
 }
 
-func (t TrackedHours) BillableHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Rat {
+func (t TrackedHours) BillableHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Billable && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -52,7 +54,7 @@ func (t TrackedHours) VacationInterestHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe Timeframe) *Rat {
+func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -62,7 +64,7 @@ func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe Timeframe) *Ra
 	return hours
 }
 
-func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Rat {
+func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -84,7 +86,7 @@ func (t TrackedHours) SicknessInterestHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe Timeframe) *Rat {
+func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -94,7 +96,7 @@ func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe Timeframe) *Ra
 	return hours
 }
 
-func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Rat {
+func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -116,7 +118,7 @@ func (t TrackedHours) ChildCareHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) ChildCareHoursForTimeframe(timeframe Timeframe) *Rat {
+func (t TrackedHours) ChildCareHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == ChildCare && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -126,7 +128,7 @@ func (t TrackedHours) ChildCareHoursForTimeframe(timeframe Timeframe) *Rat {
 	return hours
 }
 
-func (t TrackedHours) ChildCareHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Rat {
+func (t TrackedHours) ChildCareHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == ChildCare && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -148,7 +150,7 @@ func (t TrackedHours) NonBillableRemainderHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) NonBillableRemainderHoursForTimeframe(timeframe Timeframe) *Rat {
+func (t TrackedHours) NonBillableRemainderHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == NonBillable {
@@ -160,7 +162,7 @@ func (t TrackedHours) NonBillableRemainderHoursForTimeframe(timeframe Timeframe)
 	return hours
 }
 
-func (t TrackedHours) NonBillableRemainderHoursForUserAndTimeframe(userId string, timeframe Timeframe) *Rat {
+func (t TrackedHours) NonBillableRemainderHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == NonBillable {

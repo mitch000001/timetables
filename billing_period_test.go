@@ -4,11 +4,13 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/mitch000001/timetables/date"
 )
 
 func TestNewBillingPeriod(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 
@@ -28,12 +30,12 @@ func TestNewBillingPeriod(t *testing.T) {
 
 func TestBillingPeriodAddUserEntry(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	userId := "1"
 	trackedHours := NewTrackedHours([]TrackingEntry{
-		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
+		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: date.Date(2015, 1, 5, time.Local)},
 	})
 
 	billingPeriod := NewBillingPeriod(period)
@@ -57,12 +59,12 @@ func TestBillingPeriodAddUserEntry(t *testing.T) {
 
 func TestBilligPeriodUserEntries(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	userId := "1"
 	trackedHours := NewTrackedHours([]TrackingEntry{
-		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: Date(2015, 1, 5, time.Local)},
+		TrackingEntry{UserID: "1", Hours: NewRat(8), Type: Billable, TrackedAt: date.Date(2015, 1, 5, time.Local)},
 	})
 
 	billingPeriod := NewBillingPeriod(period)
@@ -84,7 +86,7 @@ func TestBilligPeriodUserEntries(t *testing.T) {
 func TestBillingPeriodMarshalText(t *testing.T) {
 	period := BillingPeriod{
 		ID:     "17",
-		Period: Period{NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+		Period: Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
 	}
 
 	expected := "{17}:{{{2015-01-01}:{2015-01-25}}:{25}}:[]"
@@ -108,7 +110,7 @@ func TestBillingPeriodMarshalText(t *testing.T) {
 func TestBillingPeriodUnmarshalText(t *testing.T) {
 	expectedPeriod := BillingPeriod{
 		ID:     "17",
-		Period: Period{NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
+		Period: Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 25},
 	}
 
 	marshaled := "{17}:{{2015-01-01:2015-01-25}:{25}}:[]"

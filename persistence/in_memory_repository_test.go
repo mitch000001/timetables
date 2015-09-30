@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/mitch000001/timetables"
+	"github.com/mitch000001/timetables/date"
 )
 
 func TestNewInMemoryBillingPeriodRepository(t *testing.T) {
@@ -26,7 +27,7 @@ func TestInMemoryBillingPeriodRepositorySave(t *testing.T) {
 		store: make(map[ID]timetables.BillingPeriod),
 	}
 
-	billingPeriod := timetables.NewBillingPeriod(timetables.Period{timetables.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
+	billingPeriod := timetables.NewBillingPeriod(timetables.Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
 
 	var err error
 	var key ID
@@ -73,7 +74,7 @@ func TestInMemoryBillingPeriodRepositoryLoad(t *testing.T) {
 		store: make(map[ID]timetables.BillingPeriod),
 	}
 
-	expectedEntry := timetables.NewBillingPeriod(timetables.Period{timetables.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
+	expectedEntry := timetables.NewBillingPeriod(timetables.Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
 
 	key, err := store.Save(expectedEntry)
 
@@ -120,7 +121,7 @@ func TestInMemoryBillingPeriodRepositoryUpdate(t *testing.T) {
 		store: make(map[ID]timetables.BillingPeriod),
 	}
 
-	entry := timetables.NewBillingPeriod(timetables.Period{timetables.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
+	entry := timetables.NewBillingPeriod(timetables.Period{date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local), 16})
 
 	key, err := store.Save(entry)
 
@@ -130,7 +131,7 @@ func TestInMemoryBillingPeriodRepositoryUpdate(t *testing.T) {
 	}
 
 	entry.AddUserEntry("1", timetables.NewTrackedHours([]timetables.TrackingEntry{
-		timetables.TrackingEntry{Hours: timetables.NewRat(8), UserID: "1", TrackedAt: timetables.Date(2015, 1, 15, time.Local), Type: timetables.Billable},
+		timetables.TrackingEntry{Hours: timetables.NewRat(8), UserID: "1", TrackedAt: date.Date(2015, 1, 15, time.Local), Type: timetables.Billable},
 	}))
 
 	err = store.Update(key, entry)

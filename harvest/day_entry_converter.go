@@ -5,6 +5,7 @@ import (
 
 	"github.com/mitch000001/go-harvest/harvest"
 	"github.com/mitch000001/timetables"
+	"github.com/mitch000001/timetables/date"
 )
 
 type TaskConfig struct {
@@ -23,7 +24,7 @@ func (h DayEntryConverter) ConvertNonbillable(entries []*harvest.DayEntry) []tim
 		trackingEntry := timetables.TrackingEntry{
 			UserID:    fmt.Sprintf("%d", entry.UserId),
 			Hours:     timetables.NewRat(entry.Hours),
-			TrackedAt: timetables.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
+			TrackedAt: date.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
 		}
 		switch entry.TaskId {
 		case h.taskConfig.VacationID:
@@ -46,7 +47,7 @@ func (h DayEntryConverter) ConvertBillable(entries []*harvest.DayEntry) []timeta
 		trackingEntry := timetables.TrackingEntry{
 			UserID:    fmt.Sprintf("%d", entry.UserId),
 			Hours:     timetables.NewRat(entry.Hours),
-			TrackedAt: timetables.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
+			TrackedAt: date.Date(entry.SpentAt.Year(), entry.SpentAt.Month(), entry.SpentAt.Day(), entry.SpentAt.Location()),
 			Type:      timetables.Billable,
 		}
 		trackingEntries = append(trackingEntries, trackingEntry)

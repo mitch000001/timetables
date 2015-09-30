@@ -1,10 +1,13 @@
 package interaction
 
-import "github.com/mitch000001/timetables"
+import (
+	"github.com/mitch000001/timetables"
+	"github.com/mitch000001/timetables/date"
+)
 
 type BillingPeriod struct {
-	StartDate timetables.ShortDate
-	EndDate   timetables.ShortDate
+	StartDate date.ShortDate
+	EndDate   date.ShortDate
 	Entries   []BillingPeriodEntry
 }
 

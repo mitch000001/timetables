@@ -1,8 +1,10 @@
 package timetables
 
+import "github.com/mitch000001/timetables/date"
+
 func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHours) BillingPeriodUserEntry {
-	cumulationTimeframe := Timeframe{
-		StartDate: Date(period.Timeframe.StartDate.Year(), 1, 1, period.Timeframe.StartDate.Location()),
+	cumulationTimeframe := date.Timeframe{
+		StartDate: date.Date(period.Timeframe.StartDate.Year(), 1, 1, period.Timeframe.StartDate.Location()),
 		EndDate:   period.Timeframe.EndDate,
 	}
 	var billingPeriod = BillingPeriodUserEntry{

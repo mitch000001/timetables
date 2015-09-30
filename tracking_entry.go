@@ -1,11 +1,15 @@
 package timetables
 
-import "sort"
+import (
+	"sort"
+
+	"github.com/mitch000001/timetables/date"
+)
 
 type TrackingEntry struct {
 	UserID    string
 	Hours     *Rat
-	TrackedAt ShortDate
+	TrackedAt date.ShortDate
 	Type      TrackingEntryType
 }
 

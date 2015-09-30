@@ -4,11 +4,13 @@ import (
 	"reflect"
 	"testing"
 	"time"
+
+	"github.com/mitch000001/timetables/date"
 )
 
 func TestNewEstimationBillingPeriod(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	planConfig := PlanConfig{
@@ -32,7 +34,7 @@ func TestNewEstimationBillingPeriod(t *testing.T) {
 
 func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	planConfig := PlanConfig{
@@ -75,7 +77,7 @@ func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
 
 func TestEstimationBillingPeriodUserEntries(t *testing.T) {
 	period := Period{
-		Timeframe:    NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
+		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
 	}
 	planConfig := PlanConfig{

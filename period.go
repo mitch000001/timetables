@@ -4,13 +4,15 @@ import (
 	"bytes"
 	"fmt"
 	"strconv"
+
+	"github.com/mitch000001/timetables/date"
 )
 
 type PeriodProvider interface {
 	Period() Period
 }
 
-func NewPeriod(timeframe Timeframe, businessDays float64) Period {
+func NewPeriod(timeframe date.Timeframe, businessDays float64) Period {
 	if businessDays <= 0 {
 		businessDays = float64(timeframe.Days())
 	}
@@ -21,7 +23,7 @@ func NewPeriod(timeframe Timeframe, businessDays float64) Period {
 }
 
 type Period struct {
-	Timeframe    Timeframe
+	Timeframe    date.Timeframe
 	BusinessDays float64
 }
 
