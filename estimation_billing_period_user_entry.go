@@ -49,15 +49,22 @@ func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, u
 }
 
 type EstimationBillingPeriodUserEntry struct {
-	ID                            string
-	Period                        Period
-	UserID                        string
-	VacationInterestDays          *Rat
-	RemainingVacationInterestDays *Rat
-	SicknessInterestDays          *Rat
-	ChildCareDays                 *Rat
-	BillableDays                  *Rat
-	NonbillableDays               *Rat
-	OfficeDays                    *Rat
-	EffectiveBillingDegree        *Rat
+	ID                              string
+	Period                          Period
+	UserID                          string
+	VacationInterestDays            *Rat
+	CumulatedVacationInterestDays   *Rat
+	RemainingVacationInterestDays   *Rat
+	SicknessInterestDays            *Rat
+	CumulatedSicknessInterestDays   *Rat
+	ChildCareDays                   *Rat
+	CumulatedChildCareDays          *Rat
+	BillableDays                    *Rat
+	CumulatedBillableDays           *Rat
+	NonbillableDays                 *Rat
+	CumulatedNonbillableDays        *Rat
+	OfficeDays                      *Rat
+	CumulatedOfficeDays             *Rat
+	EffectiveBillingDegree          *Rat
+	CumulatedEffectiveBillingDegree *Rat
 }
