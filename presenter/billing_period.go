@@ -7,20 +7,23 @@ const DefaultDateFormat = "02.01.2006"
 
 func NewBillingPeriodPresenter(billingPeriod interaction.BillingPeriod) BillingPeriodPresenter {
 	return BillingPeriodPresenter{
-		model:      billingPeriod,
-		DateFormat: DefaultDateFormat,
+		model:        billingPeriod,
+		DateFormat:   DefaultDateFormat,
+		DayPrecision: DefaultDayPrecision,
 	}
 }
 
 type BillingPeriodPresenter struct {
-	model      interaction.BillingPeriod
-	DateFormat string
+	model        interaction.BillingPeriod
+	DateFormat   string
+	DayPrecision int
 }
 
 func (b BillingPeriodPresenter) Present() BillingPeriod {
 	var entries []BillingPeriodEntry
 	for _, entry := range b.model.Entries {
 		entryPresenter := NewBillingPeriodEntryPresenter(entry)
+		entryPresenter.DayPrecision = b.DayPrecision
 		entries = append(entries, entryPresenter.Present())
 	}
 	return BillingPeriod{
