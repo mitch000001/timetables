@@ -3,8 +3,8 @@ package timetables
 type BillingPeriodUserEntryConverter struct {
 }
 
-func (b BillingPeriodUserEntryConverter) Convert(userEntry BillingPeriodUserEntry, workingDegree float64) BillingPeriodDayUserEntry {
-	workingDegreeDayFactor := NewRat(workingDegree).Mul(NewRat(8))
+func (b BillingPeriodUserEntryConverter) Convert(userEntry BillingPeriodUserEntry, workingDegree *Rat) BillingPeriodDayUserEntry {
+	workingDegreeDayFactor := workingDegree.Mul(NewRat(8))
 	return BillingPeriodDayUserEntry{
 		UserID:                        userEntry.UserID,
 		Period:                        userEntry.Period,

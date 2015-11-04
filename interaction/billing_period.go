@@ -68,8 +68,8 @@ func (b *BillingPeriodEntry) AddEstimationData(estimationPeriodEntry timetables.
 type User struct {
 	FirstName     string
 	LastName      string
-	WorkingDegree float64
-	BillingDegree float64
+	WorkingDegree *timetables.Rat
+	BillingDegree *timetables.Rat
 }
 
 type PeriodData struct {

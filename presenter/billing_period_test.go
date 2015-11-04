@@ -46,9 +46,11 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 	presenter = NewBillingPeriodPresenter(billingPeriod)
 
 	expectedPresenter := BillingPeriodPresenter{
-		DateFormat:   DefaultDateFormat,
-		DayPrecision: DefaultDayPrecision,
-		model:        billingPeriod,
+		DateFormat:             DefaultDateFormat,
+		DayPrecision:           DefaultDayPrecision,
+		BillingDegreePrecision: DefaultBillingDegreePrecision,
+		WorkingDegreePrecision: DefaultWorkingDegreePrecision,
+		model: billingPeriod,
 	}
 
 	if !reflect.DeepEqual(expectedPresenter, presenter) {
@@ -64,8 +66,10 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 		Entries: []interaction.BillingPeriodEntry{
 			interaction.BillingPeriodEntry{
 				User: interaction.User{
-					FirstName: "Max",
-					LastName:  "Muster",
+					FirstName:     "Max",
+					LastName:      "Muster",
+					BillingDegree: timetables.NewRat(0.8),
+					WorkingDegree: timetables.NewRat(1),
 				},
 				TrackedDays: interaction.PeriodData{
 					BillableDays:             timetables.NewRat(8),
@@ -113,7 +117,9 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 		EndDate:   "22.01.2015",
 		Entries: []BillingPeriodEntry{
 			BillingPeriodEntry{
-				Name: "Max",
+				Name:          "Max",
+				BillingDegree: "0.80",
+				WorkingDegree: "1.00",
 				FormattedBillingDelta: FormattedBillingDelta{
 					BillableDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
 					CumulatedBillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
@@ -150,7 +156,9 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 		EndDate:   "22/01/2015",
 		Entries: []BillingPeriodEntry{
 			BillingPeriodEntry{
-				Name: "Max",
+				Name:          "Max",
+				BillingDegree: "0.80",
+				WorkingDegree: "1.00",
 				FormattedBillingDelta: FormattedBillingDelta{
 					BillableDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
 					CumulatedBillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
@@ -176,9 +184,11 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 		t.Fail()
 	}
 
-	// Changed DayPrecision
+	// Changed DayPrecision, BillingDegreePrecision, WorkingDegreePrecision
 
 	presenter.DayPrecision = 4
+	presenter.BillingDegreePrecision = 3
+	presenter.WorkingDegreePrecision = 5
 
 	viewModel = presenter.Present()
 
@@ -187,7 +197,9 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 		EndDate:   "22/01/2015",
 		Entries: []BillingPeriodEntry{
 			BillingPeriodEntry{
-				Name: "Max",
+				Name:          "Max",
+				BillingDegree: "0.800",
+				WorkingDegree: "1.00000",
 				FormattedBillingDelta: FormattedBillingDelta{
 					BillableDaysDelta:             FormattedDelta{"8.0000", "7.0000", "1.0000"},
 					CumulatedBillableDaysDelta:    FormattedDelta{"8.0000", "7.0000", "1.0000"},
@@ -225,8 +237,10 @@ func TestNewBillingPeriodEntryPresenter(t *testing.T) {
 	presenter = NewBillingPeriodEntryPresenter(billingPeriodEntry)
 
 	expectedPresenter := BillingPeriodEntryPresenter{
-		model:        billingPeriodEntry,
-		DayPrecision: 2,
+		model:                  billingPeriodEntry,
+		DayPrecision:           2,
+		WorkingDegreePrecision: 2,
+		BillingDegreePrecision: 2,
 	}
 
 	if !reflect.DeepEqual(expectedPresenter, presenter) {
@@ -238,8 +252,10 @@ func TestNewBillingPeriodEntryPresenter(t *testing.T) {
 func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 	var billingPeriodEntry = interaction.BillingPeriodEntry{
 		User: interaction.User{
-			FirstName: "Max",
-			LastName:  "Muster",
+			FirstName:     "Max",
+			LastName:      "Muster",
+			WorkingDegree: timetables.NewRat(1),
+			BillingDegree: timetables.NewRat(0.8),
 		},
 		TrackedDays: interaction.PeriodData{
 			BillableDays:             timetables.NewRat(8),
@@ -275,8 +291,10 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 		},
 	}
 	presenter := BillingPeriodEntryPresenter{
-		model:        billingPeriodEntry,
-		DayPrecision: 2,
+		model:                  billingPeriodEntry,
+		DayPrecision:           2,
+		WorkingDegreePrecision: 2,
+		BillingDegreePrecision: 2,
 	}
 
 	var viewModel BillingPeriodEntry
@@ -284,7 +302,9 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 	viewModel = presenter.Present()
 
 	expectedViewModel := BillingPeriodEntry{
-		Name: "Max",
+		Name:          "Max",
+		BillingDegree: "0.80",
+		WorkingDegree: "1.00",
 		FormattedBillingDelta: FormattedBillingDelta{
 			BillableDaysDelta:             FormattedDelta{"8.00", "7.00", "1.00"},
 			CumulatedBillableDaysDelta:    FormattedDelta{"8.00", "7.00", "1.00"},
@@ -308,14 +328,18 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 		t.Fail()
 	}
 
-	// Changing DayPrecision
+	// Changing DayPrecision, WorkingDegreePrecision, BillingDegreePrecision
 
 	presenter.DayPrecision = 5
+	presenter.WorkingDegreePrecision = 4
+	presenter.BillingDegreePrecision = 3
 
 	viewModel = presenter.Present()
 
 	expectedViewModel = BillingPeriodEntry{
-		Name: "Max",
+		Name:          "Max",
+		BillingDegree: "0.800",
+		WorkingDegree: "1.0000",
 		FormattedBillingDelta: FormattedBillingDelta{
 			BillableDaysDelta:             FormattedDelta{"8.00000", "7.00000", "1.00000"},
 			CumulatedBillableDaysDelta:    FormattedDelta{"8.00000", "7.00000", "1.00000"},

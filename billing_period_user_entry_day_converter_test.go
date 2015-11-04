@@ -31,7 +31,7 @@ func TestBillingPeriodUserEntryDayConverterConvert(t *testing.T) {
 
 	converter := BillingPeriodUserEntryConverter{}
 
-	dayEntries := converter.Convert(userEntry, 1)
+	dayEntries := converter.Convert(userEntry, NewRat(1))
 
 	expectedEntries := BillingPeriodDayUserEntry{
 		UserID:                        "1",
