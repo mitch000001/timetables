@@ -53,7 +53,7 @@ func TestBillingPeriodEntryAddTrackingData(t *testing.T) {
 	}
 
 	expectedEntry := BillingPeriodEntry{
-		User: User{WorkingDegree: 1},
+		User: User{WorkingDegree: timetables.NewRat(1)},
 		TrackedDays: PeriodData{
 			BillableDays:             timetables.NewRat(1),
 			CumulatedBillableDays:    timetables.NewRat(1),
@@ -73,7 +73,7 @@ func TestBillingPeriodEntryAddTrackingData(t *testing.T) {
 	}
 
 	entry := BillingPeriodEntry{
-		User: User{WorkingDegree: 1},
+		User: User{WorkingDegree: timetables.NewRat(1)},
 	}
 
 	entry.AddTrackingData(billingPeriodUserEntry)
@@ -84,10 +84,10 @@ func TestBillingPeriodEntryAddTrackingData(t *testing.T) {
 	}
 
 	// Changing the users WorkingDegree
-	entry.User.WorkingDegree = 0.5
+	entry.User.WorkingDegree = timetables.NewRat(0.5)
 
 	expectedEntry = BillingPeriodEntry{
-		User: User{WorkingDegree: 0.5},
+		User: User{WorkingDegree: timetables.NewRat(0.5)},
 		TrackedDays: PeriodData{
 			BillableDays:             timetables.NewRat(2),
 			CumulatedBillableDays:    timetables.NewRat(2),
