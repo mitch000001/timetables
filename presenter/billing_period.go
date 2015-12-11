@@ -44,15 +44,15 @@ func (b BillingPeriodPresenter) Present() BillingPeriod {
 }
 
 type BillingPeriod struct {
-	StartDate string
-	EndDate   string
-	Entries   []BillingPeriodEntry
+	StartDate string               `json:"start_date"`
+	EndDate   string               `json:"end_date"`
+	Entries   []BillingPeriodEntry `json:"entries"`
 }
 
 type BillingPeriodEntry struct {
-	Name          string
-	BillingDegree string
-	WorkingDegree string
+	Name          string `json:"name"`
+	BillingDegree string `json:"billing_degree"`
+	WorkingDegree string `json:"working_degree"`
 	FormattedBillingDelta
 }
 
@@ -74,20 +74,20 @@ type BillingDelta struct {
 }
 
 type FormattedBillingDelta struct {
-	BillableDaysDelta             FormattedDelta
-	CumulatedBillableDaysDelta    FormattedDelta
-	NonbillableDaysDelta          FormattedDelta
-	CumulatedNonbillableDaysDelta FormattedDelta
-	VacationDaysDelta             FormattedDelta
-	CumulatedVacationDaysDelta    FormattedDelta
-	SicknessDaysDelta             FormattedDelta
-	CumulatedSicknessDaysDelta    FormattedDelta
-	ChildCareDaysDelta            FormattedDelta
-	CumulatedChildCareDaysDelta   FormattedDelta
-	OfficeDaysDelta               FormattedDelta
-	CumulatedOfficeDaysDelta      FormattedDelta
-	BillingDegreeDelta            FormattedDelta
-	CumulatedBillingDegreeDelta   FormattedDelta
+	BillableDaysDelta             FormattedDelta `json:"billable_days_delta"`
+	CumulatedBillableDaysDelta    FormattedDelta `json:"cumulated_billable_days_delta"`
+	NonbillableDaysDelta          FormattedDelta `json:"nonbillable_days_delta"`
+	CumulatedNonbillableDaysDelta FormattedDelta `json:"cumulated_nonbillable_days_delta"`
+	VacationDaysDelta             FormattedDelta `json:"vacation_days_delta"`
+	CumulatedVacationDaysDelta    FormattedDelta `json:"cumulated_vacation_days_delta"`
+	SicknessDaysDelta             FormattedDelta `json:"sickness_days_delta"`
+	CumulatedSicknessDaysDelta    FormattedDelta `json:"cumulated_sickness_days_delta"`
+	ChildCareDaysDelta            FormattedDelta `json:"child_care_days_delta"`
+	CumulatedChildCareDaysDelta   FormattedDelta `json:"cumulated_child_care_days_delta"`
+	OfficeDaysDelta               FormattedDelta `json:"office_days_delta"`
+	CumulatedOfficeDaysDelta      FormattedDelta `json:"cumulated_office_days_delta"`
+	BillingDegreeDelta            FormattedDelta `json:"billing_degree_delta"`
+	CumulatedBillingDegreeDelta   FormattedDelta `json:"cumulated_billing_degree_delta"`
 }
 
 func NewBillingPeriodEntryPresenter(entry interaction.BillingPeriodEntry) BillingPeriodEntryPresenter {
