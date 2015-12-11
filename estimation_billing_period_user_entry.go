@@ -19,7 +19,7 @@ type UserConfig struct {
 func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) EstimationBillingPeriodUserEntry {
 	var estimationPeriod = EstimationBillingPeriodUserEntry{
 		Period: period,
-		UserID: "1",
+		UserID: userConfig.userID,
 		RemainingVacationInterestDays: NewRat(userConfig.remainingVacationInterestDays),
 	}
 	shareOfYear := NewRat(period.BusinessDays).Div(NewRat(planConfig.BusinessDays))

@@ -87,7 +87,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				ChildCareInterestDays: 5,
 			},
 			userConfigInput: UserConfig{
-				userID:                        "1",
+				userID:                        "2",
 				hasChild:                      false,
 				billingDegree:                 0.8,
 				workingDegree:                 1.0,
@@ -95,7 +95,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 			},
 			output: EstimationBillingPeriodUserEntry{
 				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
-				UserID:                        "1",
+				UserID:                        "2",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
 				RemainingVacationInterestDays: NewRat(0),
 				SicknessInterestDays:          NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
