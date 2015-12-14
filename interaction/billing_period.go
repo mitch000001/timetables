@@ -46,7 +46,7 @@ func (b *BillingPeriodEntry) AddTrackingData(billingPeriodEntry timetables.Billi
 	}
 }
 
-func (b *BillingPeriodEntry) AddEstimationData(forecastPeriodEntry timetables.ForecastBillingPeriodUserEntry) {
+func (b *BillingPeriodEntry) AddForecastData(forecastPeriodEntry timetables.ForecastBillingPeriodUserEntry) {
 	b.ForecastedDays = PeriodData{
 		BillableDays:             forecastPeriodEntry.BillableDays,
 		CumulatedBillableDays:    forecastPeriodEntry.CumulatedBillableDays,

@@ -114,7 +114,7 @@ func TestBillingPeriodEntryAddTrackingData(t *testing.T) {
 	}
 }
 
-func TestBillingPeriodEntryAddEstimationData(t *testing.T) {
+func TestBillingPeriodEntryAddForecastData(t *testing.T) {
 	forecastPeriodUserEntry := timetables.ForecastBillingPeriodUserEntry{
 		Period:                          timetables.Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
 		UserID:                          "1",
@@ -156,7 +156,7 @@ func TestBillingPeriodEntryAddEstimationData(t *testing.T) {
 
 	entry := BillingPeriodEntry{}
 
-	entry.AddEstimationData(forecastPeriodUserEntry)
+	entry.AddForecastData(forecastPeriodUserEntry)
 
 	if !reflect.DeepEqual(expectedEntry, entry) {
 		t.Logf("Expected BillingPeriodEntry to equal\n%+v\n\tgot:\n%+v\n", expectedEntry, entry)
