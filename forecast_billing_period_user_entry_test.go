@@ -22,28 +22,28 @@ func TestNewForecastBillingPeriodUserEntry(t *testing.T) {
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          250,
-				VacationInterestDays:  25,
-				SicknessInterestDays:  5,
+				VacationDays:          25,
+				SicknessDays:          5,
 				ChildCareInterestDays: 5,
 			},
 			userConfigInput: UserConfig{
-				userID:                        "1",
-				hasChild:                      true,
-				billingDegree:                 0.8,
-				workingDegree:                 1.0,
-				remainingVacationInterestDays: 0.0,
+				userID:                "1",
+				hasChild:              true,
+				billingDegree:         0.8,
+				workingDegree:         1.0,
+				remainingVacationDays: 0.0,
 			},
 			output: ForecastBillingPeriodUserEntry{
-				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
-				UserID:                        "1",
-				VacationInterestDays:          NewRat(25).Mul(NewRat(10).Div(NewRat(250))),
-				RemainingVacationInterestDays: NewRat(0),
-				SicknessInterestDays:          NewRat(5).Mul(NewRat(10).Div(NewRat(250))),
-				ChildCareDays:                 NewRat(5).Mul(NewRat(10).Div(NewRat(250))),
-				BillableDays:                  NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(0.8)),
-				NonbillableDays:               NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(1).Sub(NewRat(0.8))),
-				OfficeDays:                    NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))),
-				EffectiveBillingDegree:        NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(0.8)).Div(NewRat(10)),
+				Period:                 Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
+				UserID:                 "1",
+				VacationDays:           NewRat(25).Mul(NewRat(10).Div(NewRat(250))),
+				RemainingVacationDays:  NewRat(0),
+				SicknessDays:           NewRat(5).Mul(NewRat(10).Div(NewRat(250))),
+				ChildCareDays:          NewRat(5).Mul(NewRat(10).Div(NewRat(250))),
+				BillableDays:           NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(0.8)),
+				NonbillableDays:        NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(1).Sub(NewRat(0.8))),
+				OfficeDays:             NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))),
+				EffectiveBillingDegree: NewRat(10).Sub(NewRat(35).Mul(NewRat(10).Div(NewRat(250)))).Mul(NewRat(0.8)).Div(NewRat(10)),
 			},
 		},
 		{
@@ -52,28 +52,28 @@ func TestNewForecastBillingPeriodUserEntry(t *testing.T) {
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
-				VacationInterestDays:  25,
-				SicknessInterestDays:  5,
+				VacationDays:          25,
+				SicknessDays:          5,
 				ChildCareInterestDays: 5,
 			},
 			userConfigInput: UserConfig{
-				userID:                        "1",
-				hasChild:                      true,
-				billingDegree:                 0.8,
-				workingDegree:                 1.0,
-				remainingVacationInterestDays: 0.0,
+				userID:                "1",
+				hasChild:              true,
+				billingDegree:         0.8,
+				workingDegree:         1.0,
+				remainingVacationDays: 0.0,
 			},
 			output: ForecastBillingPeriodUserEntry{
-				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
-				UserID:                        "1",
-				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
-				RemainingVacationInterestDays: NewRat(0),
-				SicknessInterestDays:          NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
-				ChildCareDays:                 NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
-				BillableDays:                  NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
-				NonbillableDays:               NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
-				OfficeDays:                    NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))),
-				EffectiveBillingDegree:        NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
+				Period:                 Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+				UserID:                 "1",
+				VacationDays:           NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
+				RemainingVacationDays:  NewRat(0),
+				SicknessDays:           NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
+				ChildCareDays:          NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
+				BillableDays:           NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
+				NonbillableDays:        NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
+				OfficeDays:             NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))),
+				EffectiveBillingDegree: NewRat(20).Sub(NewRat(35).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
 			},
 		},
 		{
@@ -82,28 +82,28 @@ func TestNewForecastBillingPeriodUserEntry(t *testing.T) {
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
-				VacationInterestDays:  25,
-				SicknessInterestDays:  5,
+				VacationDays:          25,
+				SicknessDays:          5,
 				ChildCareInterestDays: 5,
 			},
 			userConfigInput: UserConfig{
-				userID:                        "2",
-				hasChild:                      false,
-				billingDegree:                 0.8,
-				workingDegree:                 1.0,
-				remainingVacationInterestDays: 0,
+				userID:                "2",
+				hasChild:              false,
+				billingDegree:         0.8,
+				workingDegree:         1.0,
+				remainingVacationDays: 0,
 			},
 			output: ForecastBillingPeriodUserEntry{
-				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
-				UserID:                        "2",
-				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
-				RemainingVacationInterestDays: NewRat(0),
-				SicknessInterestDays:          NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
-				ChildCareDays:                 NewRat(0),
-				BillableDays:                  NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
-				NonbillableDays:               NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
-				OfficeDays:                    NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))),
-				EffectiveBillingDegree:        NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
+				Period:                 Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
+				UserID:                 "2",
+				VacationDays:           NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
+				RemainingVacationDays:  NewRat(0),
+				SicknessDays:           NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
+				ChildCareDays:          NewRat(0),
+				BillableDays:           NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
+				NonbillableDays:        NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
+				OfficeDays:             NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))),
+				EffectiveBillingDegree: NewRat(20).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
 			},
 		},
 		{
@@ -112,28 +112,28 @@ func TestNewForecastBillingPeriodUserEntry(t *testing.T) {
 			planConfigInput: PlanConfig{
 				Year:                  2015,
 				BusinessDays:          200,
-				VacationInterestDays:  25,
-				SicknessInterestDays:  5,
+				VacationDays:          25,
+				SicknessDays:          5,
 				ChildCareInterestDays: 5,
 			},
 			userConfigInput: UserConfig{
-				userID:                        "1",
-				hasChild:                      false,
-				billingDegree:                 0.8,
-				workingDegree:                 1.0,
-				remainingVacationInterestDays: 5.0,
+				userID:                "1",
+				hasChild:              false,
+				billingDegree:         0.8,
+				workingDegree:         1.0,
+				remainingVacationDays: 5.0,
 			},
 			output: ForecastBillingPeriodUserEntry{
-				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
-				UserID:                        "1",
-				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
-				RemainingVacationInterestDays: NewRat(5),
-				SicknessInterestDays:          NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
-				ChildCareDays:                 NewRat(0),
-				BillableDays:                  NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
-				NonbillableDays:               NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
-				OfficeDays:                    NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))),
-				EffectiveBillingDegree:        NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
+				Period:                 Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
+				UserID:                 "1",
+				VacationDays:           NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
+				RemainingVacationDays:  NewRat(5),
+				SicknessDays:           NewRat(5).Mul(NewRat(20).Div(NewRat(200))),
+				ChildCareDays:          NewRat(0),
+				BillableDays:           NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)),
+				NonbillableDays:        NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(1).Sub(NewRat(0.8))),
+				OfficeDays:             NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))),
+				EffectiveBillingDegree: NewRat(20).Sub(NewRat(5)).Sub(NewRat(30).Mul(NewRat(20).Div(NewRat(200)))).Mul(NewRat(0.8)).Div(NewRat(20)),
 			},
 		},
 	}
@@ -163,16 +163,16 @@ func compareForecastBillingPeriodUserEntry(t *testing.T, a, b ForecastBillingPer
 		t.Logf("Expected UserID to equal %q, got %q\n", a.UserID, b.UserID)
 		t.Fail()
 	}
-	if a.VacationInterestDays.Cmp(b.VacationInterestDays) != 0 {
-		t.Logf("Expected VacationInterestDays to equal\n%+v\n\tgot\n%+v\n", a.VacationInterestDays, b.VacationInterestDays)
+	if a.VacationDays.Cmp(b.VacationDays) != 0 {
+		t.Logf("Expected VacationDays to equal\n%+v\n\tgot\n%+v\n", a.VacationDays, b.VacationDays)
 		t.Fail()
 	}
-	if a.RemainingVacationInterestDays.Cmp(b.RemainingVacationInterestDays) != 0 {
-		t.Logf("Expected RemainingVacationInterestDays to equal\n%+v\n\tgot\n%+v\n", a.RemainingVacationInterestDays, b.RemainingVacationInterestDays)
+	if a.RemainingVacationDays.Cmp(b.RemainingVacationDays) != 0 {
+		t.Logf("Expected RemainingVacationDays to equal\n%+v\n\tgot\n%+v\n", a.RemainingVacationDays, b.RemainingVacationDays)
 		t.Fail()
 	}
-	if a.SicknessInterestDays.Cmp(b.SicknessInterestDays) != 0 {
-		t.Logf("Expected SicknessInterestDays to equal\n%+v\n\tgot\n%+v\n", a.SicknessInterestDays, b.SicknessInterestDays)
+	if a.SicknessDays.Cmp(b.SicknessDays) != 0 {
+		t.Logf("Expected SicknessDays to equal\n%+v\n\tgot\n%+v\n", a.SicknessDays, b.SicknessDays)
 		t.Fail()
 	}
 	if a.ChildCareDays.Cmp(b.ChildCareDays) != 0 {

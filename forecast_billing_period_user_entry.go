@@ -3,28 +3,28 @@ package timetables
 type PlanConfig struct {
 	Year                  int
 	BusinessDays          float64
-	VacationInterestDays  float64
-	SicknessInterestDays  float64
+	VacationDays          float64
+	SicknessDays          float64
 	ChildCareInterestDays float64
 }
 
 type UserConfig struct {
-	userID                        string
-	hasChild                      bool
-	billingDegree                 float64
-	workingDegree                 float64
-	remainingVacationInterestDays float64
+	userID                string
+	hasChild              bool
+	billingDegree         float64
+	workingDegree         float64
+	remainingVacationDays float64
 }
 
 func NewForecastBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) ForecastBillingPeriodUserEntry {
 	var forecastPeriod = ForecastBillingPeriodUserEntry{
-		Period: period,
-		UserID: userConfig.userID,
-		RemainingVacationInterestDays: NewRat(userConfig.remainingVacationInterestDays),
+		Period:                period,
+		UserID:                userConfig.userID,
+		RemainingVacationDays: NewRat(userConfig.remainingVacationDays),
 	}
 	shareOfYear := NewRat(period.BusinessDays).Div(NewRat(planConfig.BusinessDays))
 
-	forecastPeriod.VacationInterestDays = NewRat(userConfig.workingDegree).Mul(NewRat(planConfig.VacationInterestDays)).Mul(shareOfYear)
+	forecastPeriod.VacationDays = NewRat(userConfig.workingDegree).Mul(NewRat(planConfig.VacationDays)).Mul(shareOfYear)
 
 	if userConfig.hasChild {
 		forecastPeriod.ChildCareDays = NewRat(planConfig.ChildCareInterestDays).Mul(shareOfYear).Mul(NewRat(userConfig.workingDegree))
@@ -32,10 +32,10 @@ func NewForecastBillingPeriodUserEntry(period Period, planConfig PlanConfig, use
 		forecastPeriod.ChildCareDays = NewRat(0)
 	}
 
-	sicknessInterestShare := NewRat(planConfig.SicknessInterestDays).Mul(shareOfYear)
-	forecastPeriod.SicknessInterestDays = sicknessInterestShare.Mul(NewRat(userConfig.workingDegree))
+	sicknessInterestShare := NewRat(planConfig.SicknessDays).Mul(shareOfYear)
+	forecastPeriod.SicknessDays = sicknessInterestShare.Mul(NewRat(userConfig.workingDegree))
 
-	nonOfficeDays := forecastPeriod.SicknessInterestDays.Add(forecastPeriod.VacationInterestDays).Add(forecastPeriod.RemainingVacationInterestDays).Add(forecastPeriod.ChildCareDays)
+	nonOfficeDays := forecastPeriod.SicknessDays.Add(forecastPeriod.VacationDays).Add(forecastPeriod.RemainingVacationDays).Add(forecastPeriod.ChildCareDays)
 	forecastPeriod.OfficeDays = NewRat(period.BusinessDays).Sub(nonOfficeDays)
 
 	billingDegree := NewRat(userConfig.billingDegree)
@@ -52,11 +52,11 @@ type ForecastBillingPeriodUserEntry struct {
 	ID                              string
 	Period                          Period
 	UserID                          string
-	VacationInterestDays            *Rat
-	CumulatedVacationInterestDays   *Rat
-	RemainingVacationInterestDays   *Rat
-	SicknessInterestDays            *Rat
-	CumulatedSicknessInterestDays   *Rat
+	VacationDays                    *Rat
+	CumulatedVacationDays           *Rat
+	RemainingVacationDays           *Rat
+	SicknessDays                    *Rat
+	CumulatedSicknessDays           *Rat
 	ChildCareDays                   *Rat
 	CumulatedChildCareDays          *Rat
 	BillableDays                    *Rat

@@ -13,10 +13,10 @@ func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHour
 	}
 	billingPeriod.ChildCareHours = entries.ChildCareHoursForUserAndTimeframe(userID, period.Timeframe)
 	billingPeriod.CumulatedChildCareHours = entries.ChildCareHoursForUserAndTimeframe(userID, cumulationTimeframe)
-	billingPeriod.VacationInterestHours = entries.VacationInterestHoursForUserAndTimeframe(userID, period.Timeframe)
-	billingPeriod.CumulatedVacationInterestHours = entries.VacationInterestHoursForUserAndTimeframe(userID, cumulationTimeframe)
-	billingPeriod.SicknessInterestHours = entries.SicknessInterestHoursForUserAndTimeframe(userID, period.Timeframe)
-	billingPeriod.CumulatedSicknessInterestHours = entries.SicknessInterestHoursForUserAndTimeframe(userID, cumulationTimeframe)
+	billingPeriod.VacationHours = entries.VacationHoursForUserAndTimeframe(userID, period.Timeframe)
+	billingPeriod.CumulatedVacationHours = entries.VacationHoursForUserAndTimeframe(userID, cumulationTimeframe)
+	billingPeriod.SicknessHours = entries.SicknessHoursForUserAndTimeframe(userID, period.Timeframe)
+	billingPeriod.CumulatedSicknessHours = entries.SicknessHoursForUserAndTimeframe(userID, cumulationTimeframe)
 	billingPeriod.BillableHours = entries.BillableHoursForUserAndTimeframe(userID, period.Timeframe)
 	billingPeriod.CumulatedBillableHours = entries.BillableHoursForUserAndTimeframe(userID, cumulationTimeframe)
 	billingPeriod.NonbillableHours = entries.NonBillableRemainderHoursForUserAndTimeframe(userID, period.Timeframe)
@@ -37,21 +37,21 @@ func NewBillingPeriodUserEntry(period Period, userID string, entries TrackedHour
 }
 
 type BillingPeriodUserEntry struct {
-	ID                             string
-	UserID                         string
-	Period                         Period
-	VacationInterestHours          *Rat
-	CumulatedVacationInterestHours *Rat
-	SicknessInterestHours          *Rat
-	CumulatedSicknessInterestHours *Rat
-	ChildCareHours                 *Rat
-	CumulatedChildCareHours        *Rat
-	BillableHours                  *Rat
-	CumulatedBillableHours         *Rat
-	OfficeHours                    *Rat
-	CumulatedOfficeHours           *Rat
-	NonbillableHours               *Rat
-	CumulatedNonbillableHours      *Rat
-	BillingDegree                  *Rat
-	CumulatedBillingDegree         *Rat
+	ID                        string
+	UserID                    string
+	Period                    Period
+	VacationHours             *Rat
+	CumulatedVacationHours    *Rat
+	SicknessHours             *Rat
+	CumulatedSicknessHours    *Rat
+	ChildCareHours            *Rat
+	CumulatedChildCareHours   *Rat
+	BillableHours             *Rat
+	CumulatedBillableHours    *Rat
+	OfficeHours               *Rat
+	CumulatedOfficeHours      *Rat
+	NonbillableHours          *Rat
+	CumulatedNonbillableHours *Rat
+	BillingDegree             *Rat
+	CumulatedBillingDegree    *Rat
 }

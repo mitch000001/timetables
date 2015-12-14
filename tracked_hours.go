@@ -44,7 +44,7 @@ func (t TrackedHours) BillableHoursForUserAndTimeframe(userId string, timeframe 
 	return hours
 }
 
-func (t TrackedHours) VacationInterestHours() *Rat {
+func (t TrackedHours) VacationHours() *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Vacation {
@@ -54,7 +54,7 @@ func (t TrackedHours) VacationInterestHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe date.Timeframe) *Rat {
+func (t TrackedHours) VacationHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -64,7 +64,7 @@ func (t TrackedHours) VacationInterestHoursForTimeframe(timeframe date.Timeframe
 	return hours
 }
 
-func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
+func (t TrackedHours) VacationHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Vacation && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -76,7 +76,7 @@ func (t TrackedHours) VacationInterestHoursForUserAndTimeframe(userId string, ti
 	return hours
 }
 
-func (t TrackedHours) SicknessInterestHours() *Rat {
+func (t TrackedHours) SicknessHours() *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Sickness {
@@ -86,7 +86,7 @@ func (t TrackedHours) SicknessInterestHours() *Rat {
 	return hours
 }
 
-func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe date.Timeframe) *Rat {
+func (t TrackedHours) SicknessHoursForTimeframe(timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {
@@ -96,7 +96,7 @@ func (t TrackedHours) SicknessInterestHoursForTimeframe(timeframe date.Timeframe
 	return hours
 }
 
-func (t TrackedHours) SicknessInterestHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
+func (t TrackedHours) SicknessHoursForUserAndTimeframe(userId string, timeframe date.Timeframe) *Rat {
 	hours := NewRat(0)
 	for _, entry := range t.entries {
 		if entry.Type == Sickness && timeframe.IsInTimeframe(entry.TrackedAt) {

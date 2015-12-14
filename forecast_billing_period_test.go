@@ -40,8 +40,8 @@ func TestForecastBillingPeriodAddUserEntry(t *testing.T) {
 	planConfig := PlanConfig{
 		Year:                  2015,
 		BusinessDays:          200,
-		VacationInterestDays:  25,
-		SicknessInterestDays:  5,
+		VacationDays:          25,
+		SicknessDays:          5,
 		ChildCareInterestDays: 5,
 	}
 
@@ -53,11 +53,11 @@ func TestForecastBillingPeriodAddUserEntry(t *testing.T) {
 	}
 
 	userConfig := UserConfig{
-		userID:                        "1",
-		hasChild:                      false,
-		billingDegree:                 0.8,
-		workingDegree:                 1.0,
-		remainingVacationInterestDays: 5.0,
+		userID:                "1",
+		hasChild:              false,
+		billingDegree:         0.8,
+		workingDegree:         1.0,
+		remainingVacationDays: 5.0,
 	}
 
 	expectedUserEntry := NewForecastBillingPeriodUserEntry(period, planConfig, userConfig)
@@ -83,8 +83,8 @@ func TestForecastBillingPeriodUserEntries(t *testing.T) {
 	planConfig := PlanConfig{
 		Year:                  2015,
 		BusinessDays:          200,
-		VacationInterestDays:  25,
-		SicknessInterestDays:  5,
+		VacationDays:          25,
+		SicknessDays:          5,
 		ChildCareInterestDays: 5,
 	}
 
@@ -96,11 +96,11 @@ func TestForecastBillingPeriodUserEntries(t *testing.T) {
 	}
 
 	userConfig := UserConfig{
-		userID:                        "1",
-		hasChild:                      false,
-		billingDegree:                 0.8,
-		workingDegree:                 1.0,
-		remainingVacationInterestDays: 5.0,
+		userID:                "1",
+		hasChild:              false,
+		billingDegree:         0.8,
+		workingDegree:         1.0,
+		remainingVacationDays: 5.0,
 	}
 
 	expectedEntries := []ForecastBillingPeriodUserEntry{

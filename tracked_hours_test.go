@@ -90,7 +90,7 @@ func TestTrackedHoursBillableHoursForUserAndTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursVacationInterestHours(t *testing.T) {
+func TestTrackedHoursVacationHours(t *testing.T) {
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2015, 1, 1, time.Local), Type: Billable},
@@ -104,7 +104,7 @@ func TestTrackedHoursVacationInterestHours(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.VacationInterestHours()
+	res = trackedHours.VacationHours()
 
 	expected := NewRat(16)
 
@@ -114,7 +114,7 @@ func TestTrackedHoursVacationInterestHours(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
+func TestTrackedHoursVacationHoursForTimeframe(t *testing.T) {
 	timeframe := date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
@@ -129,7 +129,7 @@ func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.VacationInterestHoursForTimeframe(timeframe)
+	res = trackedHours.VacationHoursForTimeframe(timeframe)
 
 	expected := NewRat(8)
 
@@ -139,7 +139,7 @@ func TestTrackedHoursVacationInterestHoursForTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
+func TestTrackedHoursVacationHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
@@ -155,7 +155,7 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.VacationInterestHoursForUserAndTimeframe("1", timeframe)
+	res = trackedHours.VacationHoursForUserAndTimeframe("1", timeframe)
 
 	expected := NewRat(8)
 
@@ -165,7 +165,7 @@ func TestTrackedHoursVacationInterestHoursForUserAndTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursSicknessInterestHours(t *testing.T) {
+func TestTrackedHoursSicknessHours(t *testing.T) {
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2015, 1, 1, time.Local), Type: Billable},
@@ -179,7 +179,7 @@ func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.SicknessInterestHours()
+	res = trackedHours.SicknessHours()
 
 	expected := NewRat(16)
 
@@ -189,7 +189,7 @@ func TestTrackedHoursSicknessInterestHours(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
+func TestTrackedHoursSicknessHoursForTimeframe(t *testing.T) {
 	timeframe := date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
@@ -204,7 +204,7 @@ func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.SicknessInterestHoursForTimeframe(timeframe)
+	res = trackedHours.SicknessHoursForTimeframe(timeframe)
 
 	expected := NewRat(8)
 
@@ -214,7 +214,7 @@ func TestTrackedHoursSicknessInterestHoursForTimeframe(t *testing.T) {
 	}
 }
 
-func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
+func TestTrackedHoursSicknessHoursForUserAndTimeframe(t *testing.T) {
 	timeframe := date.NewTimeframe(2015, 1, 1, 2015, 2, 1, time.Local)
 	entries := []TrackingEntry{
 		TrackingEntry{Hours: NewRat(8), UserID: "1", TrackedAt: date.Date(2014, 1, 1, time.Local), Type: Billable},
@@ -230,7 +230,7 @@ func TestTrackedHoursSicknessInterestHoursForUserAndTimeframe(t *testing.T) {
 	}
 	var res *Rat
 
-	res = trackedHours.SicknessInterestHoursForUserAndTimeframe("1", timeframe)
+	res = trackedHours.SicknessHoursForUserAndTimeframe("1", timeframe)
 
 	expected := NewRat(8)
 
