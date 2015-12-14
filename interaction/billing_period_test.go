@@ -115,7 +115,7 @@ func TestBillingPeriodEntryAddTrackingData(t *testing.T) {
 }
 
 func TestBillingPeriodEntryAddEstimationData(t *testing.T) {
-	estimationBillingPeriodUserEntry := timetables.EstimationBillingPeriodUserEntry{
+	forecastPeriodUserEntry := timetables.ForecastBillingPeriodUserEntry{
 		Period:                          timetables.Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
 		UserID:                          "1",
 		VacationInterestDays:            timetables.NewRat(8),
@@ -136,7 +136,7 @@ func TestBillingPeriodEntryAddEstimationData(t *testing.T) {
 	}
 
 	expectedEntry := BillingPeriodEntry{
-		EstimatedDays: PeriodData{
+		ForecastedDays: PeriodData{
 			BillableDays:             timetables.NewRat(8),
 			CumulatedBillableDays:    timetables.NewRat(8),
 			NonbillableDays:          timetables.NewRat(8),
@@ -156,7 +156,7 @@ func TestBillingPeriodEntryAddEstimationData(t *testing.T) {
 
 	entry := BillingPeriodEntry{}
 
-	entry.AddEstimationData(estimationBillingPeriodUserEntry)
+	entry.AddEstimationData(forecastPeriodUserEntry)
 
 	if !reflect.DeepEqual(expectedEntry, entry) {
 		t.Logf("Expected BillingPeriodEntry to equal\n%+v\n\tgot:\n%+v\n", expectedEntry, entry)

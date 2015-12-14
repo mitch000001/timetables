@@ -8,7 +8,7 @@ import (
 	"github.com/mitch000001/timetables/date"
 )
 
-func TestNewEstimationBillingPeriod(t *testing.T) {
+func TestNewForecastBillingPeriod(t *testing.T) {
 	period := Period{
 		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
@@ -17,11 +17,11 @@ func TestNewEstimationBillingPeriod(t *testing.T) {
 		Year: 2015,
 	}
 
-	billingPeriod := NewEstimationBillingPeriod(period, planConfig)
+	billingPeriod := NewForecastBillingPeriod(period, planConfig)
 
-	expectedBillingPeriod := EstimationBillingPeriod{
+	expectedBillingPeriod := ForecastBillingPeriod{
 		ID:          "",
-		userEntries: make([]EstimationBillingPeriodUserEntry, 0),
+		userEntries: make([]ForecastBillingPeriodUserEntry, 0),
 		Period:      period,
 		planConfig:  planConfig,
 	}
@@ -32,7 +32,7 @@ func TestNewEstimationBillingPeriod(t *testing.T) {
 	}
 }
 
-func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
+func TestForecastBillingPeriodAddUserEntry(t *testing.T) {
 	period := Period{
 		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
@@ -45,9 +45,9 @@ func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
 		ChildCareInterestDays: 5,
 	}
 
-	billingPeriod := EstimationBillingPeriod{
+	billingPeriod := ForecastBillingPeriod{
 		ID:          "",
-		userEntries: make([]EstimationBillingPeriodUserEntry, 0),
+		userEntries: make([]ForecastBillingPeriodUserEntry, 0),
 		Period:      period,
 		planConfig:  planConfig,
 	}
@@ -60,7 +60,7 @@ func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
 		remainingVacationInterestDays: 5.0,
 	}
 
-	expectedUserEntry := NewEstimationBillingPeriodUserEntry(period, planConfig, userConfig)
+	expectedUserEntry := NewForecastBillingPeriodUserEntry(period, planConfig, userConfig)
 
 	billingPeriod.AddUserEntry(userConfig)
 
@@ -75,7 +75,7 @@ func TestEstimationBillingPeriodAddUserEntry(t *testing.T) {
 	}
 }
 
-func TestEstimationBillingPeriodUserEntries(t *testing.T) {
+func TestForecastBillingPeriodUserEntries(t *testing.T) {
 	period := Period{
 		Timeframe:    date.NewTimeframe(2015, 1, 1, 2015, 1, 25, time.Local),
 		BusinessDays: 20,
@@ -88,9 +88,9 @@ func TestEstimationBillingPeriodUserEntries(t *testing.T) {
 		ChildCareInterestDays: 5,
 	}
 
-	billingPeriod := EstimationBillingPeriod{
+	billingPeriod := ForecastBillingPeriod{
 		ID:          "",
-		userEntries: make([]EstimationBillingPeriodUserEntry, 0),
+		userEntries: make([]ForecastBillingPeriodUserEntry, 0),
 		Period:      period,
 		planConfig:  planConfig,
 	}
@@ -103,8 +103,8 @@ func TestEstimationBillingPeriodUserEntries(t *testing.T) {
 		remainingVacationInterestDays: 5.0,
 	}
 
-	expectedEntries := []EstimationBillingPeriodUserEntry{
-		NewEstimationBillingPeriodUserEntry(period, planConfig, userConfig),
+	expectedEntries := []ForecastBillingPeriodUserEntry{
+		NewForecastBillingPeriodUserEntry(period, planConfig, userConfig),
 	}
 
 	billingPeriod.AddUserEntry(userConfig)

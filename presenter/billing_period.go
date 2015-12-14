@@ -112,7 +112,7 @@ func (b BillingPeriodEntryPresenter) Present() BillingPeriodEntry {
 	entry.BillingDegree = b.model.User.BillingDegree.FloatString(b.BillingDegreePrecision)
 	entry.WorkingDegree = b.model.User.WorkingDegree.FloatString(b.WorkingDegreePrecision)
 	deltaConverter := DeltaConverter{}
-	billingDelta := deltaConverter.Convert(b.model.TrackedDays, b.model.EstimatedDays)
+	billingDelta := deltaConverter.Convert(b.model.TrackedDays, b.model.ForecastedDays)
 	entry.FormattedBillingDelta = BillingDeltaFormatter{}.Format(billingDelta, b.DayPrecision)
 	return entry
 }

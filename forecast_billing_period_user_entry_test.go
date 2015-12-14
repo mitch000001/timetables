@@ -8,13 +8,13 @@ import (
 	"github.com/mitch000001/timetables/date"
 )
 
-func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
+func TestNewForecastBillingPeriodUserEntry(t *testing.T) {
 	tests := []struct {
 		description     string
 		period          Period
 		planConfigInput PlanConfig
 		userConfigInput UserConfig
-		output          EstimationBillingPeriodUserEntry
+		output          ForecastBillingPeriodUserEntry
 	}{
 		{
 			description: "Has child, no remaining vacation, 250 business days, 10 in period",
@@ -33,7 +33,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0.0,
 			},
-			output: EstimationBillingPeriodUserEntry{
+			output: ForecastBillingPeriodUserEntry{
 				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 1, time.Local), EndDate: date.Date(2015, 1, 25, time.Local)}, 10},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(10).Div(NewRat(250))),
@@ -63,7 +63,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0.0,
 			},
-			output: EstimationBillingPeriodUserEntry{
+			output: ForecastBillingPeriodUserEntry{
 				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
@@ -93,7 +93,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 0,
 			},
-			output: EstimationBillingPeriodUserEntry{
+			output: ForecastBillingPeriodUserEntry{
 				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 1, 26, time.Local), EndDate: date.Date(2015, 2, 22, time.Local)}, 20},
 				UserID:                        "2",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
@@ -123,7 +123,7 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 				workingDegree:                 1.0,
 				remainingVacationInterestDays: 5.0,
 			},
-			output: EstimationBillingPeriodUserEntry{
+			output: ForecastBillingPeriodUserEntry{
 				Period:                        Period{"1", date.Timeframe{StartDate: date.Date(2015, 26, 1, time.Local), EndDate: date.Date(2015, 22, 2, time.Local)}, 20},
 				UserID:                        "1",
 				VacationInterestDays:          NewRat(25).Mul(NewRat(20).Div(NewRat(200))),
@@ -139,18 +139,18 @@ func TestNewEstimationBillingPeriodUserEntry(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		period := NewEstimationBillingPeriodUserEntry(test.period, test.planConfigInput, test.userConfigInput)
+		period := NewForecastBillingPeriodUserEntry(test.period, test.planConfigInput, test.userConfigInput)
 
 		expectedPeriod := test.output
 
-		compareEstimationBillingPeriodUserEntry(t, expectedPeriod, period)
+		compareForecastBillingPeriodUserEntry(t, expectedPeriod, period)
 		if t.Failed() {
 			t.Logf("Used configuration: %s\n", test.description)
 		}
 	}
 }
 
-func compareEstimationBillingPeriodUserEntry(t *testing.T, a, b EstimationBillingPeriodUserEntry) {
+func compareForecastBillingPeriodUserEntry(t *testing.T, a, b ForecastBillingPeriodUserEntry) {
 	if a.ID != b.ID {
 		t.Logf("Expected ID to equal %q, got %q\n", a.ID, b.ID)
 		t.Fail()

@@ -21,9 +21,9 @@ func NewBillingPeriodEntry(user timetables.User) BillingPeriodEntry {
 }
 
 type BillingPeriodEntry struct {
-	User          User
-	TrackedDays   PeriodData
-	EstimatedDays PeriodData
+	User           User
+	TrackedDays    PeriodData
+	ForecastedDays PeriodData
 }
 
 func (b *BillingPeriodEntry) AddTrackingData(billingPeriodEntry timetables.BillingPeriodUserEntry) {
@@ -46,22 +46,22 @@ func (b *BillingPeriodEntry) AddTrackingData(billingPeriodEntry timetables.Billi
 	}
 }
 
-func (b *BillingPeriodEntry) AddEstimationData(estimationPeriodEntry timetables.EstimationBillingPeriodUserEntry) {
-	b.EstimatedDays = PeriodData{
-		BillableDays:             estimationPeriodEntry.BillableDays,
-		CumulatedBillableDays:    estimationPeriodEntry.CumulatedBillableDays,
-		NonbillableDays:          estimationPeriodEntry.NonbillableDays,
-		CumulatedNonbillableDays: estimationPeriodEntry.CumulatedNonbillableDays,
-		VacationDays:             estimationPeriodEntry.VacationInterestDays.Add(estimationPeriodEntry.RemainingVacationInterestDays),
-		CumulatedVacationDays:    estimationPeriodEntry.CumulatedVacationInterestDays,
-		SicknessDays:             estimationPeriodEntry.SicknessInterestDays,
-		CumulatedSicknessDays:    estimationPeriodEntry.CumulatedSicknessInterestDays,
-		ChildCareDays:            estimationPeriodEntry.ChildCareDays,
-		CumulatedChildCareDays:   estimationPeriodEntry.CumulatedChildCareDays,
-		OfficeDays:               estimationPeriodEntry.OfficeDays,
-		CumulatedOfficeDays:      estimationPeriodEntry.CumulatedOfficeDays,
-		BillingDegree:            estimationPeriodEntry.EffectiveBillingDegree,
-		CumulatedBillingDegree:   estimationPeriodEntry.CumulatedEffectiveBillingDegree,
+func (b *BillingPeriodEntry) AddEstimationData(forecastPeriodEntry timetables.ForecastBillingPeriodUserEntry) {
+	b.ForecastedDays = PeriodData{
+		BillableDays:             forecastPeriodEntry.BillableDays,
+		CumulatedBillableDays:    forecastPeriodEntry.CumulatedBillableDays,
+		NonbillableDays:          forecastPeriodEntry.NonbillableDays,
+		CumulatedNonbillableDays: forecastPeriodEntry.CumulatedNonbillableDays,
+		VacationDays:             forecastPeriodEntry.VacationInterestDays.Add(forecastPeriodEntry.RemainingVacationInterestDays),
+		CumulatedVacationDays:    forecastPeriodEntry.CumulatedVacationInterestDays,
+		SicknessDays:             forecastPeriodEntry.SicknessInterestDays,
+		CumulatedSicknessDays:    forecastPeriodEntry.CumulatedSicknessInterestDays,
+		ChildCareDays:            forecastPeriodEntry.ChildCareDays,
+		CumulatedChildCareDays:   forecastPeriodEntry.CumulatedChildCareDays,
+		OfficeDays:               forecastPeriodEntry.OfficeDays,
+		CumulatedOfficeDays:      forecastPeriodEntry.CumulatedOfficeDays,
+		BillingDegree:            forecastPeriodEntry.EffectiveBillingDegree,
+		CumulatedBillingDegree:   forecastPeriodEntry.CumulatedEffectiveBillingDegree,
 	}
 }
 

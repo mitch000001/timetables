@@ -16,39 +16,39 @@ type UserConfig struct {
 	remainingVacationInterestDays float64
 }
 
-func NewEstimationBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) EstimationBillingPeriodUserEntry {
-	var estimationPeriod = EstimationBillingPeriodUserEntry{
+func NewForecastBillingPeriodUserEntry(period Period, planConfig PlanConfig, userConfig UserConfig) ForecastBillingPeriodUserEntry {
+	var forecastPeriod = ForecastBillingPeriodUserEntry{
 		Period: period,
 		UserID: userConfig.userID,
 		RemainingVacationInterestDays: NewRat(userConfig.remainingVacationInterestDays),
 	}
 	shareOfYear := NewRat(period.BusinessDays).Div(NewRat(planConfig.BusinessDays))
 
-	estimationPeriod.VacationInterestDays = NewRat(userConfig.workingDegree).Mul(NewRat(planConfig.VacationInterestDays)).Mul(shareOfYear)
+	forecastPeriod.VacationInterestDays = NewRat(userConfig.workingDegree).Mul(NewRat(planConfig.VacationInterestDays)).Mul(shareOfYear)
 
 	if userConfig.hasChild {
-		estimationPeriod.ChildCareDays = NewRat(planConfig.ChildCareInterestDays).Mul(shareOfYear).Mul(NewRat(userConfig.workingDegree))
+		forecastPeriod.ChildCareDays = NewRat(planConfig.ChildCareInterestDays).Mul(shareOfYear).Mul(NewRat(userConfig.workingDegree))
 	} else {
-		estimationPeriod.ChildCareDays = NewRat(0)
+		forecastPeriod.ChildCareDays = NewRat(0)
 	}
 
 	sicknessInterestShare := NewRat(planConfig.SicknessInterestDays).Mul(shareOfYear)
-	estimationPeriod.SicknessInterestDays = sicknessInterestShare.Mul(NewRat(userConfig.workingDegree))
+	forecastPeriod.SicknessInterestDays = sicknessInterestShare.Mul(NewRat(userConfig.workingDegree))
 
-	nonOfficeDays := estimationPeriod.SicknessInterestDays.Add(estimationPeriod.VacationInterestDays).Add(estimationPeriod.RemainingVacationInterestDays).Add(estimationPeriod.ChildCareDays)
-	estimationPeriod.OfficeDays = NewRat(period.BusinessDays).Sub(nonOfficeDays)
+	nonOfficeDays := forecastPeriod.SicknessInterestDays.Add(forecastPeriod.VacationInterestDays).Add(forecastPeriod.RemainingVacationInterestDays).Add(forecastPeriod.ChildCareDays)
+	forecastPeriod.OfficeDays = NewRat(period.BusinessDays).Sub(nonOfficeDays)
 
 	billingDegree := NewRat(userConfig.billingDegree)
 
-	estimationPeriod.BillableDays = estimationPeriod.OfficeDays.Mul(billingDegree)
-	estimationPeriod.NonbillableDays = estimationPeriod.OfficeDays.Mul(NewRat(1).Sub(billingDegree))
+	forecastPeriod.BillableDays = forecastPeriod.OfficeDays.Mul(billingDegree)
+	forecastPeriod.NonbillableDays = forecastPeriod.OfficeDays.Mul(NewRat(1).Sub(billingDegree))
 
-	estimationPeriod.EffectiveBillingDegree = estimationPeriod.BillableDays.Div(NewRat(period.BusinessDays))
+	forecastPeriod.EffectiveBillingDegree = forecastPeriod.BillableDays.Div(NewRat(period.BusinessDays))
 
-	return estimationPeriod
+	return forecastPeriod
 }
 
-type EstimationBillingPeriodUserEntry struct {
+type ForecastBillingPeriodUserEntry struct {
 	ID                              string
 	Period                          Period
 	UserID                          string

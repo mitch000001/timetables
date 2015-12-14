@@ -30,7 +30,7 @@ func TestNewBillingPeriodPresenter(t *testing.T) {
 					OfficeDays:      timetables.NewRat(8),
 					BillingDegree:   timetables.NewRat(8),
 				},
-				EstimatedDays: interaction.PeriodData{
+				ForecastedDays: interaction.PeriodData{
 					BillableDays:    timetables.NewRat(7),
 					NonbillableDays: timetables.NewRat(7),
 					VacationDays:    timetables.NewRat(7),
@@ -87,7 +87,7 @@ func TestBillingPeriodPresenterPresent(t *testing.T) {
 					BillingDegree:            timetables.NewRat(8),
 					CumulatedBillingDegree:   timetables.NewRat(8),
 				},
-				EstimatedDays: interaction.PeriodData{
+				ForecastedDays: interaction.PeriodData{
 					BillableDays:             timetables.NewRat(7),
 					CumulatedBillableDays:    timetables.NewRat(7),
 					NonbillableDays:          timetables.NewRat(7),
@@ -273,7 +273,7 @@ func TestBillingPeriodEntryPresenterPresent(t *testing.T) {
 			BillingDegree:            timetables.NewRat(8),
 			CumulatedBillingDegree:   timetables.NewRat(8),
 		},
-		EstimatedDays: interaction.PeriodData{
+		ForecastedDays: interaction.PeriodData{
 			BillableDays:             timetables.NewRat(7),
 			CumulatedBillableDays:    timetables.NewRat(7),
 			NonbillableDays:          timetables.NewRat(7),
